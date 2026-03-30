@@ -1,5 +1,19 @@
-@media screen and (max-width: 800px), handheld and (orientation: portrait) {
-    .col, .col-1, .col-2, .col-3, .col-4, .col-5, .col-6, .col-7, .col-8, .col-9, .col-10, .col-11, .col-12 {
+@media screen and (max-width: 800px),
+handheld and (orientation: portrait) {
+
+    .col,
+    .col-1,
+    .col-2,
+    .col-3,
+    .col-4,
+    .col-5,
+    .col-6,
+    .col-7,
+    .col-8,
+    .col-9,
+    .col-10,
+    .col-11,
+    .col-12 {
         flex: 0 0 auto;
         width: 100%;
     }
@@ -13,10 +27,11 @@ div#root {
 }
 
 body {
-    font-family: Poppins, sans-serif; 
+    font-family: Poppins, sans-serif;
 }
 
-label:has(+ [required]), [required] ~ label {
+label:has(+ [required]),
+[required]~label {
     font-weight: bold;
 }
 
@@ -32,4 +47,15 @@ input[type="file"][required] {
 .is-invalid {
     border-bottom-color: var(--bs-form-invalid-color);
     border-bottom-width: medium;
+}
+
+.section-row {
+    --base-color: green;
+    border-radius: 10px;
+    background: linear-gradient(to bottom,
+            color-mix(in oklab, var(--base-color) 7.5%, rgba(0, 0, 0, 0) 92.5%) 0%,
+            #ffffff 50%,
+            color-mix(in oklab, var(--base-color) 7.5%, rgba(0, 0, 0, 0) 92.5%) 100%);
+    border-top: 2px solid color-mix(in oklab, var(--base-color) 40%, rgba(0, 0, 0, 0) 60%);
+    border-bottom: 2px solid color-mix(in oklab, var(--base-color) 40%, rgba(0, 0, 0, 0) 60%);
 }

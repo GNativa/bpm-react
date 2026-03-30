@@ -1,6 +1,5 @@
-import { useEffect, useState, forwardRef, useImperativeHandle } from "react";
+import { useEffect, useState, useImperativeHandle } from "react";
 import { Form, Row, Col, FloatingLabel, Button } from "react-bootstrap";
-import { Spinner } from 'react-bootstrap';
 import { useForm } from "react-hook-form";
 import { LabelContent, InvalidFeedback } from './Display';
 import { currentStepIs, currentStepOrNone } from '../logic/flow.js';
@@ -9,7 +8,7 @@ const steps = {
     request: '1',
 };
 
-export default function MainForm({ data, loaded, ref }) {
+export default function MainForm({ data, ref }) {
     const {
         register,
         handleSubmit,
@@ -43,14 +42,6 @@ export default function MainForm({ data, loaded, ref }) {
         };
     }, []);
 
-    if (!loaded) {
-        return (
-            <div className="p-3">
-                <Spinner animation="border" />
-            </div>
-        );
-    }
-
     const required = () => {
         return { required: 'Este campo é obrigatório.' };
     };
@@ -66,7 +57,7 @@ export default function MainForm({ data, loaded, ref }) {
                     <h5 style={{ color: 'black' }}><strong><em>Solicitação</em></strong></h5>
                 </Col>
             </Row>
-            <div className="linha-secao p-2">
+            <div className="section-row p-2">
                 <Row className="g-3">
                     <Col lg="4">
                         <FloatingLabel label="Tipo de solicitação" controlId="tipoSolicitacao">
@@ -82,7 +73,7 @@ export default function MainForm({ data, loaded, ref }) {
                             <InvalidFeedback message={errors.tipoSolicitacao?.message} />
                         </FloatingLabel>
                     </Col>
-                    <Col lg="2" className={!currentStepOrNone(steps.request) ? 'd-none' : ''}>
+                    <Col lg="2" className={currentStepOrNone(steps.request) ? '' : 'd-none'}>
                         <FloatingLabel label="Número" controlId="numeroRemessa">
                             <Form.Control
                                 type="number"

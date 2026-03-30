@@ -1,7 +1,8 @@
 import { useEffect, useState, useRef } from "react";
-import MainForm from "./components/MainForm";
 import { initBPMBridge } from "./bpmBridge";
-import { Container } from "react-bootstrap";
+import { Container, Spinner } from "react-bootstrap";
+
+import MainForm from "./components/MainForm";
 
 export default function App() {
   const [formData, setFormData] = useState({});
@@ -90,9 +91,17 @@ export default function App() {
     initializationRef.current = true;
   }, []);
 
+  if (!loaded) {
+    return (
+      <div className="d-flex align-items-center justify-content-center" style={{ width: '100vw', height: '100vh'}}>
+        <Spinner animation="border" />
+      </div>
+    );
+  }
+
   return (
     <Container fluid>
-      <MainForm ref={formRef} data={formData} loaded={loaded} />
+      <MainForm ref={formRef} data={formData} />
     </Container>
   );
 }
