@@ -64,19 +64,11 @@ export default function MainForm({ data, loaded, ref }) {
                 <Col lg="4">
                     <FloatingLabel label="Tipo de solicitação" controlId="tipoSolicitacao">
                         <Form.Select
-                            {...register('tipoSolicitacao', {
-                                validate: {
-                                    tipo: (tipo) => {
-                                        if (tipo === '1') {
-                                            return true;
-                                        }
-
-                                        return 'O tipo de solicitação 2 não pode ser selecionado.';
-                                    }
-                                }
-                            })}
+                            {...register('tipoSolicitacao', required())}
                             isInvalid={errors.tipoSolicitacao}
+                            required
                         >
+                            <option value="">Selecione...</option>
                             <option value="1">1 - Aprovação de remessas de NF-e</option>
                             <option value="2">2 - Aprovação de contrato</option>
                         </Form.Select>
@@ -92,8 +84,8 @@ export default function MainForm({ data, loaded, ref }) {
                                 required: 'abcde',
                                 validate: {
                                     tipo: (numeroRemessa, { tipoSolicitacao }) => {
-                                        if (tipoSolicitacao === '1') {
-                                            return 'Errado';
+                                        if (tipoSolicitacao === '2') {
+                                            return 'O número da remessa não pode ser informado para o tipo 2.';
                                         }
 
                                         return true;

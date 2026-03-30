@@ -20,7 +20,7 @@ label:has(+ [required]), [required] ~ label {
     font-weight: bold;
 }
 
-select[required], input[type="file"][required] {
+input[type="file"][required] {
     font-weight: bold;
 }
 
