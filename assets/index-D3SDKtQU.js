@@ -15538,7 +15538,9 @@ function App() {
 				}
 				setLoaded(true);
 			},
-			onSubmit,
+			onSubmit: async () => {
+				return { formData: await onSubmit() };
+			},
 			onError: (err) => {
 				console.error("Erro no BPM:", err);
 			},
