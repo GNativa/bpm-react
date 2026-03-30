@@ -69,7 +69,12 @@ export default function App() {
 
         setLoaded(true);
       },
-      onSubmit,
+      onSubmit: async () => {
+        const data = await onSubmit();
+        return {
+          formData: data,
+        };
+      },
       onError: (err) => {
         console.error("Erro no BPM:", err);
       },
@@ -82,9 +87,6 @@ export default function App() {
       return;
     }
 
-    //setFormData({ numeroRemessa: 123 });
-    // TODO: remover
-    setTimeout(() => setLoaded(true), 1000);
     initializationRef.current = true;
   }, []);
 
