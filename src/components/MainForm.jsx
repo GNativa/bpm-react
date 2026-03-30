@@ -1,25 +1,25 @@
 import { useEffect, useState, useImperativeHandle } from "react";
 import { Form, Row, Col, FloatingLabel, Button } from "react-bootstrap";
 import { useForm } from "react-hook-form";
+import { z } from 'zod';
+import { zodResolver } from "@hookform/resolvers/zod";
+
 import { LabelContent, InvalidFeedback } from './Display';
 import { currentStepIs, currentStepOrNone } from '../logic/flow.js';
-
-const steps = {
-    request: '1',
-};
+import { useDependentValidation } from "../validation/helpers.jsx";
 
 export default function MainForm({ data, ref }) {
-    const {
-        register,
-        handleSubmit,
-        watch,
-        reset,
-        getValues,
-        trigger,
-        formState: { errors, touchedFields }
-    } = useForm({
-        mode: "onBlur", reValidateMode: "onChange", defaultValues: data
+    const form = useForm({
+        mode: "onBlur",
+        reValidateMode: "onChange",
+        defaultValues: data,
+        resolver: zodResolver(validationSchema),
     });
+
+    const {
+        register, handleSubmit, watch, reset, getValues, trigger,
+        formState: { errors, touchedFields },
+    } = form;
 
     useEffect(() => {
         reset(data);
@@ -42,11 +42,13 @@ export default function MainForm({ data, ref }) {
         };
     }, []);
 
-    const required = () => {
-        return { required: 'Este campo é obrigatório.' };
-    };
+    const tipoSolicitacao = watch('tipoSolicitacao');
+    //const formData = watch();
+    const formData = {};
 
-    const formData = watch();
+    useDependentValidation(form, {
+        watch: 'tipoSolicitacao', trigger: ['numeroRemessa'],
+    });
 
     return (
         <Form noValidate onSubmit={handleSubmit(() => {
@@ -62,7 +64,7 @@ export default function MainForm({ data, ref }) {
                     <Col lg="4">
                         <FloatingLabel label="Tipo de solicitação" controlId="tipoSolicitacao">
                             <Form.Select
-                                {...register('tipoSolicitacao', required())}
+                                {...register('tipoSolicitacao')}
                                 isInvalid={errors.tipoSolicitacao}
                                 required
                             >
@@ -78,11 +80,11 @@ export default function MainForm({ data, ref }) {
                             <Form.Control
                                 type="number"
                                 placeholder="Número"
-                                {...register('numeroRemessa', required())}
-                                required
+                                {...register('numeroRemessa')}
                                 isInvalid={errors.numeroRemessa}
+                                required={tipoSolicitacao === '1'}
                                 disabled={!currentStepIs(steps.request)}
-                                //isValid={touchedFields.numeroRemessa && !errors.numeroRemessa}
+                            //isValid={touchedFields.numeroRemessa && !errors.numeroRemessa}
                             />
                             <InvalidFeedback message={errors.numeroRemessa?.message} />
                         </FloatingLabel>
@@ -163,3 +165,22 @@ export default function MainForm({ data, ref }) {
         </Form>
     );
 }
+
+const steps = {
+    request: '1',
+};
+
+const validationSchema = z.object({
+    tipoSolicitacao: z.string({ error: 'Este campo é obrigatório.' }),
+    numeroRemessa: z.string().nullish(),
+}).superRefine((data, context) => {
+    if (data.tipoSolicitacao === '1') {
+        if (!data.numeroRemessa) {
+            context.addIssue({
+                code: 'custom',
+                message: 'O número da remessa é obrigatório.',
+                path: ['numeroRemessa'],
+            });
+        }
+    }
+});
