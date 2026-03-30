@@ -15547,7 +15547,6 @@ function App() {
 	}, []);
 	(0, import_react.useEffect)(() => {
 		if (initializationRef.current) return;
-		setTimeout(() => setLoaded(true), 1e3);
 		initializationRef.current = true;
 	}, []);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Container, {
