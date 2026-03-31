@@ -1,4 +1,4 @@
-import { Form, Overlay, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Form, OverlayTrigger, Tooltip } from 'react-bootstrap';
 
 export function InvalidFeedback({ message }) {
     return Feedback({
