@@ -1,6 +1,5 @@
 @media screen and (max-width: 800px),
 handheld and (orientation: portrait) {
-
     .col,
     .col-1,
     .col-2,
@@ -58,4 +57,19 @@ input[type="file"][required] {
             color-mix(in oklab, var(--base-color) 7.5%, rgba(0, 0, 0, 0) 92.5%) 100%);
     border-top: 2px solid color-mix(in oklab, var(--base-color) 40%, rgba(0, 0, 0, 0) 60%);
     border-bottom: 2px solid color-mix(in oklab, var(--base-color) 40%, rgba(0, 0, 0, 0) 60%);
+}
+
+.form-check-input {
+    width: 2em;
+    height: 2em;
+}
+
+.form-check {
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+label:has(+ input[type="file"]) {
+    margin-bottom: 0;
 }
