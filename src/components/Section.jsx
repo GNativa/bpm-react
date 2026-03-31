@@ -11,11 +11,9 @@ export default function Section({ title, columns = [] }) {
                         </h5>
                     </Col>
                 </Row>
-                <div className="section-row p-2">
-                    <Row className={`g-3`}>
-                        {columns}
-                    </Row>
-                </div>
+                <Row className="section-row g-3 pb-3`">
+                    {columns}
+                </Row>
             </Col>
         </Row>
     );
