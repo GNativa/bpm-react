@@ -111,3 +111,22 @@ input[disabled],
     font-weight: bold;
     color: var(--base-color);
 }
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    width: 1.75em;
+    height: 1.75em;
+    filter: invert(1);
+}
+
+/*
+.date-control:not([disabled])::after {
+    content: "📅";
+    position: absolute;
+    font-size: 1.5em;
+    right: 1.5%;
+    top: 65%;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+*/
