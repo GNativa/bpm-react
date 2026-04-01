@@ -1,13 +1,17 @@
 import { useEffect, useState, useImperativeHandle } from "react";
 import { Form, Row, Col, FloatingLabel, Button } from "react-bootstrap";
-import { useFieldArray, useForm, useWatch } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import { z } from 'zod';
 import { zodResolver } from "@hookform/resolvers/zod";
 
+import Section from './Section';
 import { LabelContent, InvalidFeedback } from './Display';
 import { currentStepIs, currentStepOrNone } from '../logic/flow.js';
-import { useDependentValidation } from "../validation/helpers.jsx";
-import FieldArrayRow from "./FieldArrayRow.jsx";
+import { useDependentValidation } from "../validation/helpers";
+import FieldArrayRow from "./FieldArrayRow";
+import SelectField from "./fields/select.jsx";
+import InputField from "./fields/input.jsx";
+import { naturalLanguageJoin } from "./text/helpers.jsx";
 
 export default function MainForm({ data, ref }) {
     const form = useForm({
@@ -49,124 +53,151 @@ export default function MainForm({ data, ref }) {
 
     const tipoSolicitacao = watch('tipoSolicitacao');
     //const formData = watch();
-    const formData = {};
 
     useDependentValidation(form, {
         watch: 'tipoSolicitacao', trigger: ['numeroRemessa'],
     });
 
-    if (arrayFields.length === 0) {
-        append();
-    }
+    useEffect(() => {
+        if (arrayFields.length === 0) {
+            append();
+        }
+    }, [arrayFields, append]);
+
+    // TODO: reutilizar condições
 
     return (
         <Form noValidate onSubmit={handleSubmit(() => {
             console.log('Dados enviados.');
         })}>
-            <Row className="mt-2 mb-4">
-                <Col className="d-flex align-items-start">
-                    <h5 style={{ color: 'black' }}><strong><em>Solicitação</em></strong></h5>
-                </Col>
-            </Row>
-            <Row className="section-row g-3 pb-3">
-                <Col xs="4">
-                    <FloatingLabel label="Tipo de solicitação" controlId="tipoSolicitacao">
-                        <Form.Select
-                            {...register('tipoSolicitacao')}
-                            isInvalid={errors.tipoSolicitacao}
+            <Section
+                title="Solicitação"
+                columns={[{
+                    children: (
+                        <SelectField
+                            form={form}
+                            errors={errors}
+                            id="tipoSolicitacao"
+                            label="Tipo de solicitação"
                             required
-                        >
-                            <option value="">Selecione...</option>
-                            <option value="1">1 - Aprovação de remessas de NF-e</option>
-                            <option value="2">2 - Aprovação de contrato</option>
-                        </Form.Select>
-                        <InvalidFeedback message={errors.tipoSolicitacao?.message} />
-                    </FloatingLabel>
-                </Col>
-                <Col xs="2" className={tipoSolicitacao === '1' ? '' : 'd-none'}>
-                    <FloatingLabel label="Número" controlId="numeroRemessa">
-                        <Form.Control
+                            options={[
+                                { value: '1', label: 'Aprovação de remessas de NF-e', },
+                                { value: '2', label: 'Aprovação de contrato', },
+                            ]}
+                        />
+                    ),
+                    width: 4,
+                }, {
+                    children: (
+                        <InputField
+                            form={form}
+                            errors={errors}
                             type="number"
-                            placeholder="Número"
-                            {...register('numeroRemessa')}
-                            isInvalid={errors.numeroRemessa}
+                            id="numeroRemessa"
+                            label="Número"
                             required={tipoSolicitacao === '1'}
                             disabled={!currentStepIs(steps.request)}
-                            //isValid={touchedFields.numeroRemessa && !errors.numeroRemessa}
                         />
-                        <InvalidFeedback message={errors.numeroRemessa?.message} />
-                    </FloatingLabel>
-                </Col>
-                <Col xs="2">
-                    <FloatingLabel label="Data">
-                        <Form.Control
-                            id="dataRemessa"
-                            name="dataRemessa"
+                    ),
+                    width: 2,
+                    visible: tipoSolicitacao === '1',
+                }, {
+                    children: (
+                        <InputField
+                            form={form}
+                            errors={errors}
                             type="date"
-                            placeholder="Data"
+                            id="dataRemessa"
+                            label="Data"
                             disabled
                         />
-                    </FloatingLabel>
-                </Col>
-                <Col xs="2">
-                    <FloatingLabel label="Quantidade de notas">
-                        <Form.Control
-                            id="quantidadeNotasRemessa"
-                            name="quantidadeNotasRemessa"
+                    ),
+                    width: 2,
+                    visible: tipoSolicitacao === '1',
+                }, {
+                    children: (
+                        <InputField
+                            form={form}
+                            errors={errors}
                             type="number"
-                            placeholder="Quantidade de notas"
+                            id="quantidadeNotasRemessa"
+                            label="Quantidade de notas"
                             disabled
                         />
-                    </FloatingLabel>
-                </Col>
-                <Col xs="2">
-                    <FloatingLabel label={
-                        <LabelContent label="Categoria" tooltip="Categoria da remessa com base em seu valor ( <= 1000 = baixo valor, > 1000 = alto valor)"></LabelContent>
-                    }>
-                        <Form.Control
+                    ),
+                    width: 2,
+                    visible: tipoSolicitacao === '1',
+                }, {
+                    children: (
+                        <InputField
+                            form={form}
+                            errors={errors}
+                            type="text"
                             id="categoriaRemessa"
-                            name="categoriaRemessa"
-                            type="text"
-                            placeholder="Categoria"
+                            label="Categoria"
+                            hint="Categoria da remessa com base em seu valor ( <= 1000 = baixo valor, > 1000 = alto valor)"
                             disabled
                         />
-                    </FloatingLabel>
-                </Col>
-                <Col xs="2">
-                    <FloatingLabel label="Valor total">
-                        <Form.Control
+                    ),
+                    width: 2,
+                    visible: tipoSolicitacao === '1',
+                }, {
+                    children: (
+                        <InputField
+                            form={form}
+                            errors={errors}
+                            type="number"
                             id="valorTotalRemessa"
-                            name="valorTotalRemessa"
-                            type="text"
-                            placeholder="Valor total"
+                            label="Valor total"
                             disabled
                         />
-                    </FloatingLabel>
-                </Col>
-                <Col xs="4">
-                    <FloatingLabel label="Solicitante">
-                        <Form.Control
+                    ),
+                    width: 2,
+                    visible: tipoSolicitacao === '1',
+                }, {
+                    children: (
+                        <InputField
+                            form={form}
+                            errors={errors}
+                            type="text"
                             id="solicitante"
-                            name="solicitante"
-                            type="text"
-                            placeholder="Solicitante"
+                            label="Solicitante"
                             disabled
                         />
-                    </FloatingLabel>
-                </Col>
-                <Col xs="6">
-                    <Form.Label className="d-flex align-items-start" htmlFor="anexo">Remessa e notas fiscais</Form.Label>
-                    <Form.Control
-                        id="anexo"
-                        name="anexo"
-                        type="file"
-                    />
-                </Col>
-            </Row>
+                    ),
+                    width: 4,
+                    visible: tipoSolicitacao === '1',
+                }, {
+                    children: (
+                        <InputField
+                            form={form}
+                            errors={errors}
+                            id="anexo"
+                            type="file"
+                            label={(() => {
+                                switch (tipoSolicitacao) {
+                                    case '1':
+                                        return 'Remessa e notas fiscais';
+                                    case '2':
+                                        return 'Contrato';
+                                    default:
+                                        return 'Anexo';
+                                }
+                            })()}
+                            required
+                            multiple={tipoSolicitacao === '1'}
+                        />
+                    ),
+                    width: 6,
+                }]}
+            />
+
             {tipoSolicitacao === '1' && (<>
                 <Row className="mt-4 mb-4">
                     <Col className="d-flex align-items-start">
-                        <h6 style={{ color: 'black' }}><strong>Notas fiscais</strong></h6>
+                        <div className="title-sm">
+                            Notas fiscais
+                        </div>
                     </Col>
                 </Row>
                 {arrayFields.map((field, index) => {
@@ -327,7 +358,7 @@ export default function MainForm({ data, ref }) {
             </>)}
 
 
-            {true && <Row>
+            {false && <Row>
                 <Col>
                     <p>Dados: {JSON.stringify(formData)}</p>
                     <Button type="submit">Enviar</Button>
@@ -341,6 +372,8 @@ const steps = {
     request: '1',
 };
 
+const requiredMsg = 'Este campo é obrigatório.';
+
 const arraySchema = z.object({
     reprovar: z.boolean(),
     motivo: z.string().nullish(),
@@ -348,22 +381,36 @@ const arraySchema = z.object({
     if (data.reprovar && !data.motivo) {
         context.addIssue({
             code: 'custom',
-            message: 'O motivo da reprovação é obrigatório.',
+            message: requiredMsg,
             path: ['motivo'],
         });
     }
 });
 
+
+const supportedFormats = ['png', 'jpg', 'jpeg', 'pdf'];
+
 const formValidationSchema = z.object({
-    tipoSolicitacao: z.string({ error: 'Este campo é obrigatório.' }),
-    numeroRemessa: z.string().nullish(),
+    tipoSolicitacao: z.string().min(1, requiredMsg),
+    numeroRemessa: z.number().nullish(),
+    anexo: z.custom()
+        .transform((files) => {
+            /** @type {File[]} */
+            const asArray = Array.from(files);
+            return asArray;
+        })
+        .refine((files) => files?.length >= 1, 'Você deve anexar ao menos um arquivo.')
+        .refine(
+            (files) => files && files.every(f => supportedFormats.some(s => f.type.toLowerCase().endsWith(s))),
+            `Somente são suportados os formatos ${naturalLanguageJoin(supportedFormats)}.`,
+        ),
     notasFiscais: z.array(arraySchema).optional(),
 }).superRefine((data, context) => {
     if (data.tipoSolicitacao === '1') {
         if (!data.numeroRemessa) {
             context.addIssue({
                 code: 'custom',
-                message: 'O número da remessa é obrigatório.',
+                message: requiredMsg,
                 path: ['numeroRemessa'],
             });
         }
