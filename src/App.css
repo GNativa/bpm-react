@@ -1,5 +1,6 @@
 @media screen and (max-width: 800px),
 handheld and (orientation: portrait) {
+
     .col,
     .col-1,
     .col-2,
@@ -16,6 +17,10 @@ handheld and (orientation: portrait) {
         flex: 0 0 auto;
         width: 100%;
     }
+}
+
+:root {
+    --base-color: #272927;
 }
 
 div#root {
@@ -39,24 +44,13 @@ input[type="file"][required] {
 }
 
 [required] {
-    border-bottom-color: var(--bs-body);
+    border-bottom-color: var(--base-color);
     border-bottom-width: thin;
 }
 
 .is-invalid {
     border-bottom-color: var(--bs-form-invalid-color);
     border-bottom-width: medium;
-}
-
-.section-row {
-    --base-color: green;
-    border-radius: 10px;
-    background: linear-gradient(to bottom,
-            color-mix(in oklab, var(--base-color) 7.5%, rgba(0, 0, 0, 0) 92.5%) 0%,
-            #ffffff 50%,
-            color-mix(in oklab, var(--base-color) 7.5%, rgba(0, 0, 0, 0) 92.5%) 100%);
-    border-top: 2px solid color-mix(in oklab, var(--base-color) 40%, rgba(0, 0, 0, 0) 60%);
-    border-bottom: 2px solid color-mix(in oklab, var(--base-color) 40%, rgba(0, 0, 0, 0) 60%);
 }
 
 .form-check-input {
@@ -72,4 +66,48 @@ input[type="file"][required] {
 
 label:has(+ input[type="file"]) {
     margin-bottom: 0;
+    color: var(--base-color);
+}
+
+.form-select,
+.form-floating>label,
+option,
+input.form-control,
+input[type="file"]::file-selector-button {
+    color: var(--base-color);
+}
+
+input[disabled],
+.form-floating>input[disabled].form-control~label,
+.form-floating>label:has(input[disabled]) {
+    color: color-mix(in oklab, var(--base-color) 60%, rgba(0, 0, 0, 0) 40%);
+}
+
+.section-row {
+    border-radius: 10px;
+    background: linear-gradient(to bottom,
+            color-mix(in oklab, var(--base-color) 7.5%, rgba(0, 0, 0, 0) 92.5%) 0%,
+            #ffffff 50%,
+            color-mix(in oklab, var(--base-color) 7.5%, rgba(0, 0, 0, 0) 92.5%) 100%);
+    border-top: 2px solid color-mix(in oklab, var(--base-color) 40%, rgba(0, 0, 0, 0) 60%);
+    border-bottom: 2px solid color-mix(in oklab, var(--base-color) 40%, rgba(0, 0, 0, 0) 60%);
+}
+
+.title-l {
+    font-size: 1.5em;
+    font-weight: bold;
+    font-style: italic;
+    color: var(--base-color);
+}
+
+.title-md {
+    font-size: 1.25em;
+    font-weight: bold;
+    color: var(--base-color);
+}
+
+.title-sm {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: var(--base-color);
 }
