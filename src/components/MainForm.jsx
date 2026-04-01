@@ -92,7 +92,7 @@ export default function MainForm({ data, ref }) {
                             isInvalid={errors.numeroRemessa}
                             required={tipoSolicitacao === '1'}
                             disabled={!currentStepIs(steps.request)}
-                        //isValid={touchedFields.numeroRemessa && !errors.numeroRemessa}
+                            //isValid={touchedFields.numeroRemessa && !errors.numeroRemessa}
                         />
                         <InvalidFeedback message={errors.numeroRemessa?.message} />
                     </FloatingLabel>

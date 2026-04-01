@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useWatch } from "react-hook-form";
 
-// TODO: possibilitar visualizar campos de fieldArray também
+// TODO: possibilitar monitorar campos de fieldArray também
 export function useDependentValidation(form, { watch, trigger }) {
   const values = useWatch({
     control: form.control,
@@ -18,16 +18,22 @@ export function useDependentValidation(form, { watch, trigger }) {
       form.trigger(trigger);
     }
   }, [values, form.formState.touchedFields, form.formState.errors]);
+
+  return values;
 }
 
 export function useDependentValidations(form, dependencies) {
+  const watched = {};
+
   for (const dependency of dependencies) {
-    useDependentValidation({
+    watched[dependency.watch] = useDependentValidation({
       form,
       watch: dependency.watch,
       trigger: dependency.trigger,
     });
   }
+
+  return watched;
 }
 
 export function useDependentFieldArrayValidation({ form, arrayName, fieldName, index, targetFields = [] }) {

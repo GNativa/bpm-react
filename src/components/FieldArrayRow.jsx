@@ -25,7 +25,7 @@ export default function FieldArrayRow({
     index,
     validationDependencies = [],
     fieldIds,
-    builder
+    builder,
 }) {
     const mappedDependencies = validationDependencies.map(v => ({
         form, arrayName, index,
