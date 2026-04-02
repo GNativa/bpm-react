@@ -1,53 +1,87 @@
+import { Col, Button } from "react-bootstrap";
+import SectionRow from "./layout/SectionRow";
+import Column from "./layout/Column";
 import { useDependentFieldArrayValidations } from "../validation/helpers";
 
-/** 
- * @typedef {{
- *  field: string, index: number, rowFields: Record<string, any>,
- *  rowErrors: Record<string, ?string|undefined>
- * }} FieldArrayRowBuilder
- */
+function buildIds(idList, arrayName, index) {
+  const idObject = {};
+
+  for (const id of idList) {
+    idObject[id] = `${arrayName}.${index}.${id}`;
+  }
+
+  return idObject;
+}
 
 /**
  * @param {{
- *  validationDependencies: Object[],
+ *  form: import("react-hook-form").UseFormReturn,
  *  field: string, 
  *  arrayName: string,
  *  index: number,
- *  fieldIds: string[],
- *  builder: function(FieldArrayRowBuilder): import("react").JSX.Element
+ *  fieldNames: string[],
+ *  validationDependencies: Object[],
+ *  rowBuilder: function(FieldArrayRowBuilder): import("react").JSX.Element
+ *  removeFunction: function,
  * }}
  * @returns
  */
 export default function FieldArrayRow({
+  form,
+  field,
+  arrayName,
+  index,
+  fieldNames,
+  validationDependencies = [],
+  rowBuilder,
+  removeFunction,
+}) {
+  const mappedDependencies = validationDependencies.map((v) => ({
     form,
-    field,
     arrayName,
     index,
-    validationDependencies = [],
-    fieldIds,
-    builder,
-}) {
-    const mappedDependencies = validationDependencies.map(v => ({
-        form, arrayName, index,
-        fieldName: v.fieldName,
-        targetFields: v.targetFields,
-    }));
-    
-    const watched = useDependentFieldArrayValidations(form, mappedDependencies);
-    const rowFields = buildIds(fieldIds, arrayName, index);
-    
-    return builder({
-        field, index, rowFields, watched,
-        rowErrors: form.formState.errors?.[arrayName]?.[index],
-    });
-}
+    dependency: v,
+  }));
 
-function buildIds(idList, arrayName, index) {
-    const idObject = {};
+  const watched = useDependentFieldArrayValidations(
+    form,
+    mappedDependencies
+  );
 
-    for (const id of idList) {
-        idObject[id] = `${arrayName}.${index}.${id}`;
-    }
+  const rowFields = buildIds(fieldNames, arrayName, index);
 
-    return idObject;
+  const columns = rowBuilder({
+    field,
+    index,
+    rowFields,
+    watched,
+    rowErrors: form.formState.errors?.[arrayName]?.[index],
+  });
+
+  return (
+    <SectionRow>
+      {removeFunction && (
+        <Col xs="12" className="d-flex justify-content-end">
+          <Button onClick={() => removeFunction(index)}>
+            <i className="bi bi-dash fs-5" />
+          </Button>
+        </Col>
+      )}
+
+      {columns.map((column, columnIndex) => (
+        <Column
+          key={columnIndex}
+          visible={column.visible ?? undefined}
+          width={column.width ?? undefined}
+          breakAfter={column.breakAfter ?? undefined}
+        >
+          {Array.isArray(column.children)
+            ? column.children.map((child, i) => (
+                <span key={i}>{child}</span>
+              ))
+            : column.children}
+        </Column>
+      ))}
+    </SectionRow>
+  );
 }

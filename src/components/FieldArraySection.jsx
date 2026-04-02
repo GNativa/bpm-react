@@ -1,8 +1,8 @@
 import { hideIf } from "./layout/helpers";
-import { Row, Col } from "react-bootstrap";
+import { Row, Col, Button } from "react-bootstrap";
 import SectionRow from "./layout/SectionRow";
 import Column from "./layout/Column";
-import buildFieldArrayRow from "./buildFieldArrayRow";
+import FieldArrayRow from "./FieldArrayRow";
 
 /**
  * @param {{
@@ -14,6 +14,8 @@ import buildFieldArrayRow from "./buildFieldArrayRow";
  *  visible: boolean,
  *  arrayFields: {id: string}[],
  *  validationDependencies: FieldArrayValidationDependency[],
+ *  appendFunction: function,
+ *  removeFunction: function,
  *  rowBuilder: FieldArrayRowBuilder,
  * }}
  * @returns 
@@ -27,6 +29,8 @@ export default function FieldArraySection({
     visible = true,
     arrayFields = [],
     validationDependencies = [],
+    appendFunction,
+    removeFunction,
     rowBuilder,
 }) {
     return (
@@ -34,39 +38,33 @@ export default function FieldArraySection({
             `${hideIf(!visible)} ${first ? '' : 'mt-4'}`
         }>
             <Row className="mt-2 mb-4">
-                <Col className="d-flex align-items-start">
-                    <div className="title-sm">
-                        {title}
-                    </div>
+                <Col xs="6" className="d-flex justify-content-start title-sm">
+                    {title}
                 </Col>
+                {appendFunction && (
+                    <Col xs="6" className="d-flex justify-content-end">
+                        <Button onClick={(e) => {
+                            appendFunction();
+                        }}>
+                            <i className="bi bi-plus fs-5" />
+                        </Button>
+                    </Col>
+                )}
             </Row>
-            <div className="g-3">
-                {arrayFields.map((field, rowIndex) => {
-                    const columns = buildFieldArrayRow({
-                        form, field, arrayName,
-                        index: rowIndex,
-                        fieldNames,
-                        validationDependencies,
-                        builder: rowBuilder,
-                    });
-
-                    return (
-                        <SectionRow key={field.id}>
-                            {columns.map((column, columnIndex) => (
-                                <Column
-                                    key={columnIndex}
-                                    visible={column.visible ?? undefined}
-                                    width={column.width ?? undefined}
-                                    breakAfter={column.breakAfter ?? undefined}
-                                >
-                                    {Array.isArray(column.children)
-                                        ? column.children.map((child, i) => <span key={i}>{child}</span>)
-                                        : column.children}
-                                </Column>
-                            ))}
-                        </SectionRow>
-                    );
-                })}
+            <div className="d-grid gap-4">
+                {arrayFields.map((field, rowIndex) => (
+                    <FieldArrayRow
+                        key={field.id}
+                        form={form}
+                        field={field}
+                        arrayName={arrayName}
+                        index={rowIndex}
+                        fieldNames={fieldNames}
+                        validationDependencies={validationDependencies}
+                        rowBuilder={rowBuilder}
+                        removeFunction={removeFunction}
+                    />
+                ))}
             </div>
         </div>
     );

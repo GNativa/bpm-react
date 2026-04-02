@@ -1,11 +1,4 @@
-import { useDependentFieldArrayValidations } from "../validation/helpers";
-
-/** 
- * @typedef {{
- *  field: string, index: number, rowFields: Record<string, any>,
- *  rowErrors: Record<string, ?string|undefined>
- * }} FieldArrayRowBuilder
- */
+import { useDependentFieldArrayValidations } from "../../validation/helpers";
 
 /**
  * @param {{

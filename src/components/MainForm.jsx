@@ -5,10 +5,8 @@ import { z } from 'zod';
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import Section from './layout/Section';
-import { InvalidFeedback } from './Display';
 import { currentStepIs, currentStepOrNone } from '../logic/flow.js';
 import { useDependentValidation } from "../validation/helpers";
-import FieldArrayRow from "./FieldArrayRow";
 import SelectField from "./fields/select.jsx";
 import InputField from "./fields/input.jsx";
 import { naturalLanguageJoin } from "./text/helpers.jsx";
@@ -62,9 +60,11 @@ export default function MainForm({ data, ref }) {
     });
 
     useEffect(() => {
+        /*
         if (arrayFields.length === 0) {
             append();
         }
+        */
     }, [arrayFields, append]);
 
     // TODO: reutilizar condições
@@ -208,6 +208,8 @@ export default function MainForm({ data, ref }) {
                     validationDependencies={[
                         { fieldName: 'reprovar', defaultValue: false, targetFields: ['motivo'] },
                     ]}
+                    appendFunction={append}
+                    removeFunction={remove}
                     rowBuilder={({ rowFields, watched, rowErrors }) => {
                         return [{
                             children: (
@@ -315,6 +317,7 @@ export default function MainForm({ data, ref }) {
                                     errors={rowErrors}
                                     id={rowFields.reprovar}
                                     label="Reprovar"
+                                    hint="Marque aqui caso queira reprovar esta nota fiscal."
                                 />
                             ),
                             width: 2,
@@ -335,146 +338,6 @@ export default function MainForm({ data, ref }) {
                     }}
                 />
             )}
-
-
-            {/*
-            
-            tipoSolicitacao === '1' && (<>
-                <Row className="mt-4 mb-4">
-                    <Col className="d-flex align-items-start">
-                        <div className="title-sm">
-                            Notas fiscais
-                        </div>
-                    </Col>
-                </Row>
-                {arrayFields.map((field, index) => {
-                    const builder = ({ rowFields, watched, rowErrors }) => {
-                        return (
-                            <Row className="section-row g-3 pb-3">
-                                <Col xs="2">
-                                    <InputField
-                                        form={form}
-                                        id={rowFields.empresa}
-                                        type="number"
-                                        label="Empresa"
-                                        disabled
-                                    />
-                                </Col>
-                                <Col xs="2">
-                                    <InputField
-                                        form={form}
-                                        id={rowFields.filial}
-                                        type="number"
-                                        label="Filial"
-                                        disabled
-                                    />
-                                </Col>
-                                <Col xs="4">
-                                    <InputField
-                                        form={form}
-                                        id={rowFields.nomeFilial}
-                                        type="text"
-                                        label="Nome da filial"
-                                        disabled
-                                    />
-                                </Col>
-                                <Col xs="2">
-                                    <InputField
-                                        form={form}
-                                        id={rowFields.serie}
-                                        type="text"
-                                        label="Série"
-                                        disabled
-                                    />
-                                </Col>
-                                <Col xs="2">
-                                    <InputField
-                                        form={form}
-                                        id={rowFields.fornecedor}
-                                        type="number"
-                                        label="Fornecedor"
-                                        disabled
-                                    />
-                                </Col>
-                                <Col xs="4">
-                                    <InputField
-                                        form={form}
-                                        id={rowFields.nomeFornecedor}
-                                        type="text"
-                                        label="Nome do fornecedor"
-                                        disabled
-                                    />
-                                </Col>
-                                <Col xs="2">
-                                    <InputField
-                                        form={form}
-                                        id={rowFields.numero}
-                                        type="number"
-                                        label="Número"
-                                        disabled
-                                    />
-                                </Col>
-                                <Col xs="2">
-                                    <InputField
-                                        form={form}
-                                        id={rowFields.emissao}
-                                        type="date"
-                                        label="Data de emissão"
-                                        disabled
-                                    />
-                                </Col>
-                                <Col xs="2">
-                                    <InputField
-                                        form={form}
-                                        id={rowFields.entrada}
-                                        type="date"
-                                        label="Data de entrada"
-                                        disabled
-                                    />
-                                </Col>
-                                <Col xs="2">
-                                    <CheckboxField
-                                        form={form}
-                                        errors={rowErrors}
-                                        id={rowFields.reprovar}
-                                        label="Reprovar"
-                                    />
-                                </Col>
-                                <Col xs="4" className={!watched.reprovar ? 'd-none' : ''}
-                                >
-                                    <TextAreaField
-                                        form={form}
-                                        errors={rowErrors}
-                                        id={rowFields.motivo}
-                                        fieldName="motivo"
-                                        label="Motivo"
-                                        required={watched.reprovar}
-                                    />
-                                </Col>
-                            </Row>
-                        );
-                    };
-
-                    return (
-                        <FieldArrayRow
-                            key={field.id}
-                            form={form}
-                            field={field}
-                            arrayName={'notasFiscais'}
-                            index={index}
-                            validationDependencies={[
-                                { fieldName: 'reprovar', targetFields: ['motivo'] },
-                            ]}
-                            fieldIds={[
-                                'empresa', 'filial', 'nomeFilial', 'serie', 'fornecedor', 'nomeFornecedor',
-                                'numero', 'emissao', 'entrada', 'reprovar', 'motivo',
-                            ]}
-                            builder={builder}>
-                        </FieldArrayRow>
-                    );
-                })}
-            </>)*/ <></>}
-
 
             {false && <Row>
                 <Col>
