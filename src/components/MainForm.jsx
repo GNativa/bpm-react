@@ -13,6 +13,7 @@ import { naturalLanguageJoin } from "../logic/text/helpers.jsx";
 import CheckboxField from "./fields/checkbox.jsx";
 import TextAreaField from "./fields/textarea.jsx";
 import FieldArraySection from "./FieldArraySection.jsx";
+import FileField from "./fields/file.jsx";
 
 export default function MainForm({ data, ref }) {
     const form = useForm({
@@ -54,6 +55,7 @@ export default function MainForm({ data, ref }) {
 
     const tipoSolicitacao = watch('tipoSolicitacao');
     //const formData = watch();
+    const formData = {};
 
     useDependentValidation(form, {
         watch: 'tipoSolicitacao', trigger: ['numeroRemessa'],
@@ -172,11 +174,10 @@ export default function MainForm({ data, ref }) {
                     visible: tipoSolicitacao === '1',
                 }, {
                     children: (
-                        <InputField
+                        <FileField
                             form={form}
                             errors={errors}
                             id="anexo"
-                            type="file"
                             label={(() => {
                                 switch (tipoSolicitacao) {
                                     case '1':
@@ -339,7 +340,7 @@ export default function MainForm({ data, ref }) {
                 />
             )}
 
-            {false && <Row>
+            {true && <Row>
                 <Col>
                     <p>Dados: {JSON.stringify(formData)}</p>
                     <Button type="submit">Enviar</Button>

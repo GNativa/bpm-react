@@ -48,37 +48,21 @@ export default function InputField({
         options.valueAsDate = true;
     }
 
-    const control = (
-        <Form.Control
-            type={type}
-            placeholder={label}
-            {...form.register(id, options)}
-            isInvalid={!!errors?.[fieldName]}
-            required={required}
-            disabled={disabled}
-            multiple={multiple}
-        />
-    );
-
-    const invalidFeedback = <InvalidFeedback message={errors?.[fieldName]?.message} />;
-
-    if (type === 'file') {
-        return (
-            <>
-                <Form.Label className="d-flex align-items-start" htmlFor="anexo">{buildLabel(label, hint)}</Form.Label>
-                {control}
-                {invalidFeedback}
-            </>
-        );
-    }
-
     return (
         <FloatingLabel
             label={buildLabel(label, hint)}
             controlId={id}
         >
-            {control}
-            {invalidFeedback}
+            <Form.Control
+                type={type}
+                placeholder={label}
+                {...form.register(id, options)}
+                isInvalid={!!errors?.[fieldName]}
+                required={required}
+                disabled={disabled}
+                multiple={multiple}
+            />
+            <InvalidFeedback message={errors?.[fieldName]?.message} />
         </FloatingLabel>
     );
 }
