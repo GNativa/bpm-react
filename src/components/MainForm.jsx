@@ -12,6 +12,8 @@ import FieldArrayRow from "./FieldArrayRow";
 import SelectField from "./fields/select.jsx";
 import InputField from "./fields/input.jsx";
 import { naturalLanguageJoin } from "./text/helpers.jsx";
+import CheckboxField from "./fields/checkbox.jsx";
+import TextAreaField from "./fields/textarea.jsx";
 
 export default function MainForm({ data, ref }) {
     const form = useForm({
@@ -205,133 +207,104 @@ export default function MainForm({ data, ref }) {
                         return (
                             <Row className="section-row g-3 pb-3">
                                 <Col xs="2">
-                                    <FloatingLabel label="Empresa" controlId={rowFields.empresa}>
-                                        <Form.Control
-                                            {...register(rowFields.empresa, {
-                                                valueAsNumber: true,
-                                            })}
-                                            type="number"
-                                            placeholder="Empresa"
-                                            disabled
-                                        />
-                                    </FloatingLabel>
+                                    <InputField
+                                        form={form}
+                                        id={rowFields.empresa}
+                                        type="number"
+                                        label="Empresa"
+                                        disabled
+                                    />
                                 </Col>
                                 <Col xs="2">
-                                    <FloatingLabel label="Filial" controlId={rowFields.filial}>
-                                        <Form.Control
-                                            {...register(rowFields.filial, {
-                                                valueAsNumber: true,
-                                            })}
-                                            type="number"
-                                            placeholder="Filial"
-                                            disabled
-                                        />
-                                    </FloatingLabel>
+                                    <InputField
+                                        form={form}
+                                        id={rowFields.filial}
+                                        type="number"
+                                        label="Filial"
+                                        disabled
+                                    />
                                 </Col>
                                 <Col xs="4">
-                                    <FloatingLabel label="Nome da filial" controlId={rowFields.nomeFilial}>
-                                        <Form.Control
-                                            {...register(rowFields.nomeFilial)}
-                                            type="text"
-                                            placeholder="Nome da filial"
-                                            disabled
-                                        />
-                                    </FloatingLabel>
+                                    <InputField
+                                        form={form}
+                                        id={rowFields.nomeFilial}
+                                        type="text"
+                                        label="Nome da filial"
+                                        disabled
+                                    />
                                 </Col>
                                 <Col xs="2">
-                                    <FloatingLabel label="Série" controlId={rowFields.serie}>
-                                        <Form.Control
-                                            {...register(rowFields.serie)}
-                                            type="text"
-                                            placeholder="Série"
-                                            disabled
-                                        />
-                                    </FloatingLabel>
+                                    <InputField
+                                        form={form}
+                                        id={rowFields.serie}
+                                        type="text"
+                                        label="Série"
+                                        disabled
+                                    />
                                 </Col>
                                 <Col xs="2">
-                                    <FloatingLabel label="Fornecedor" controlId={rowFields.fornecedor}>
-                                        <Form.Control
-                                            {...register(rowFields.fornecedor, {
-                                                valueAsNumber: true,
-                                            })}
-                                            type="number"
-                                            placeholder="Fornecedor"
-                                            disabled
-                                        />
-                                    </FloatingLabel>
+                                    <InputField
+                                        form={form}
+                                        id={rowFields.fornecedor}
+                                        type="number"
+                                        label="Fornecedor"
+                                        disabled
+                                    />
                                 </Col>
                                 <Col xs="4">
-                                    <FloatingLabel label="Nome do fornecedor" controlId={rowFields.nomeFornecedor}>
-                                        <Form.Control
-                                            {...register(rowFields.nomeFornecedor)}
-                                            type="text"
-                                            placeholder="Nome do fornecedor"
-                                            disabled
-                                        />
-                                    </FloatingLabel>
+                                    <InputField
+                                        form={form}
+                                        id={rowFields.nomeFornecedor}
+                                        type="text"
+                                        label="Nome do fornecedor"
+                                        disabled
+                                    />
                                 </Col>
                                 <Col xs="2">
-                                    <FloatingLabel label="Número" controlId={rowFields.numero}>
-                                        <Form.Control
-                                            {...register(rowFields.numero, {
-                                                valueAsNumber: true,
-                                            })}
-                                            type="number"
-                                            placeholder="Número"
-                                            disabled
-                                        />
-                                    </FloatingLabel>
+                                    <InputField
+                                        form={form}
+                                        id={rowFields.numero}
+                                        type="number"
+                                        label="Número"
+                                        disabled
+                                    />
                                 </Col>
                                 <Col xs="2">
-                                    <FloatingLabel label="Data de emissão" controlId={rowFields.emissao}>
-                                        <Form.Control
-                                            {...register(rowFields.emissao, {
-                                                valueAsDate: true,
-                                            })}
-                                            type="date"
-                                            placeholder="Data de emissão"
-                                            disabled
-                                        />
-                                    </FloatingLabel>
+                                    <InputField
+                                        form={form}
+                                        id={rowFields.emissao}
+                                        type="date"
+                                        label="Data de emissão"
+                                        disabled
+                                    />
                                 </Col>
                                 <Col xs="2">
-                                    <FloatingLabel label="Data de entrada" controlId={rowFields.entrada}>
-                                        <Form.Control
-                                            {...register(rowFields.entrada, {
-                                                valueAsDate: true,
-                                            })}
-                                            type="date"
-                                            placeholder="Data de entrada"
-                                            disabled
-                                        />
-                                    </FloatingLabel>
+                                    <InputField
+                                        form={form}
+                                        id={rowFields.entrada}
+                                        type="date"
+                                        label="Data de entrada"
+                                        disabled
+                                    />
                                 </Col>
                                 <Col xs="2">
-                                    <Form.Check>
-                                        <Form.Check.Input
-                                            id={rowFields.reprovar}
-                                            {...register(rowFields.reprovar)}
-                                            type="checkbox"
-                                        />
-                                        <Form.Check.Label className="ms-2" htmlFor={rowFields.reprovar}>
-                                            Reprovar
-                                        </Form.Check.Label>
-                                    </Form.Check>
+                                    <CheckboxField
+                                        form={form}
+                                        errors={rowErrors}
+                                        id={rowFields.reprovar}
+                                        label="Reprovar"
+                                    />
                                 </Col>
                                 <Col xs="4" className={!watched.reprovar ? 'd-none' : ''}
                                 >
-                                    <FloatingLabel label="Motivo" controlId={rowFields.nomeFornecedor}>
-                                        <Form.Control
-                                            {...register(rowFields.motivo)}
-                                            as="textarea"
-                                            placeholder="Motivo"
-                                            style={{ height: "5lh" }}
-                                            required={watched.reprovar}
-                                            isInvalid={rowErrors?.motivo}
-                                        >
-                                        </Form.Control>
-                                        <InvalidFeedback message={rowErrors?.motivo?.message} />
-                                    </FloatingLabel>
+                                    <TextAreaField
+                                        form={form}
+                                        errors={rowErrors}
+                                        id={rowFields.motivo}
+                                        fieldName="motivo"
+                                        label="Motivo"
+                                        required={watched.reprovar}
+                                    />
                                 </Col>
                             </Row>
                         );
