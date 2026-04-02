@@ -43,9 +43,12 @@ export default function FieldArraySection({
                 </Col>
                 {appendFunction && (
                     <Col xs="6" className="d-flex justify-content-end">
-                        <Button onClick={(e) => {
-                            appendFunction();
-                        }}>
+                        <Button
+                            onClick={(e) => {
+                                appendFunction();
+                            }}
+                            size="sm"
+                        >
                             <i className="bi bi-plus fs-5" />
                         </Button>
                     </Col>

@@ -62,7 +62,7 @@ export default function FieldArrayRow({
     <SectionRow>
       {removeFunction && (
         <Col xs="12" className="d-flex justify-content-end">
-          <Button onClick={() => removeFunction(index)}>
+          <Button onClick={() => removeFunction(index)} size="sm">
             <i className="bi bi-dash fs-5" />
           </Button>
         </Col>
