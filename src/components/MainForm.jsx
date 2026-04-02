@@ -4,7 +4,7 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { z } from 'zod';
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import Section from './Section';
+import Section from './layout/Section';
 import { LabelContent, InvalidFeedback } from './Display';
 import { currentStepIs, currentStepOrNone } from '../logic/flow.js';
 import { useDependentValidation } from "../validation/helpers";

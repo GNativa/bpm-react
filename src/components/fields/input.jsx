@@ -1,6 +1,6 @@
 import { Form, FloatingLabel } from "react-bootstrap";
 import { InvalidFeedback } from "../Display";
-import { buildLabel, defaultParams } from "../helpers";
+import { buildLabel, defaultParams } from "../layout/helpers";
 
 // TODO: passar etapa atual
 

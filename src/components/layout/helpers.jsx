@@ -1,4 +1,4 @@
-import { LabelContent } from "./Display";
+import { LabelContent } from "../Display";
 
 export function hideIf(condition) {
     return condition ? 'd-none' : '';

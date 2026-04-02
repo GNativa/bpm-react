@@ -1,6 +1,6 @@
 import { FloatingLabel, Form } from "react-bootstrap";
 import { InvalidFeedback, LabelContent } from "../Display";
-import { buildLabel, defaultParams } from "../helpers";
+import { buildLabel, defaultParams } from "../layout/helpers";
 
 // TODO: passar etapa atual para sobrescrever o bloqueio do campo se necessário
 /**
