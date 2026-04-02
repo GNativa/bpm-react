@@ -1,6 +1,5 @@
 @media screen and (max-width: 800px),
 handheld and (orientation: portrait) {
-
     .col,
     .col-1,
     .col-2,
@@ -83,6 +82,30 @@ input[disabled],
     color: color-mix(in oklab, var(--base-color) 60%, rgba(0, 0, 0, 0) 40%);
 }
 
+input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    width: 1.75em;
+    height: 1.75em;
+    filter: invert(1);
+}
+
+/*
+.date-control:not([disabled])::after {
+    content: "📅";
+    position: absolute;
+    font-size: 1.5em;
+    right: 1.5%;
+    top: 65%;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+*/
+
+.form-check-input:checked {
+    border-color: color-mix(in oklab, var(--base-color) 60%, rgba(0, 0, 0, 0) 40%);
+    background-color: var(--base-color);
+}
+
 .section-row {
     border-radius: 10px;
     background: linear-gradient(to bottom,
@@ -111,22 +134,3 @@ input[disabled],
     font-weight: bold;
     color: var(--base-color);
 }
-
-input[type="date"]::-webkit-calendar-picker-indicator {
-    cursor: pointer;
-    width: 1.75em;
-    height: 1.75em;
-    filter: invert(1);
-}
-
-/*
-.date-control:not([disabled])::after {
-    content: "📅";
-    position: absolute;
-    font-size: 1.5em;
-    right: 1.5%;
-    top: 65%;
-    transform: translateY(-50%);
-    pointer-events: none;
-}
-*/
