@@ -7,6 +7,14 @@
  * }} ColumnProps
  */
 
+/** 
+ * @typedef {{
+ *  field: string, index: number, rowFields: Record<string, any>,
+ *  rowErrors: Record<string, ?string|undefined>
+ * }} FieldArrayRowBuilder
+ */
+
+
 /**
  * @typedef {{
  *  fieldName: string | string[],
