@@ -1,5 +1,8 @@
 import { Col } from 'react-bootstrap';
 
+/**
+ * @param {ColumnProps} 
+ */
 export default function Column({
     children = [],
     visible = true,

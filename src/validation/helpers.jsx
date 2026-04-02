@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useWatch } from "react-hook-form";
 
-// TODO: possibilitar monitorar campos de fieldArray também
+// TODO: possibilitar notificar campos de fieldArray também
 export function useDependentValidation(form, { watch, trigger }) {
   const values = useWatch({
     control: form.control,

@@ -2,14 +2,13 @@ import { Row, Col } from "react-bootstrap";
 import Column from "./Column";
 import { hideIf } from "./helpers";
 
+/**
+ * @param {{title: string, columns: ColumnProps[], first: boolean}} 
+ * @returns 
+ */
 export default function Section({
     title,
-    columns = [{
-        children: <></>,
-        visible: false,
-        width: 12,
-        breakAfter: false,
-    }],
+    columns = [],
     first = false,
 }) {
     return (
