@@ -52,9 +52,14 @@ input[type="file"][required] {
     border-bottom-width: medium;
 }
 
-.form-check-input {
+.form-check:not(.form-switch) > .form-check-input {
     width: 2em;
     height: 2em;
+}
+
+.form-switch > .form-check-input {
+    width: 3em;
+    height: 1.5em;
 }
 
 .form-check {

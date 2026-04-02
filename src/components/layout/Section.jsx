@@ -1,6 +1,7 @@
 import { Row, Col } from "react-bootstrap";
 import Column from "./Column";
 import { hideIf } from "./helpers";
+import SectionRow from "./SectionRow";
 
 /**
  * @param {{title: string, columns: ColumnProps[], first: boolean}} 
@@ -22,7 +23,7 @@ export default function Section({
                     </div>
                 </Col>
             </Row>
-            <Row className="section-row g-3 pb-3">
+            <SectionRow>
                 {columns.map((column, index) => (
                     <Column
                         key={index}
@@ -35,7 +36,7 @@ export default function Section({
                             : column.children}
                     </Column>
                 ))}
-            </Row>
+            </SectionRow>
         </div>
     );
 }

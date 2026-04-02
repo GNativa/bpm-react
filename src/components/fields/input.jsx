@@ -38,6 +38,9 @@ export default function InputField({
             return isNaN(parsed) ? undefined : parsed;
         };
     }
+    else if (type === 'date') {
+        options.valueAsDate = true;
+    }
 
     const control = (
         <Form.Control
