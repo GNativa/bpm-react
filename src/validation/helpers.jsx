@@ -36,24 +36,43 @@ export function useDependentValidations(form, dependencies) {
   return watched;
 }
 
-export function useDependentFieldArrayValidation({ form, arrayName, fieldName, index, targetFields = [] }) {
-  const fieldPath = `${arrayName}.${index}.${fieldName}`;
+/**
+ * @param {{
+ *  form: import("react-hook-form").UseFormReturn,
+ *  arrayName: string,
+ *  index: number,
+ *  dependency: FieldArrayValidationDependency,
+ * }} 
+ * @returns 
+ */
+export function useDependentFieldArrayValidation({
+  form,
+  arrayName,
+  index,
+  dependency,
+}) {
+  const fieldPath = `${arrayName}.${index}.${dependency.fieldName}`;
 
   const itemValue = useWatch({
     control: form.control,
     name: fieldPath,
+    defaultValue: dependency.defaultValue,
   });
 
   useEffect(() => {
-    const shouldTrigger = targetFields.some(
+    const shouldTrigger = dependency.targetFields.some(
       (field) => {
         return form.formState.touchedFields?.[arrayName]?.[index]?.[field]
-            || form.formState.errors?.[arrayName]?.[index]?.[field];
+          || form.formState.errors?.[arrayName]?.[index]?.[field];
       }
     );
 
     if (shouldTrigger) {
-      form.trigger(targetFields.map(target => `${arrayName}.${index}.${target}`));
+      form.trigger(
+        dependency.targetFields.map(
+          target => `${arrayName}.${index}.${target}`
+        )
+      );
     }
   }, [
     itemValue,
@@ -64,16 +83,22 @@ export function useDependentFieldArrayValidation({ form, arrayName, fieldName, i
   return itemValue;
 }
 
+/**
+ * @param {import("react-hook-form").UseFormReturn} form 
+ * @param {{
+ *  arrayName: string, index: number, dependency: FieldArrayValidationDependency
+ * }[]} dependencies 
+ * @returns 
+ */
 export function useDependentFieldArrayValidations(form, dependencies) {
   const watched = {};
 
   for (const dependency of dependencies) {
-    watched[dependency.fieldName] = useDependentFieldArrayValidation({
+    watched[dependency.dependency.fieldName] = useDependentFieldArrayValidation({
       form,
       arrayName: dependency.arrayName,
-      fieldName: dependency.fieldName,
       index: dependency.index,
-      targetFields: dependency.targetFields,
+      dependency: dependency.dependency,
     });
   }
 

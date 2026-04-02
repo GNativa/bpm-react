@@ -14,6 +14,7 @@ import InputField from "./fields/input.jsx";
 import { naturalLanguageJoin } from "./text/helpers.jsx";
 import CheckboxField from "./fields/checkbox.jsx";
 import TextAreaField from "./fields/textarea.jsx";
+import FieldArraySection from "./FieldArraySection.jsx";
 
 export default function MainForm({ data, ref }) {
     const form = useForm({
@@ -194,7 +195,151 @@ export default function MainForm({ data, ref }) {
                 }]}
             />
 
-            {tipoSolicitacao === '1' && (<>
+            {tipoSolicitacao === '1' && (
+                <FieldArraySection
+                    form={form}
+                    arrayName={'notasFiscais'}
+                    fieldNames={[
+                        'empresa', 'filial', 'nomeFilial', 'serie', 'fornecedor', 'nomeFornecedor',
+                        'numero', 'emissao', 'entrada', 'reprovar', 'motivo',
+                    ]}
+                    title="Notas fiscais"
+                    arrayFields={arrayFields}
+                    validationDependencies={[
+                        { fieldName: 'reprovar', defaultValue: false, targetFields: ['motivo'] },
+                    ]}
+                    rowBuilder={({ rowFields, watched, rowErrors }) => {
+                        return [{
+                            children: (
+                                <InputField
+                                    form={form}
+                                    id={rowFields.empresa}
+                                    type="number"
+                                    label="Empresa"
+                                    disabled
+                                />
+                            ),
+                            width: 2,
+                        }, {
+                            children: (
+                                <InputField
+                                    form={form}
+                                    id={rowFields.filial}
+                                    type="number"
+                                    label="Filial"
+                                    disabled
+                                />
+                            ),
+                            width: 2,
+                        }, {
+                            children: (
+                                <InputField
+                                    form={form}
+                                    id={rowFields.nomeFilial}
+                                    type="text"
+                                    label="Nome da filial"
+                                    disabled
+                                />
+                            ),
+                            width: 4,
+                        }, {
+                            children: (
+                                <InputField
+                                    form={form}
+                                    id={rowFields.serie}
+                                    type="text"
+                                    label="Série"
+                                    disabled
+                                />
+                            ),
+                            width: 2,
+                        }, {
+                            children: (
+                                <InputField
+                                    form={form}
+                                    id={rowFields.fornecedor}
+                                    type="number"
+                                    label="Fornecedor"
+                                    disabled
+                                />
+                            ),
+                            width: 2,
+                        }, {
+                            children: (
+                                <InputField
+                                    form={form}
+                                    id={rowFields.nomeFornecedor}
+                                    type="text"
+                                    label="Nome do fornecedor"
+                                    disabled
+                                />
+                            ),
+                            width: 4,
+                        }, {
+                            children: (
+                                <InputField
+                                    form={form}
+                                    id={rowFields.numero}
+                                    type="number"
+                                    label="Número"
+                                    disabled
+                                />
+                            ),
+                            width: 2,
+                        }, {
+                            children: (
+                                <InputField
+                                    form={form}
+                                    id={rowFields.emissao}
+                                    type="date"
+                                    label="Data de emissão"
+                                    disabled
+                                />
+                            ),
+                            width: 2,
+                        }, {
+                            children: (
+                                <InputField
+                                    form={form}
+                                    id={rowFields.entrada}
+                                    type="date"
+                                    label="Data de entrada"
+                                    disabled
+                                />
+                            ),
+                            width: 2,
+                        }, {
+                            children: (
+                                <CheckboxField
+                                    form={form}
+                                    errors={rowErrors}
+                                    id={rowFields.reprovar}
+                                    label="Reprovar"
+                                />
+                            ),
+                            width: 2,
+                        }, {
+                            children: (
+                                <TextAreaField
+                                    form={form}
+                                    errors={rowErrors}
+                                    id={rowFields.motivo}
+                                    fieldName="motivo"
+                                    label="Motivo"
+                                    required={watched.reprovar}
+                                />
+                            ),
+                            width: 4,
+                            visible: watched.reprovar,
+                        }];
+                    }}
+                />
+            )}
+
+
+            {/*
+            
+            tipoSolicitacao === '1' && (<>
                 <Row className="mt-4 mb-4">
                     <Col className="d-flex align-items-start">
                         <div className="title-sm">
@@ -328,7 +473,7 @@ export default function MainForm({ data, ref }) {
                         </FieldArrayRow>
                     );
                 })}
-            </>)}
+            </>)*/ <></>}
 
 
             {false && <Row>

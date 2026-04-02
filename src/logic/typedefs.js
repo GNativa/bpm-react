@@ -7,3 +7,10 @@
  * }} ColumnProps
  */
 
+/**
+ * @typedef {{
+ *  fieldName: string | string[],
+ *  defaultValue: any | Record<string, any> | undefined,
+ *  targetFields: string[]
+ * }} FieldArrayValidationDependency
+ */
