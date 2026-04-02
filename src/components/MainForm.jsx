@@ -9,7 +9,7 @@ import { currentStepIs, currentStepOrNone } from '../logic/flow.js';
 import { useDependentValidation } from "../validation/helpers";
 import SelectField from "./fields/select.jsx";
 import InputField from "./fields/input.jsx";
-import { naturalLanguageJoin } from "./text/helpers.jsx";
+import { naturalLanguageJoin } from "../logic/text/helpers.jsx";
 import CheckboxField from "./fields/checkbox.jsx";
 import TextAreaField from "./fields/textarea.jsx";
 import FieldArraySection from "./FieldArraySection.jsx";
