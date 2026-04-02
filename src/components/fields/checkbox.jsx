@@ -15,6 +15,8 @@ import { buildLabel, defaultParams } from "../layout/helpers";
  *  hint: ?string,
  *  required: boolean,
  *  disabled: boolean,
+ *  onBlur: React.FocusEventHandler,
+ *  onChange: React.ChangeEventHandler,
  * }} props 
  * @returns {import("react").JSX.Element}
  */
@@ -28,12 +30,14 @@ export default function CheckboxField({
     hint = defaultParams.hint,
     required = defaultParams.required,
     disabled = defaultParams.disabled,
+    onBlur,
+    onChange,
 }) {
     return (
         <Form.Check type={isSwitch ? 'switch' : 'checkbox'}>
             <Form.Check.Input
                 id={id}
-                {...form.register(id)}
+                {...form.register(id, { onBlur, onChange })}
                 type="checkbox"
                 required={required}
                 disabled={disabled}

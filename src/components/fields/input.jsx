@@ -15,7 +15,9 @@ import { buildLabel, defaultParams } from "../layout/helpers";
  *  type: string,
  *  required: boolean,
  *  disabled: boolean,
- *  onBlur: function(React.FocusEventHandler): void
+ *  multiple: boolean,
+ *  onBlur: React.FocusEventHandler,
+ *  onChange: React.ChangeEventHandler,
  * }} props 
  * @returns {import("react").JSX.Element}
  */
@@ -30,8 +32,10 @@ export default function InputField({
     required = defaultParams.required,
     disabled = defaultParams.disabled,
     multiple = false,
+    onBlur,
+    onChange,
 }) {
-    const options = {};
+    const options = { onBlur, onChange };
 
     if (type === 'number') {
         options.setValueAs = (value) => {

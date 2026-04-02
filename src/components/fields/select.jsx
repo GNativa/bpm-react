@@ -15,7 +15,8 @@ import { buildLabel, defaultParams } from "../layout/helpers";
  *  disabled: boolean,
  *  options: {label: string, value: string}[],
  *  showEmptyOption: boolean,
- *  onBlur: function(React.FocusEventHandler): void
+ *  onBlur: React.FocusEventHandler,
+ *  onChange: React.ChangeEventHandler,
  * }} props
  * @returns {import("react").JSX.Element}
  */
@@ -30,6 +31,8 @@ export default function SelectField({
     disabled = defaultParams.disabled,
     options,
     showEmptyOption = true,
+    onBlur,
+    onChange,
 }) {
     return (
         <FloatingLabel
@@ -37,7 +40,7 @@ export default function SelectField({
             controlId={id}
         >
             <Form.Select
-                {...form.register(id)}
+                {...form.register(id, { onBlur, onChange })}
                 isInvalid={!!errors?.[fieldName]}
                 required={required}
                 disabled={disabled}

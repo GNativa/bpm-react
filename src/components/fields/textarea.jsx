@@ -3,6 +3,7 @@ import { FloatingLabel, Form } from "react-bootstrap";
 import { buildLabel } from "../layout/helpers";
 import { InvalidFeedback } from "../Display";
 import { defaultParams } from "../layout/helpers";
+import React from "react";
 
 /**
  * @param {{
@@ -15,6 +16,8 @@ import { defaultParams } from "../layout/helpers";
  *  height: number,
  *  required: boolean,
  *  disabled: boolean,
+ *  onBlur: React.FocusEventHandler,
+ *  onChange: React.ChangeEventHandler,
  * }} props 
  * @returns {import("react").JSX.Element}
  */
@@ -28,11 +31,13 @@ export default function TextAreaField({
     height = 5,
     required = defaultParams.required,
     disabled = defaultParams.disabled,
+    onBlur,
+    onChange,
 }) {
     return (
         <FloatingLabel label={buildLabel(label, hint)} controlId={id}>
             <Form.Control
-                {...form.register(id)}
+                {...form.register(id, { onBlur, onChange })}
                 as="textarea"
                 placeholder={label}
                 style={{ height: `${height}lh` }}
