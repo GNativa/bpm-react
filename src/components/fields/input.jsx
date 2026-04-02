@@ -9,6 +9,7 @@ import { buildLabel, defaultParams } from "../layout/helpers";
  *  form: import("react-hook-form").UseFormReturn,
  *  errors: import("react-hook-form").FieldErrors,
  *  id: string,
+ *  fieldName: string,
  *  label: string,
  *  hint: ?string,
  *  type: string,
@@ -22,6 +23,7 @@ export default function InputField({
     form,
     errors,
     id,
+    fieldName = id,
     label,
     hint = defaultParams.hint,
     type = 'text',
@@ -47,14 +49,14 @@ export default function InputField({
             type={type}
             placeholder={label}
             {...form.register(id, options)}
-            isInvalid={!!errors?.[id]}
+            isInvalid={!!errors?.[fieldName]}
             required={required}
             disabled={disabled}
             multiple={multiple}
         />
     );
 
-    const invalidFeedback = <InvalidFeedback message={errors?.[id]?.message} />;
+    const invalidFeedback = <InvalidFeedback message={errors?.[fieldName]?.message} />;
 
     if (type === 'file') {
         return (
@@ -83,7 +85,7 @@ function buildControl({ form, type, label, id, options, errors, required, disabl
             type={type}
             placeholder={label}
             {...form.register(id, options)}
-            isInvalid={!!errors?.[id]}
+            isInvalid={!!errors?.[fieldName]}
             required={required}
             disabled={disabled}
         />

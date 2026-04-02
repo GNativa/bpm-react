@@ -1,8 +1,8 @@
-import { Form, FloatingLabel } from "react-bootstrap";
-import { InvalidFeedback } from "../Display";
-import { buildLabel, defaultParams } from "../layout/helpers";
+import { FloatingLabel, Form } from "react-bootstrap";
 
-// TODO: passar etapa atual
+import { buildLabel } from "../layout/helpers";
+import { InvalidFeedback } from "../Display";
+import { defaultParams } from "../layout/helpers";
 
 /**
  * @param {{
@@ -11,39 +11,37 @@ import { buildLabel, defaultParams } from "../layout/helpers";
  *  id: string,
  *  fieldName: string,
  *  label: string,
- *  isSwitch: boolean,
  *  hint: ?string,
+ *  height: number,
  *  required: boolean,
  *  disabled: boolean,
  * }} props 
  * @returns {import("react").JSX.Element}
  */
-export default function CheckboxField({
+export default function TextAreaField({
     form,
     errors,
     id,
     fieldName = id,
     label,
-    isSwitch = false,
     hint = defaultParams.hint,
+    height = 5,
     required = defaultParams.required,
     disabled = defaultParams.disabled,
 }) {
     return (
-        <Form.Check type={isSwitch ? 'switch' : 'checkbox'}>
-            <Form.Check.Input
-                id={id}
+        <FloatingLabel label={buildLabel(label, hint)} controlId={id}>
+            <Form.Control
                 {...form.register(id)}
-                type="checkbox"
+                as="textarea"
+                placeholder={label}
+                style={{ height: `${height}lh` }}
                 required={required}
                 disabled={disabled}
-                role={isSwitch ? 'switch' : undefined}
                 isInvalid={!!errors?.[fieldName]}
-            />
-            <Form.Check.Label className="ms-2" htmlFor={id}>
-                {buildLabel(label, hint)}
-            </Form.Check.Label>
+            >
+            </Form.Control>
             <InvalidFeedback message={errors?.[fieldName]?.message} />
-        </Form.Check>
+        </FloatingLabel>
     );
 }

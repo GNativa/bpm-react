@@ -8,6 +8,7 @@ import { buildLabel, defaultParams } from "../layout/helpers";
  *  form: import("react-hook-form").UseFormReturn,
  *  errors: import("react-hook-form").FieldErrors,
  *  id: string,
+ *  fieldName: string,
  *  label: string,
  *  hint: ?string,
  *  required: boolean,
@@ -22,6 +23,7 @@ export default function SelectField({
     form,
     errors,
     id,
+    fieldName = id,
     label,
     hint = defaultParams.hint,
     required = defaultParams.required,
@@ -36,7 +38,7 @@ export default function SelectField({
         >
             <Form.Select
                 {...form.register(id)}
-                isInvalid={errors?.[id]}
+                isInvalid={!!errors?.[fieldName]}
                 required={required}
                 disabled={disabled}
             >
@@ -53,7 +55,7 @@ export default function SelectField({
                     );
                 })}
             </Form.Select>
-            <InvalidFeedback message={errors?.[id]?.message} />
+            <InvalidFeedback message={errors?.[fieldName]?.message} />
         </FloatingLabel>
     );
 }
