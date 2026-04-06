@@ -1,4 +1,4 @@
-import { Button, Form, ListGroup, ListGroupItem } from "react-bootstrap";
+import { Button, Form, ListGroup, ListGroupItem, Collapse } from "react-bootstrap";
 import { InvalidFeedback } from "../Display";
 import { buildLabel, defaultParams } from "../layout/helpers";
 import { useEffect, useRef, useState } from "react";
@@ -34,12 +34,12 @@ export default function FileField({
     onBlur,
     onChange,
 }) {
+    /** @type {import("react").RefObject<HTMLInputElement>} */
     const inputRef = useRef(null);
 
     /** @type {File[]} */
     const initialList = [];
     const [files, setFiles] = useState(initialList);
-    // TODO: usar para exibir um botão com Collapse e mostrar os itens além do primeiro quando tiver mais de um anexo
     const [showMore, setShowMore] = useState(false);
 
     const options = {
@@ -57,8 +57,6 @@ export default function FileField({
             return;
         }
 
-        input.value = "";
-
         const dataTransfer = new DataTransfer();
 
         files.forEach((file, i) => {
@@ -68,18 +66,28 @@ export default function FileField({
         });
 
         input.files = dataTransfer.files;
+
+        if (dataTransfer.files.length === 0) {
+            input.value = "";
+        }
+
         setFiles(Array.from(dataTransfer.files));
     };
 
     const { ref: registerRef, ...rest } = form.register(id, options);
 
-    // TODO: usar Collapse para esconder lista de arquivos se tiver mais que um
+    const moreThanOneFile = files.length > 1;
+    const filesToShow = files.length - 1;
+
+    // TODO: verificar se há uma forma simples de manter as bordas inferiores arredondadas nos itens do Collapse
     return (
         <>
             <Form.Label className="d-flex align-items-start" htmlFor={id}>
                 {buildLabel(label, hint)}
             </Form.Label>
             <Form.Control
+                id={id}
+                name={id}
                 type="file"
                 placeholder={label}
                 ref={(r) => {
@@ -93,35 +101,68 @@ export default function FileField({
                 multiple={multiple}
             />
             {files.length > 0 && (
-                <div className="mt-1 card">
-                    <ListGroup>
-                        {files.map((file, index) => (
-                            <>
-                                <ListGroupItem key={file.name} className="d-flex justify-content-between">
-                                    <div className="justify-content-start">
-                                        <a href={URL.createObjectURL(file)} target="_blank">
-                                            {file.name}
-                                        </a>
-                                    </div>
-                                    {allowRemoval && (
-                                        <div>
-                                            <Button
-                                                variant="danger"
-                                                size="sm"
-                                                onClick={() => removeFile(index)}
-                                            >
-                                                <i className="bi bi-trash-fill"></i>
-                                            </Button>
-                                        </div>
-                                    )}
-                                </ListGroupItem>
-
-                            </>
-                        ))}
-                    </ListGroup>
-                </div>
+                <ListGroup className="mt-1">
+                    {moreThanOneFile && (
+                        <ListGroupItem>
+                            <Button onClick={() => setShowMore(!showMore)}>
+                                {`Mostrar ${showMore ? 'menos arquivos' : `mais ${filesToShow} arquivo${filesToShow > 1 ? 's' : ''}`}`}
+                            </Button>
+                        </ListGroupItem>
+                    )}
+                    <FileLink
+                        key={files[0].name}
+                        file={files[0]}
+                        index={0}
+                        onRemove={allowRemoval ? removeFile : null}
+                    />
+                    {moreThanOneFile && (
+                        <Collapse in={showMore}>
+                            <div>
+                                {files.slice(1).map((file, index) => (
+                                    <FileLink
+                                        key={file.name}
+                                        file={file}
+                                        index={index + 1}
+                                        onRemove={allowRemoval ? removeFile : null}
+                                    />
+                                ))}
+                            </div>
+                        </Collapse>
+                    )}
+                </ListGroup>
             )}
             <InvalidFeedback message={errors?.[fieldName]?.message} />
         </>
+    );
+}
+
+/**
+ * @param {{
+ *  file: File,
+ *  index: number,
+ *  onRemove: function(number): void,
+ * }} 
+ * @returns {import("react").JSX.Element}
+ */
+function FileLink({ file, index, onRemove }) {
+    return (
+        <ListGroupItem className="d-flex justify-content-between">
+            <div className="justify-content-start">
+                <a href={URL.createObjectURL(file)} target="_blank">
+                    {file.name}
+                </a>
+            </div>
+            {onRemove && (
+                <div>
+                    <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={() => onRemove(index)}
+                    >
+                        <i className="bi bi-trash-fill"></i>
+                    </Button>
+                </div>
+            )}
+        </ListGroupItem>
     );
 }
