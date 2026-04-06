@@ -53,7 +53,7 @@ export default function FileField({
     useEffect(() => {
         const input = inputRef.current;
 
-        if (!multiple && files.length > 1 && input) {
+        if (input && !multiple && files.length > 1) {
             const dataTransfer = new DataTransfer();
             dataTransfer.items.add(files[0]);
             input.files = dataTransfer.files;
@@ -86,10 +86,26 @@ export default function FileField({
         setFiles(Array.from(dataTransfer.files));
     };
 
+    const removeAll = () => {
+        const input = inputRef.current;
+
+        if (!input) {
+            return;
+        }
+
+        const emptyFiles = new DataTransfer().files
+
+        input.value = "";
+        input.files = emptyFiles;
+        setFiles(Array.from(emptyFiles));
+    }
+
     const { ref: registerRef, ...rest } = form.register(id, options);
 
     const moreThanOneFile = files.length > 1;
     const filesToShow = files.length - 1;
+
+    const denyRemoval = disabled || !allowRemoval;
 
     // TODO: verificar se há uma forma simples de manter as bordas inferiores arredondadas nos itens do Collapse
     // TODO: implementar adição de arquivos pelo botão +
@@ -113,26 +129,40 @@ export default function FileField({
                 disabled={disabled}
                 multiple={multiple}
             />
+            <InvalidFeedback message={errors?.[fieldName]?.message} />
             {files.length > 0 && (
                 <ListGroup className="mt-1" as="ul">
-                    {moreThanOneFile && (
-                        <ListGroupItem className="d-flex justify-content-between" as="li">
+                    <ListGroupItem className="d-flex justify-content-between" as="li">
+                        {moreThanOneFile ? (
                             <Button onClick={() => setShowMore(!showMore)}>
                                 {`Mostrar ${showMore ? 'menos arquivos' : `mais ${filesToShow} arquivo${filesToShow > 1 ? 's' : ''}`}`}
                             </Button>
+                        ) : (
+                            <div></div>
+                        )}
+                        <div className="d-flex justify-content-end gap-2">
                             <Button
                                 variant="primary"
-                                size="sm"
+                                size="md"
+                                title="Adicionar"
                             >
                                 <i className="bi bi-file-earmark-plus-fill"></i>
                             </Button>
-                        </ListGroupItem>
-                    )}
+                            <Button
+                                variant="danger"
+                                size="md"
+                                title="Limpar"
+                                onClick={denyRemoval ? null : () => removeAll()}
+                            >
+                                <i className="bi bi-x-square-fill"></i>
+                            </Button>
+                        </div>
+                    </ListGroupItem>
                     <FileLink
                         key={files[0].name}
                         file={files[0]}
                         index={0}
-                        onRemove={allowRemoval ? removeFile : null}
+                        onRemove={denyRemoval ? null : removeFile}
                     />
                     {moreThanOneFile && (
                         <Collapse in={showMore}>
@@ -142,7 +172,7 @@ export default function FileField({
                                         key={file.name}
                                         file={file}
                                         index={index + 1}
-                                        onRemove={allowRemoval ? removeFile : null}
+                                        onRemove={denyRemoval ? null : removeFile}
                                     />
                                 ))}
                             </div>
@@ -150,7 +180,6 @@ export default function FileField({
                     )}
                 </ListGroup>
             )}
-            <InvalidFeedback message={errors?.[fieldName]?.message} />
         </>
     );
 }
@@ -174,8 +203,9 @@ function FileLink({ file, index, onRemove = null }) {
             {onRemove && (
                 <div>
                     <Button
-                        variant="danger"
+                        variant="warning"
                         size="sm"
+                        title="Remover"
                         onClick={() => onRemove(index)}
                     >
                         <i className="bi bi-trash-fill"></i>
