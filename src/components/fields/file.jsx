@@ -50,6 +50,18 @@ export default function FileField({
         },
     };
 
+    useEffect(() => {
+        const input = inputRef.current;
+
+        if (!multiple && files.length > 1 && input) {
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(files[0]);
+            input.files = dataTransfer.files;
+            setFiles(Array.from(dataTransfer.files));
+        }
+
+    }, [multiple]);
+
     const removeFile = (index) => {
         const input = inputRef.current;
 
@@ -80,6 +92,7 @@ export default function FileField({
     const filesToShow = files.length - 1;
 
     // TODO: verificar se há uma forma simples de manter as bordas inferiores arredondadas nos itens do Collapse
+    // TODO: implementar adição de arquivos pelo botão +
     return (
         <>
             <Form.Label className="d-flex align-items-start" htmlFor={id}>
@@ -101,11 +114,17 @@ export default function FileField({
                 multiple={multiple}
             />
             {files.length > 0 && (
-                <ListGroup className="mt-1">
+                <ListGroup className="mt-1" as="ul">
                     {moreThanOneFile && (
-                        <ListGroupItem>
+                        <ListGroupItem className="d-flex justify-content-between" as="li">
                             <Button onClick={() => setShowMore(!showMore)}>
                                 {`Mostrar ${showMore ? 'menos arquivos' : `mais ${filesToShow} arquivo${filesToShow > 1 ? 's' : ''}`}`}
+                            </Button>
+                            <Button
+                                variant="primary"
+                                size="sm"
+                            >
+                                <i className="bi bi-file-earmark-plus-fill"></i>
                             </Button>
                         </ListGroupItem>
                     )}
@@ -140,13 +159,13 @@ export default function FileField({
  * @param {{
  *  file: File,
  *  index: number,
- *  onRemove: function(number): void,
+ *  onRemove: ?function(number): void,
  * }} 
  * @returns {import("react").JSX.Element}
  */
-function FileLink({ file, index, onRemove }) {
+function FileLink({ file, index, onRemove = null }) {
     return (
-        <ListGroupItem className="d-flex justify-content-between">
+        <ListGroupItem className="d-flex justify-content-between" as="li">
             <div className="justify-content-start">
                 <a href={URL.createObjectURL(file)} target="_blank">
                     {file.name}
