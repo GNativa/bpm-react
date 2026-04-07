@@ -22,3 +22,16 @@
  *  targetFields: string[]
  * }} FieldArrayValidationDependency
  */
+
+/**
+ * @typedef {{
+ *  name: string;
+ *  token: string;
+ *  searchField?: string;
+ *  columnMap: Record<string, string>; // campo -> nome legível
+ *  visibleFields: string[];
+ *  keyField: string;
+ * }} DataSourceConfig
+ */
+
+export default {};

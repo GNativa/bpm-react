@@ -6,18 +6,19 @@ import { buildLabel, defaultParams } from "../layout/helpers";
 
 /**
  * @param {{
- *  form: import("react-hook-form").UseFormReturn,
- *  errors: import("react-hook-form").FieldErrors,
- *  id: string,
- *  fieldName: string,
- *  label: string,
- *  hint: ?string,
- *  type: string,
- *  required: boolean,
- *  disabled: boolean,
- *  multiple: boolean,
- *  onBlur: React.FocusEventHandler,
- *  onChange: React.ChangeEventHandler,
+ *  form: import("react-hook-form").UseFormReturn;
+ *  errors: import("react-hook-form").FieldErrors;
+ *  id: string;
+ *  fieldName: string;
+ *  label: string;
+ *  hint: ?string;
+ *  type: string;
+ *  value: string | number | string[];
+ *  required: boolean;
+ *  disabled: boolean;
+ *  onBlur: React.FocusEventHandler;
+ *  onChange: React.ChangeEventHandler;
+ *  className: ?string | undefined;
  * }} props 
  * @returns {import("react").JSX.Element}
  */
@@ -31,9 +32,9 @@ export default function InputField({
     type = 'text',
     required = defaultParams.required,
     disabled = defaultParams.disabled,
-    multiple = false,
     onBlur,
     onChange,
+    className,
 }) {
     const options = { onBlur, onChange };
 
@@ -54,34 +55,15 @@ export default function InputField({
             controlId={id}
         >
             <Form.Control
+                className={className}
                 type={type}
                 placeholder={label}
                 {...form.register(id, options)}
                 isInvalid={!!errors?.[fieldName]}
                 required={required}
                 disabled={disabled}
-                multiple={multiple}
             />
             <InvalidFeedback message={errors?.[fieldName]?.message} />
         </FloatingLabel>
-    );
-}
-
-function buildControl({ form, type, label, id, options, errors, required, disabled }) {
-    return (
-        <Form.Control
-            type={type}
-            placeholder={label}
-            {...form.register(id, options)}
-            isInvalid={!!errors?.[fieldName]}
-            required={required}
-            disabled={disabled}
-        />
-    );
-}
-
-function buildInvalidFeedback({ id, errors }) {
-    return (
-        <InvalidFeedback message={errors?.[id]?.message} />
     );
 }

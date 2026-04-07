@@ -6,6 +6,7 @@ import MainForm from "./components/MainForm";
 
 export default function App() {
   const [formData, setFormData] = useState({});
+  const [userData, setUserData] = useState({});
   const [loaded, setLoaded] = useState(false);
   const formRef = useRef(null);
   const initializationRef = useRef(false);
@@ -39,15 +40,19 @@ export default function App() {
         }
 
         try {
-          // const userData = await info.getUserData();
+          const userData = await info.getUserData();
           // const taskData = await info.getTaskData();
           const platformData = await info.getPlatformData();
           // TODO: salvar token em algum canto
           const accessToken = platformData.token.access_token;
           const variableData = await info.getInfoFromProcessVariables();
 
+          userData.accessToken = accessToken;
+          setUserData(userData);
+
           if (info.isRequestNew() || !Array.isArray(variableData)) {
             setFormData(data);
+            setLoaded(true);
             return;
           }
 
@@ -101,7 +106,7 @@ export default function App() {
 
   return (
     <Container fluid>
-      <MainForm ref={formRef} data={formData} />
+      <MainForm ref={formRef} initialData={formData} userData={userData} />
     </Container>
   );
 }

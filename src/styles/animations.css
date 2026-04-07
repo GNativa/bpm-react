@@ -1,0 +1,54 @@
+@keyframes loading {
+    0% {
+        background-position: 200% 50%;
+    }
+
+    100% {
+        background-position: -100% 50%;
+    }
+}
+
+.loading {
+    background: linear-gradient(90deg, var(--bs-body-bg) 0% 40%, var(--base-color) 50%, var(--bs-body-bg) 60% 100%);
+    background-size: 150% 150%;
+    animation-name: loading;
+    animation-duration: 0.8s;
+    animation-timing-function: linear;
+    animation-delay: 0s;
+    animation-iteration-count: infinite;
+    animation-direction: normal;
+}
+
+@keyframes loaded {
+    0% {
+        background-color: var(--base-color);
+    }
+
+    100% {
+        background-color: var(--bs-body-bg);
+    }
+}
+
+.loaded {
+    animation-name: loaded;
+    animation-duration: 1s;
+    animation-timing-function: cubic-bezier(0.13, 1.09, 0.81, 0.99);
+    animation-direction: normal;
+}
+
+@keyframes loading-failed {
+    0% {
+        background-color: var(--bs-form-invalid-color);;
+    }
+
+    100% {
+        background-color: var(--bs-body-bg);
+    }
+}
+
+.loading-failed {
+    animation-name: loading-failed;
+    animation-duration: 1s;
+    animation-timing-function: cubic-bezier(0.13, 1.09, 0.81, 0.99);
+    animation-direction: normal;
+}
