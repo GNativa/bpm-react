@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useImperativeHandle } from "react";
-import { Form, Row, Col, FloatingLabel, Button, Modal, Table } from "react-bootstrap";
+import { Form, Row, Col, Button, } from "react-bootstrap";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from 'zod';
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,6 +15,7 @@ import TextAreaField from "./fields/textarea.jsx";
 import FieldArraySection from "./FieldArraySection.jsx";
 import FileField from "./fields/file.jsx";
 import LookupField from "./fields/lookup.jsx";
+import { useToast } from "./messages/ToastContext.jsx";
 
 /**
  * @param {{
@@ -46,22 +47,24 @@ export default function MainForm({ ref, initialData, userData }) {
         reset(initialData);
     }, [initialData, reset]);
 
-    const validate = async () => {
-        const isValid = await trigger();
-        return isValid;
-    }
-
-    const getData = () => getValues();
-
-    const showMessage = (type, content) => {
-        console.log(content);
-    }
-
     useImperativeHandle(ref, () => {
         return {
             validate, getData, showMessage
         };
     }, []);
+
+    async function validate() {
+        const isValid = await trigger();
+        return isValid;
+    }
+
+    function getData() {
+        return getValues();
+    }
+
+    function showMessage(type, content) {
+        console.log(content);
+    }
 
     const tipoSolicitacao = watch('tipoSolicitacao');
     //const formData = watch();
@@ -71,17 +74,24 @@ export default function MainForm({ ref, initialData, userData }) {
         watch: 'tipoSolicitacao', trigger: ['numeroRemessa'],
     });
 
-    useEffect(() => {
-        /*
-        if (arrayFields.length === 0) {
-            append();
-        }
-        */
-    }, [arrayFields, append]);
+    const { showToast } = useToast();
 
     // TODO: reutilizar condições
     return (
         <>
+            <Button
+                variant="primary"
+                onClick={() => {
+                    showToast({
+                        variant: 'danger',
+                        title: 'Título',
+                        message: 'Mensagem',
+                        autohide: false,
+                    });
+                }}
+            >
+                Clique aqui!
+            </Button>
             <Form noValidate onSubmit={handleSubmit(() => {
                 console.log('Dados enviados.');
             })}>

@@ -7,9 +7,12 @@ import './App.css';
 import './styles/animations.css'
 import './Custom.css';
 import App from './App.jsx'
+import ToastProvider from './components/messages/ToastProvider.jsx';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <App/>
+    <ToastProvider>
+      <App/>
+    </ToastProvider>
   </StrictMode>,
 );
