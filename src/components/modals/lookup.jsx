@@ -13,7 +13,7 @@ import { loadingStatus } from "../../hooks/useDataSource";
  *      search: function;
  *      status: number;
  *  };
- *  config: import("../../logic/typedefs").DataSourceConfig;
+ *  config: import("../../logic/types").DataSourceConfig;
  *  onSelect: function(Object): void;
  * }} 
  * @returns 

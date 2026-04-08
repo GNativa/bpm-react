@@ -3,6 +3,7 @@ import { initBPMBridge } from "./bpmBridge";
 import { Container, Spinner } from "react-bootstrap";
 
 import MainForm from "./components/MainForm";
+import { useToast } from "./components/messages/ToastContext";
 
 export default function App() {
   const [formData, setFormData] = useState({});
@@ -10,80 +11,97 @@ export default function App() {
   const [loaded, setLoaded] = useState(false);
   const formRef = useRef(null);
   const initializationRef = useRef(false);
+  const { showToast } = useToast();
 
-  const onSubmit = async () => {
+  async function onLoad(incomingData, info) {
+    const data = {};
+    const { initialVariables } = incomingData['loadContext'];
+
+    for (const prop in initialVariables) {
+      data[prop] = initialVariables[prop];
+    }
+
+    try {
+      const userData = await info.getUserData();
+      // const taskData = await info.getTaskData();
+      const platformData = await info.getPlatformData();
+      // TODO: salvar token em algum canto
+      const accessToken = platformData.token.access_token;
+      const variableData = await info.getInfoFromProcessVariables();
+
+      userData.accessToken = accessToken;
+      setUserData(userData);
+
+      if (info.isRequestNew() || !Array.isArray(variableData)) {
+        setFormData(data);
+        setLoaded(true);
+        return;
+      }
+
+      for (let i = 0; i < variableData.length; i++) {
+        /** @type {{key: string, value: any}} */
+        const item = variableData[i];
+
+        if (data[item.key]) {
+          continue;
+        }
+
+        data[item.key] = item.value || '';
+      }
+
+      setFormData(data);
+    }
+    catch (e) {
+      console.error(`Erro ao carregar os dados: ${e}`);
+    }
+
+    setLoaded(true);
+  }
+
+  async function onSubmit() {
     const currentRef = formRef.current;
 
     if (!currentRef) {
-      throw new Error('O formulário ainda não foi carregado.');
+      const msg = 'O formulário ainda não foi carregado.';
+      showToast({
+        variant: 'danger',
+        title: 'Estado inválido!',
+        message: msg,
+      });
+      throw new Error(msg);
     }
 
     const isValid = await currentRef.validate();
 
     if (!isValid) {
-      // TODO: expor função no useImperativeHandle do MainForm para exibir mensagem
-      throw new Error('Dados inválidos. Preencha todos os campos obrigatórios e verifique as '
-        + 'informações inseridas no formulário para prosseguir');
+      const msg = 'Preencha todos os campos obrigatórios e verifique as '
+        + 'informações inseridas no formulário para prosseguir.';
+
+      showToast({
+        variant: 'danger',
+        title: 'Dados inválidos',
+        message: msg,
+      });
+
+      throw new Error(msg);
     }
 
-    return currentRef.getData();
+    const data = await  currentRef.getData();
+    
+    return {
+      formData: data,
+    };
+  }
+
+  async function onError(err) {
+    console.error("Erro no BPM:", err);
   }
 
   useEffect(() => {
     initBPMBridge({
-      onLoad: async (incomingData, info) => {
-        const data = {};
-        const { initialVariables } = incomingData['loadContext'];
-
-        for (const prop in initialVariables) {
-          data[prop] = initialVariables[prop];
-        }
-
-        try {
-          const userData = await info.getUserData();
-          // const taskData = await info.getTaskData();
-          const platformData = await info.getPlatformData();
-          // TODO: salvar token em algum canto
-          const accessToken = platformData.token.access_token;
-          const variableData = await info.getInfoFromProcessVariables();
-
-          userData.accessToken = accessToken;
-          setUserData(userData);
-
-          if (info.isRequestNew() || !Array.isArray(variableData)) {
-            setFormData(data);
-            setLoaded(true);
-            return;
-          }
-
-          for (let i = 0; i < variableData.length; i++) {
-            /** @type {{key: string, value: any}} */
-            const item = variableData[i];
-
-            if (data[item.key]) {
-              continue;
-            }
-
-            data[item.key] = item.value || '';
-          }
-
-          setFormData(data);
-        }
-        catch (e) {
-          console.error(`Erro ao carregar os dados: ${e}`);
-        }
-
-        setLoaded(true);
-      },
-      onSubmit: async () => {
-        const data = await onSubmit();
-        return {
-          formData: data,
-        };
-      },
-      onError: (err) => {
-        console.error("Erro no BPM:", err);
-      },
+      onLoad,
+      onSubmit,
+      onError,
       initializationRef,
     });
   }, []);
@@ -98,7 +116,10 @@ export default function App() {
 
   if (!loaded) {
     return (
-      <div className="d-flex align-items-center justify-content-center" style={{ width: '100vw', height: '100vh'}}>
+      <div
+        className="d-flex align-items-center justify-content-center"
+        style={{ width: '100vw', height: '100vh' }}
+      >
         <Spinner animation="border" />
       </div>
     );

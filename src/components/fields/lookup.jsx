@@ -8,12 +8,18 @@ import { InvalidFeedback } from "../Display";
 import { buildLabel } from "../layout/helpers";
 import { getStyleFromLoadingStatus } from "../../styles/loading";
 
+/**
+ * @import {DataSourceConfig} from '../../logic/types'
+ * @import {UseFormReturn} from 'react-hook-form'
+ * @import {FieldErrors} from 'react-hook-form'
+*/
+
 // TODO: permitir obrigar que o valor exista na fonte de dados
 
 /**
  * @param {{
- *  form: import("react-hook-form").UseFormReturn;
- *  errors: import("react-hook-form").FieldErrors;
+ *  form: UseFormReturn;
+ *  errors: FieldErrors;
  *  id: string;
  *  fieldName: string;
  *  label: string;
@@ -23,7 +29,7 @@ import { getStyleFromLoadingStatus } from "../../styles/loading";
  *  disabled: boolean;
  *  onBlur: React.FocusEventHandler;
  *  onChange: React.ChangeEventHandler;
- *  config: import('../../logic/typedefs').DataSourceConfig;
+ *  config: DataSourceConfig;
  *  formMap: Record<string, [
  *      name: string,
  *      parse: (function(any): any)|undefined;

@@ -1,5 +1,7 @@
 import { createContext, useContext } from "react";
 
+/** @import {ToastData} from "../../logic/types" */
+
 export const ToastContext = createContext();
 /**
  * @returns {{

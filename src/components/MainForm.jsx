@@ -27,6 +27,8 @@ import { useToast } from "./messages/ToastContext.jsx";
  * }}
  */
 export default function MainForm({ ref, initialData, userData }) {
+    const { showToast } = useToast();
+    
     const form = useForm({
         mode: "onBlur",
         reValidateMode: "onChange",
@@ -35,7 +37,7 @@ export default function MainForm({ ref, initialData, userData }) {
     });
 
     const {
-        register, handleSubmit, watch, reset, getValues, trigger,
+        handleSubmit, watch, reset, getValues, trigger,
         control, formState: { errors, touchedFields },
     } = form;
 
@@ -49,7 +51,7 @@ export default function MainForm({ ref, initialData, userData }) {
 
     useImperativeHandle(ref, () => {
         return {
-            validate, getData, showMessage
+            validate, getData,
         };
     }, []);
 
@@ -62,10 +64,6 @@ export default function MainForm({ ref, initialData, userData }) {
         return getValues();
     }
 
-    function showMessage(type, content) {
-        console.log(content);
-    }
-
     const tipoSolicitacao = watch('tipoSolicitacao');
     //const formData = watch();
     const formData = {};
@@ -73,8 +71,6 @@ export default function MainForm({ ref, initialData, userData }) {
     useDependentValidation(form, {
         watch: 'tipoSolicitacao', trigger: ['numeroRemessa'],
     });
-
-    const { showToast } = useToast();
 
     // TODO: reutilizar condições
     return (

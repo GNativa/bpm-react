@@ -34,4 +34,16 @@
  * }} DataSourceConfig
  */
 
+/**
+ * @typedef {{
+ *  id: number,
+ *  show: boolean;
+ *  variant: string;
+ *  title: string;
+ *  message: string;
+ *  autohide: boolean,
+ *  delay: ?number;  
+ * }} ToastData
+ */
+
 export default {};

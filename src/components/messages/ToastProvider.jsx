@@ -2,17 +2,7 @@ import { useState, useCallback } from "react";
 import { ToastContext, useToast } from "./ToastContext";
 import { Toast, ToastContainer } from "react-bootstrap";
 
-/**
- * @typedef {{
- *  id: number,
- *  show: boolean;
- *  variant: string;
- *  title: string;
- *  message: string;
- *  autohide: boolean,
- *  delay: ?number;  
- * }} ToastData
- */
+/** @import {ToastData} from "../../logic/types" */
 
 let idCounter = 0;
 
@@ -46,7 +36,7 @@ export default function ToastProvider({ children }) {
 
         setTimeout(() => {
             removeToast(id);
-        }, delay ?? 10000)
+        }, 120000)
     }
 
     function removeToast(id) {
