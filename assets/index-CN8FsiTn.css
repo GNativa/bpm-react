@@ -2220,11 +2220,29 @@ url("/bpm-react/assets/bootstrap-icons-BeopsB42.woff?e34853135f9e39acf6431523685
 .bi-globe-asia-australia-fill::before { content: "\f91c"; }
 .bi-globe-central-south-asia-fill::before { content: "\f91d"; }
 .bi-globe-europe-africa-fill::before { content: "\f91e"; }
-@media screen and (max-width: 800px), handheld and (orientation: portrait) {
-    .col, .col-1, .col-2, .col-3, .col-4, .col-5, .col-6, .col-7, .col-8, .col-9, .col-10, .col-11, .col-12 {
+@media screen and (max-width: 800px),
+handheld and (orientation: portrait) {
+
+    .col,
+    .col-1,
+    .col-2,
+    .col-3,
+    .col-4,
+    .col-5,
+    .col-6,
+    .col-7,
+    .col-8,
+    .col-9,
+    .col-10,
+    .col-11,
+    .col-12 {
         flex: 0 0 auto;
         width: 100%;
     }
+}
+
+:root {
+    --base-color: #272927;
 }
 
 div#root {
@@ -2235,10 +2253,12 @@ div#root {
 }
 
 body {
-    font-family: Poppins, sans-serif; 
+    font-family: Poppins, sans-serif;
 }
 
-label:has(+ [required]), [required] ~ label {
+label:has(+ [required]),
+[required]~label,
+[required] label {
     font-weight: bold;
 }
 
@@ -2247,11 +2267,167 @@ input[type="file"][required] {
 }
 
 [required] {
-    border-bottom-color: var(--bs-body);
+    border-bottom-color: var(--base-color);
     border-bottom-width: thin;
 }
 
 .is-invalid {
     border-bottom-color: var(--bs-form-invalid-color);
     border-bottom-width: medium;
+}
+
+.form-check:not(.form-switch)>.form-check-input {
+    width: 2em;
+    height: 2em;
+}
+
+.form-switch>.form-check-input {
+    width: 3em;
+    height: 1.5em;
+}
+
+.form-check {
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+label {
+    color: var(--base-color);
+}
+
+label:has(+ input[type="file"]) {
+    margin-bottom: 0;
+    color: var(--base-color);
+}
+
+.form-select,
+.form-floating>label,
+option,
+input.form-control,
+input[type="file"]::file-selector-button {
+    color: var(--base-color);
+}
+
+input[disabled],
+.form-floating>input[disabled].form-control~label,
+.form-floating>label:has(input[disabled]) {
+    color: color-mix(in oklab, var(--base-color) 60%, rgba(0, 0, 0, 0) 40%);
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    width: 1.75em;
+    height: 1.75em;
+    filter: invert(1);
+}
+
+/*
+.date-control:not([disabled])::after {
+    content: "📅";
+    position: absolute;
+    font-size: 1.5em;
+    right: 1.5%;
+    top: 65%;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+*/
+
+.form-check-input:checked {
+    border-color: color-mix(in oklab, var(--base-color) 60%, rgba(0, 0, 0, 0) 40%);
+    background-color: var(--base-color);
+}
+
+.btn-primary {
+    background-color: var(--base-color);
+    border-color: var(--base-color);
+}
+
+.section-row {
+    border-radius: 10px;
+    background: linear-gradient(to bottom,
+            color-mix(in oklab, var(--base-color) 7.5%, rgba(0, 0, 0, 0) 92.5%) 0%,
+            #ffffff 50%,
+            color-mix(in oklab, var(--base-color) 7.5%, rgba(0, 0, 0, 0) 92.5%) 100%);
+    border-top: 2px solid color-mix(in oklab, var(--base-color) 40%, rgba(0, 0, 0, 0) 60%);
+    border-bottom: 2px solid color-mix(in oklab, var(--base-color) 40%, rgba(0, 0, 0, 0) 60%);
+}
+
+.title-l {
+    font-size: 1.5em;
+    font-weight: bold;
+    font-style: italic;
+    color: var(--base-color);
+}
+
+.title-md {
+    font-size: 1.25em;
+    font-weight: bold;
+    color: var(--base-color);
+}
+
+.title-sm {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: var(--base-color);
+}
+
+.file-selector-header {
+    height: calc(3.5rem + calc(var(--bs-border-width) * 2));
+}@keyframes loading {
+    0% {
+        background-position: 200% 50%;
+    }
+
+    100% {
+        background-position: -100% 50%;
+    }
+}
+
+.loading {
+    background: linear-gradient(90deg, var(--bs-body-bg) 0% 40%, var(--base-color) 50%, var(--bs-body-bg) 60% 100%);
+    background-size: 150% 150%;
+    animation-name: loading;
+    animation-duration: 0.8s;
+    animation-timing-function: linear;
+    animation-delay: 0s;
+    animation-iteration-count: infinite;
+    animation-direction: normal;
+}
+
+@keyframes loaded {
+    0% {
+        background-color: var(--base-color);
+    }
+
+    100% {
+        background-color: var(--bs-body-bg);
+    }
+}
+
+.loaded {
+    animation-name: loaded;
+    animation-duration: 1s;
+    animation-timing-function: cubic-bezier(0.13, 1.09, 0.81, 0.99);
+    animation-direction: normal;
+}
+
+@keyframes loading-failed {
+    0% {
+        background-color: var(--bs-form-invalid-color);;
+    }
+
+    100% {
+        background-color: var(--bs-body-bg);
+    }
+}
+
+.loading-failed {
+    animation-name: loading-failed;
+    animation-duration: 1s;
+    animation-timing-function: cubic-bezier(0.13, 1.09, 0.81, 0.99);
+    animation-direction: normal;
+}:root {
+    --base-color: #0c9614;
 }

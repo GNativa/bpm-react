@@ -9916,6 +9916,29 @@ var require_client = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_client = require_client();
 //#endregion
+//#region src/bpmBridge.jsx
+function initBPMBridge({ onLoad, onSubmit, onError, initializationRef }) {
+	window._loadData = async (data, info) => {
+		onLoad && await onLoad(data, info);
+	};
+	window._saveData = (data, info) => {
+		return onSubmit ? onSubmit(data, info) : {};
+	};
+	window._rollback = (error) => {
+		onError && onError(error);
+	};
+	if (!window.workflowCockpit) {
+		console.warn("workflowCockpit não está disponível ainda.");
+		return;
+	}
+	if (initializationRef.current) return;
+	window.workflowCockpit = window.workflowCockpit({
+		init: window._loadData,
+		onSubmit: window._saveData,
+		onError: window._rollback
+	});
+}
+//#endregion
 //#region node_modules/classnames/index.js
 var require_classnames = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	/*!
@@ -9958,8 +9981,19 @@ var require_classnames = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	})();
 }));
 //#endregion
+//#region node_modules/@babel/runtime/helpers/esm/extends.js
+function _extends() {
+	return _extends = Object.assign ? Object.assign.bind() : function(n) {
+		for (var e = 1; e < arguments.length; e++) {
+			var t = arguments[e];
+			for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]);
+		}
+		return n;
+	}, _extends.apply(null, arguments);
+}
+//#endregion
 //#region node_modules/@babel/runtime/helpers/esm/objectWithoutPropertiesLoose.js
-function _objectWithoutPropertiesLoose$4(r, e) {
+function _objectWithoutPropertiesLoose$10(r, e) {
 	if (null == r) return {};
 	var t = {};
 	for (var n in r) if ({}.hasOwnProperty.call(r, n)) {
@@ -10004,9 +10038,26 @@ function _objectWithoutPropertiesLoose$4(r, e) {
 	};
 	module.exports = invariant;
 })))();
+function defaultKey(key) {
+	return "default" + key.charAt(0).toUpperCase() + key.substr(1);
+}
 //#endregion
 //#region node_modules/uncontrollable/lib/esm/hook.js
-function useUncontrolledProp(propValue, defaultValue, handler) {
+function _toPropertyKey(arg) {
+	var key = _toPrimitive(arg, "string");
+	return typeof key === "symbol" ? key : String(key);
+}
+function _toPrimitive(input, hint) {
+	if (typeof input !== "object" || input === null) return input;
+	var prim = input[Symbol.toPrimitive];
+	if (prim !== void 0) {
+		var res = prim.call(input, hint || "default");
+		if (typeof res !== "object") return res;
+		throw new TypeError("@@toPrimitive must return a primitive value.");
+	}
+	return (hint === "string" ? String : Number)(input);
+}
+function useUncontrolledProp$1(propValue, defaultValue, handler) {
 	var wasPropRef = (0, import_react.useRef)(propValue !== void 0);
 	var _useState = (0, import_react.useState)(defaultValue), stateValue = _useState[0], setState = _useState[1];
 	var isProp = propValue !== void 0;
@@ -10022,6 +10073,15 @@ function useUncontrolledProp(propValue, defaultValue, handler) {
 		if (handler) handler.apply(void 0, [value].concat(args));
 		setState(value);
 	}, [handler])];
+}
+function useUncontrolled(props, config) {
+	return Object.keys(config).reduce(function(result, fieldName) {
+		var _extends2;
+		var _ref = result, defaultValue = _ref[defaultKey(fieldName)], propsValue = _ref[fieldName], rest = _objectWithoutPropertiesLoose$10(_ref, [defaultKey(fieldName), fieldName].map(_toPropertyKey));
+		var handlerName = config[fieldName];
+		var _useUncontrolledProp = useUncontrolledProp$1(propsValue, defaultValue, props[handlerName]), value = _useUncontrolledProp[0], handler = _useUncontrolledProp[1];
+		return _extends({}, rest, (_extends2 = {}, _extends2[fieldName] = value, _extends2[handlerName] = handler, _extends2));
+	}, props);
 }
 //#endregion
 //#region node_modules/@babel/runtime/helpers/esm/setPrototypeOf.js
@@ -10553,7 +10613,7 @@ var Transition = /* @__PURE__ */ function(_React$Component) {
 		_this$props.onExiting;
 		_this$props.onExited;
 		_this$props.nodeRef;
-		var childProps = _objectWithoutPropertiesLoose$4(_this$props, [
+		var childProps = _objectWithoutPropertiesLoose$10(_this$props, [
 			"children",
 			"in",
 			"mountOnEnter",
@@ -10577,7 +10637,7 @@ var Transition = /* @__PURE__ */ function(_React$Component) {
 }(import_react.Component);
 Transition.contextType = TransitionGroupContext_default;
 Transition.propTypes = {};
-function noop$2() {}
+function noop$5() {}
 Transition.defaultProps = {
 	in: false,
 	mountOnEnter: false,
@@ -10585,12 +10645,12 @@ Transition.defaultProps = {
 	appear: false,
 	enter: true,
 	exit: true,
-	onEnter: noop$2,
-	onEntering: noop$2,
-	onEntered: noop$2,
-	onExit: noop$2,
-	onExiting: noop$2,
-	onExited: noop$2
+	onEnter: noop$5,
+	onEntering: noop$5,
+	onEntered: noop$5,
+	onExit: noop$5,
+	onExiting: noop$5,
+	onExited: noop$5
 };
 Transition.UNMOUNTED = UNMOUNTED;
 Transition.EXITED = EXITED;
@@ -10747,6 +10807,27 @@ function transitionEndListener(element, handler) {
 	}, parseDuration(element, "transitionDuration") + parseDuration(element, "transitionDelay"));
 }
 //#endregion
+//#region node_modules/react-bootstrap/esm/createChainedFunction.js
+/**
+* Safe chained function
+*
+* Will only create a new function if needed,
+* otherwise will pass back existing functions or null.
+*
+* @param {function} functions to chain
+* @returns {function|null}
+*/
+function createChainedFunction(...funcs) {
+	return funcs.filter((f) => f != null).reduce((acc, f) => {
+		if (typeof f !== "function") throw new Error("Invalid Argument Type, must only provide functions, undefined, or null.");
+		if (acc === null) return f;
+		return function chainedFunction(...args) {
+			acc.apply(this, args);
+			f.apply(this, args);
+		};
+	}, null);
+}
+//#endregion
 //#region node_modules/react-bootstrap/esm/triggerBrowserReflow.js
 function triggerBrowserReflow(node) {
 	node.offsetHeight;
@@ -10826,6 +10907,70 @@ var TransitionWrapper = /* @__PURE__ */ import_react.forwardRef(({ onEnter, onEn
 });
 TransitionWrapper.displayName = "TransitionWrapper";
 //#endregion
+//#region node_modules/react-bootstrap/esm/Collapse.js
+var import_classnames = /* @__PURE__ */ __toESM(require_classnames());
+var MARGINS = {
+	height: ["marginTop", "marginBottom"],
+	width: ["marginLeft", "marginRight"]
+};
+function getDefaultDimensionValue(dimension, elem) {
+	const value = elem[`offset${dimension[0].toUpperCase()}${dimension.slice(1)}`];
+	const margins = MARGINS[dimension];
+	return value + parseInt(style(elem, margins[0]), 10) + parseInt(style(elem, margins[1]), 10);
+}
+var collapseStyles = {
+	[EXITED]: "collapse",
+	[EXITING]: "collapsing",
+	[ENTERING]: "collapsing",
+	[ENTERED]: "collapse show"
+};
+var Collapse = /* @__PURE__ */ import_react.forwardRef(({ onEnter, onEntering, onEntered, onExit, onExiting, className, children, dimension = "height", in: inProp = false, timeout = 300, mountOnEnter = false, unmountOnExit = false, appear = false, getDimensionValue = getDefaultDimensionValue, ...props }, ref) => {
+	const computedDimension = typeof dimension === "function" ? dimension() : dimension;
+	const handleEnter = (0, import_react.useMemo)(() => createChainedFunction((elem) => {
+		elem.style[computedDimension] = "0";
+	}, onEnter), [computedDimension, onEnter]);
+	const handleEntering = (0, import_react.useMemo)(() => createChainedFunction((elem) => {
+		const scroll = `scroll${computedDimension[0].toUpperCase()}${computedDimension.slice(1)}`;
+		elem.style[computedDimension] = `${elem[scroll]}px`;
+	}, onEntering), [computedDimension, onEntering]);
+	const handleEntered = (0, import_react.useMemo)(() => createChainedFunction((elem) => {
+		elem.style[computedDimension] = null;
+	}, onEntered), [computedDimension, onEntered]);
+	const handleExit = (0, import_react.useMemo)(() => createChainedFunction((elem) => {
+		elem.style[computedDimension] = `${getDimensionValue(computedDimension, elem)}px`;
+		triggerBrowserReflow(elem);
+	}, onExit), [
+		onExit,
+		getDimensionValue,
+		computedDimension
+	]);
+	const handleExiting = (0, import_react.useMemo)(() => createChainedFunction((elem) => {
+		elem.style[computedDimension] = null;
+	}, onExiting), [computedDimension, onExiting]);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TransitionWrapper, {
+		ref,
+		addEndListener: transitionEndListener,
+		...props,
+		"aria-expanded": props.role ? inProp : null,
+		onEnter: handleEnter,
+		onEntering: handleEntering,
+		onEntered: handleEntered,
+		onExit: handleExit,
+		onExiting: handleExiting,
+		childRef: getChildRef(children),
+		in: inProp,
+		timeout,
+		mountOnEnter,
+		unmountOnExit,
+		appear,
+		children: (state, innerProps) => /* @__PURE__ */ import_react.cloneElement(children, {
+			...innerProps,
+			className: (0, import_classnames.default)(className, children.props.className, collapseStyles[state], computedDimension === "width" && "collapse-horizontal")
+		})
+	});
+});
+Collapse.displayName = "Collapse";
+//#endregion
 //#region node_modules/@restart/hooks/esm/useCommittedRef.js
 /**
 * Creates a `Ref` whose value is updated in an effect, ensuring the most recent
@@ -10852,6 +10997,26 @@ function useEventCallback$1(fn) {
 	}, [ref]);
 }
 //#endregion
+//#region node_modules/react-bootstrap/esm/divWithClassName.js
+var divWithClassName_default = ((className) => /* @__PURE__ */ import_react.forwardRef((p, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+	...p,
+	ref,
+	className: (0, import_classnames.default)(p.className, className)
+})));
+//#endregion
+//#region node_modules/react-bootstrap/esm/AlertHeading.js
+var DivStyledAsH4$1 = divWithClassName_default("h4");
+DivStyledAsH4$1.displayName = "DivStyledAsH4";
+var AlertHeading = /* @__PURE__ */ import_react.forwardRef(({ className, bsPrefix, as: Component = DivStyledAsH4$1, ...props }, ref) => {
+	bsPrefix = useBootstrapPrefix(bsPrefix, "alert-heading");
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Component, {
+		ref,
+		className: (0, import_classnames.default)(className, bsPrefix),
+		...props
+	});
+});
+AlertHeading.displayName = "AlertHeading";
+//#endregion
 //#region node_modules/@restart/ui/node_modules/@restart/hooks/esm/useCallbackRef.js
 /**
 * A convenience hook around `useState` designed to be paired with
@@ -10877,7 +11042,7 @@ function useEventCallback$1(fn) {
 *
 * @category refs
 */
-function useCallbackRef() {
+function useCallbackRef$1() {
 	return (0, import_react.useState)(null);
 }
 //#endregion
@@ -10905,6 +11070,25 @@ function useEventCallback(fn) {
 	return (0, import_react.useCallback)(function(...args) {
 		return ref.current && ref.current(...args);
 	}, [ref]);
+}
+//#endregion
+//#region node_modules/@restart/ui/node_modules/@restart/hooks/esm/useEventListener.js
+/**
+* Attaches an event handler outside directly to specified DOM element
+* bypassing the react synthetic event system.
+*
+* @param element The target to listen for events on
+* @param event The DOM event name
+* @param handler An event handler
+* @param capture Whether or not to listen during the capture event phase
+*/
+function useEventListener(eventTarget, event, listener, capture = false) {
+	const handler = useEventCallback(listener);
+	(0, import_react.useEffect)(() => {
+		const target = typeof eventTarget === "function" ? eventTarget() : eventTarget;
+		target.addEventListener(event, handler, capture);
+		return () => target.removeEventListener(event, handler, capture);
+	}, [eventTarget]);
 }
 //#endregion
 //#region node_modules/@restart/ui/node_modules/@restart/hooks/esm/useMounted.js
@@ -10940,6 +11124,32 @@ function useMounted$1() {
 	return isMounted.current;
 }
 //#endregion
+//#region node_modules/@restart/ui/node_modules/@restart/hooks/esm/usePrevious.js
+/**
+* Store the last of some value. Tracked via a `Ref` only updating it
+* after the component renders.
+*
+* Helpful if you need to compare a prop value to it's previous value during render.
+*
+* ```ts
+* function Component(props) {
+*   const lastProps = usePrevious(props)
+*
+*   if (lastProps.foo !== props.foo)
+*     resetValueFromProps(props.foo)
+* }
+* ```
+*
+* @param value the value to track
+*/
+function usePrevious(value) {
+	const ref = (0, import_react.useRef)(null);
+	(0, import_react.useEffect)(() => {
+		ref.current = value;
+	});
+	return ref.current;
+}
+//#endregion
 //#region node_modules/@restart/ui/node_modules/@restart/hooks/esm/useIsomorphicEffect.js
 var isReactNative$1 = typeof global !== "undefined" && global.navigator && global.navigator.product === "ReactNative";
 /**
@@ -10953,8 +11163,8 @@ var isReactNative$1 = typeof global !== "undefined" && global.navigator && globa
 var useIsomorphicEffect_default$1 = typeof document !== "undefined" || isReactNative$1 ? import_react.useLayoutEffect : import_react.useEffect;
 //#endregion
 //#region node_modules/@restart/ui/esm/Button.js
-var _excluded$3 = ["as", "disabled"];
-function _objectWithoutPropertiesLoose$3(r, e) {
+var _excluded$9 = ["as", "disabled"];
+function _objectWithoutPropertiesLoose$9(r, e) {
 	if (null == r) return {};
 	var t = {};
 	for (var n in r) if ({}.hasOwnProperty.call(r, n)) {
@@ -10963,7 +11173,7 @@ function _objectWithoutPropertiesLoose$3(r, e) {
 	}
 	return t;
 }
-function isTrivialHref(href) {
+function isTrivialHref$1(href) {
 	return !href || href.trim() === "#";
 }
 function useButtonProps({ tagName, disabled, href, target, rel, role, onClick, tabIndex = 0, type }) {
@@ -10975,7 +11185,7 @@ function useButtonProps({ tagName, disabled, href, target, rel, role, onClick, t
 		disabled
 	}, meta];
 	const handleClick = (event) => {
-		if (disabled || tagName === "a" && isTrivialHref(href)) event.preventDefault();
+		if (disabled || tagName === "a" && isTrivialHref$1(href)) event.preventDefault();
 		if (disabled) {
 			event.stopPropagation();
 			return;
@@ -11005,7 +11215,7 @@ function useButtonProps({ tagName, disabled, href, target, rel, role, onClick, t
 	}, meta];
 }
 var Button$1 = /* @__PURE__ */ import_react.forwardRef((_ref, ref) => {
-	let { as: asProp, disabled } = _ref, props = _objectWithoutPropertiesLoose$3(_ref, _excluded$3);
+	let { as: asProp, disabled } = _ref, props = _objectWithoutPropertiesLoose$9(_ref, _excluded$9);
 	const [buttonProps, { tagName: Component }] = useButtonProps(Object.assign({
 		tagName: asProp,
 		disabled
@@ -11014,9 +11224,49 @@ var Button$1 = /* @__PURE__ */ import_react.forwardRef((_ref, ref) => {
 });
 Button$1.displayName = "Button";
 //#endregion
+//#region node_modules/@restart/ui/esm/Anchor.js
+var _excluded$8 = ["onKeyDown"];
+function _objectWithoutPropertiesLoose$8(r, e) {
+	if (null == r) return {};
+	var t = {};
+	for (var n in r) if ({}.hasOwnProperty.call(r, n)) {
+		if (e.indexOf(n) >= 0) continue;
+		t[n] = r[n];
+	}
+	return t;
+}
+function isTrivialHref(href) {
+	return !href || href.trim() === "#";
+}
+/**
+* An generic `<a>` component that covers a few A11y cases, ensuring that
+* cases where the `href` is missing or trivial like "#" are treated like buttons.
+*/
+var Anchor = /* @__PURE__ */ import_react.forwardRef((_ref, ref) => {
+	let { onKeyDown } = _ref, props = _objectWithoutPropertiesLoose$8(_ref, _excluded$8);
+	const [buttonProps] = useButtonProps(Object.assign({ tagName: "a" }, props));
+	const handleKeyDown = useEventCallback((e) => {
+		buttonProps.onKeyDown(e);
+		onKeyDown?.(e);
+	});
+	if (isTrivialHref(props.href) || props.role === "button") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", Object.assign({ ref }, props, buttonProps, { onKeyDown: handleKeyDown }));
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", Object.assign({ ref }, props, { onKeyDown }));
+});
+Anchor.displayName = "Anchor";
+//#endregion
+//#region node_modules/react-bootstrap/esm/AlertLink.js
+var AlertLink = /* @__PURE__ */ import_react.forwardRef(({ className, bsPrefix, as: Component = Anchor, ...props }, ref) => {
+	bsPrefix = useBootstrapPrefix(bsPrefix, "alert-link");
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Component, {
+		ref,
+		className: (0, import_classnames.default)(className, bsPrefix),
+		...props
+	});
+});
+AlertLink.displayName = "AlertLink";
+//#endregion
 //#region node_modules/react-bootstrap/esm/Fade.js
-var import_classnames = /* @__PURE__ */ __toESM(require_classnames());
-var fadeStyles = {
+var fadeStyles$1 = {
 	[ENTERING]: "show",
 	[ENTERED]: "show"
 };
@@ -11041,11 +11291,62 @@ var Fade = /* @__PURE__ */ import_react.forwardRef(({ className, children, trans
 		childRef: getChildRef(children),
 		children: (status, innerProps) => /* @__PURE__ */ import_react.cloneElement(children, {
 			...innerProps,
-			className: (0, import_classnames.default)("fade", className, children.props.className, fadeStyles[status], transitionClasses[status])
+			className: (0, import_classnames.default)("fade", className, children.props.className, fadeStyles$1[status], transitionClasses[status])
 		})
 	});
 });
 Fade.displayName = "Fade";
+//#endregion
+//#region node_modules/react-bootstrap/esm/CloseButton.js
+var import_prop_types = /* @__PURE__ */ __toESM(require_prop_types());
+var propTypes$2 = {
+	"aria-label": import_prop_types.default.string,
+	onClick: import_prop_types.default.func,
+	variant: import_prop_types.default.oneOf(["white"])
+};
+var CloseButton = /* @__PURE__ */ import_react.forwardRef(({ className, variant, "aria-label": ariaLabel = "Close", ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+	ref,
+	type: "button",
+	className: (0, import_classnames.default)("btn-close", variant && `btn-close-${variant}`, className),
+	"aria-label": ariaLabel,
+	...props
+}));
+CloseButton.displayName = "CloseButton";
+CloseButton.propTypes = propTypes$2;
+//#endregion
+//#region node_modules/react-bootstrap/esm/Alert.js
+var Alert = /* @__PURE__ */ import_react.forwardRef((uncontrolledProps, ref) => {
+	const { bsPrefix, show = true, closeLabel = "Close alert", closeVariant, className, children, variant = "primary", onClose, dismissible, transition = Fade, ...props } = useUncontrolled(uncontrolledProps, { show: "onClose" });
+	const prefix = useBootstrapPrefix(bsPrefix, "alert");
+	const handleClose = useEventCallback$1((e) => {
+		if (onClose) onClose(false, e);
+	});
+	const Transition = transition === true ? Fade : transition;
+	const alert = /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		role: "alert",
+		...!Transition ? props : void 0,
+		ref,
+		className: (0, import_classnames.default)(className, prefix, variant && `${prefix}-${variant}`, dismissible && `${prefix}-dismissible`),
+		children: [dismissible && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CloseButton, {
+			onClick: handleClose,
+			"aria-label": closeLabel,
+			variant: closeVariant
+		}), children]
+	});
+	if (!Transition) return show ? alert : null;
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Transition, {
+		unmountOnExit: true,
+		...props,
+		ref: void 0,
+		in: show,
+		children: alert
+	});
+});
+Alert.displayName = "Alert";
+var Alert_default = Object.assign(Alert, {
+	Link: AlertLink,
+	Heading: AlertHeading
+});
 //#endregion
 //#region node_modules/react-bootstrap/esm/Button.js
 var Button = /* @__PURE__ */ import_react.forwardRef(({ as, bsPrefix, variant = "primary", size, active = false, disabled = false, className, ...props }, ref) => {
@@ -11064,6 +11365,138 @@ var Button = /* @__PURE__ */ import_react.forwardRef(({ as, bsPrefix, variant = 
 	});
 });
 Button.displayName = "Button";
+//#endregion
+//#region node_modules/react-bootstrap/esm/CardBody.js
+var CardBody = /* @__PURE__ */ import_react.forwardRef(({ className, bsPrefix, as: Component = "div", ...props }, ref) => {
+	bsPrefix = useBootstrapPrefix(bsPrefix, "card-body");
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Component, {
+		ref,
+		className: (0, import_classnames.default)(className, bsPrefix),
+		...props
+	});
+});
+CardBody.displayName = "CardBody";
+//#endregion
+//#region node_modules/react-bootstrap/esm/CardFooter.js
+var CardFooter = /* @__PURE__ */ import_react.forwardRef(({ className, bsPrefix, as: Component = "div", ...props }, ref) => {
+	bsPrefix = useBootstrapPrefix(bsPrefix, "card-footer");
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Component, {
+		ref,
+		className: (0, import_classnames.default)(className, bsPrefix),
+		...props
+	});
+});
+CardFooter.displayName = "CardFooter";
+//#endregion
+//#region node_modules/react-bootstrap/esm/CardHeaderContext.js
+var context$2 = /* @__PURE__ */ import_react.createContext(null);
+context$2.displayName = "CardHeaderContext";
+//#endregion
+//#region node_modules/react-bootstrap/esm/CardHeader.js
+var CardHeader = /* @__PURE__ */ import_react.forwardRef(({ bsPrefix, className, as: Component = "div", ...props }, ref) => {
+	const prefix = useBootstrapPrefix(bsPrefix, "card-header");
+	const contextValue = (0, import_react.useMemo)(() => ({ cardHeaderBsPrefix: prefix }), [prefix]);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(context$2.Provider, {
+		value: contextValue,
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Component, {
+			ref,
+			...props,
+			className: (0, import_classnames.default)(className, prefix)
+		})
+	});
+});
+CardHeader.displayName = "CardHeader";
+//#endregion
+//#region node_modules/react-bootstrap/esm/CardImg.js
+var CardImg = /* @__PURE__ */ import_react.forwardRef(({ bsPrefix, className, variant, as: Component = "img", ...props }, ref) => {
+	const prefix = useBootstrapPrefix(bsPrefix, "card-img");
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Component, {
+		ref,
+		className: (0, import_classnames.default)(variant ? `${prefix}-${variant}` : prefix, className),
+		...props
+	});
+});
+CardImg.displayName = "CardImg";
+//#endregion
+//#region node_modules/react-bootstrap/esm/CardImgOverlay.js
+var CardImgOverlay = /* @__PURE__ */ import_react.forwardRef(({ className, bsPrefix, as: Component = "div", ...props }, ref) => {
+	bsPrefix = useBootstrapPrefix(bsPrefix, "card-img-overlay");
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Component, {
+		ref,
+		className: (0, import_classnames.default)(className, bsPrefix),
+		...props
+	});
+});
+CardImgOverlay.displayName = "CardImgOverlay";
+//#endregion
+//#region node_modules/react-bootstrap/esm/CardLink.js
+var CardLink = /* @__PURE__ */ import_react.forwardRef(({ className, bsPrefix, as: Component = "a", ...props }, ref) => {
+	bsPrefix = useBootstrapPrefix(bsPrefix, "card-link");
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Component, {
+		ref,
+		className: (0, import_classnames.default)(className, bsPrefix),
+		...props
+	});
+});
+CardLink.displayName = "CardLink";
+//#endregion
+//#region node_modules/react-bootstrap/esm/CardSubtitle.js
+var DivStyledAsH6 = divWithClassName_default("h6");
+var CardSubtitle = /* @__PURE__ */ import_react.forwardRef(({ className, bsPrefix, as: Component = DivStyledAsH6, ...props }, ref) => {
+	bsPrefix = useBootstrapPrefix(bsPrefix, "card-subtitle");
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Component, {
+		ref,
+		className: (0, import_classnames.default)(className, bsPrefix),
+		...props
+	});
+});
+CardSubtitle.displayName = "CardSubtitle";
+//#endregion
+//#region node_modules/react-bootstrap/esm/CardText.js
+var CardText = /* @__PURE__ */ import_react.forwardRef(({ className, bsPrefix, as: Component = "p", ...props }, ref) => {
+	bsPrefix = useBootstrapPrefix(bsPrefix, "card-text");
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Component, {
+		ref,
+		className: (0, import_classnames.default)(className, bsPrefix),
+		...props
+	});
+});
+CardText.displayName = "CardText";
+//#endregion
+//#region node_modules/react-bootstrap/esm/CardTitle.js
+var DivStyledAsH5 = divWithClassName_default("h5");
+var CardTitle = /* @__PURE__ */ import_react.forwardRef(({ className, bsPrefix, as: Component = DivStyledAsH5, ...props }, ref) => {
+	bsPrefix = useBootstrapPrefix(bsPrefix, "card-title");
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Component, {
+		ref,
+		className: (0, import_classnames.default)(className, bsPrefix),
+		...props
+	});
+});
+CardTitle.displayName = "CardTitle";
+//#endregion
+//#region node_modules/react-bootstrap/esm/Card.js
+var Card = /* @__PURE__ */ import_react.forwardRef(({ bsPrefix, className, bg, text, border, body = false, children, as: Component = "div", ...props }, ref) => {
+	const prefix = useBootstrapPrefix(bsPrefix, "card");
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Component, {
+		ref,
+		...props,
+		className: (0, import_classnames.default)(className, prefix, bg && `bg-${bg}`, text && `text-${text}`, border && `border-${border}`),
+		children: body ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CardBody, { children }) : children
+	});
+});
+Card.displayName = "Card";
+var Card_default = Object.assign(Card, {
+	Img: CardImg,
+	Title: CardTitle,
+	Subtitle: CardSubtitle,
+	Body: CardBody,
+	Link: CardLink,
+	Text: CardText,
+	Header: CardHeader,
+	Footer: CardFooter,
+	ImgOverlay: CardImgOverlay
+});
 //#endregion
 //#region node_modules/@restart/hooks/esm/useMounted.js
 /**
@@ -11105,7 +11538,7 @@ function useMounted() {
 * @param value The Ref value
 * @category refs
 */
-function useUpdatedRef(value) {
+function useUpdatedRef$1(value) {
 	const valueRef = (0, import_react.useRef)(value);
 	valueRef.current = value;
 	return valueRef;
@@ -11118,8 +11551,8 @@ function useUpdatedRef(value) {
 * @param fn Handler to run when the component unmounts
 * @category effects
 */
-function useWillUnmount(fn) {
-	const onUnmount = useUpdatedRef(fn);
+function useWillUnmount$1(fn) {
+	const onUnmount = useUpdatedRef$1(fn);
 	(0, import_react.useEffect)(() => () => onUnmount.current(), []);
 }
 //#endregion
@@ -11150,7 +11583,7 @@ function setChainedTimeout(handleRef, fn, timeoutAtMs) {
 function useTimeout() {
 	const isMounted = useMounted();
 	const handleRef = (0, import_react.useRef)();
-	useWillUnmount(() => clearTimeout(handleRef.current));
+	useWillUnmount$1(() => clearTimeout(handleRef.current));
 	return (0, import_react.useMemo)(() => {
 		const clear = () => clearTimeout(handleRef.current);
 		function set(fn, delayMs = 0) {
@@ -11226,6 +11659,63 @@ var Container = /* @__PURE__ */ import_react.forwardRef(({ bsPrefix, fluid = fal
 	});
 });
 Container.displayName = "Container";
+//#endregion
+//#region node_modules/dom-helpers/esm/querySelectorAll.js
+var toArray = Function.prototype.bind.call(Function.prototype.call, [].slice);
+/**
+* Runs `querySelectorAll` on a given element.
+* 
+* @param element the element
+* @param selector the selector
+*/
+function qsa(element, selector) {
+	return toArray(element.querySelectorAll(selector));
+}
+//#endregion
+//#region node_modules/@restart/ui/node_modules/uncontrollable/lib/esm/index.js
+function useUncontrolledProp(propValue, defaultValue, handler) {
+	const wasPropRef = (0, import_react.useRef)(propValue !== void 0);
+	const [stateValue, setState] = (0, import_react.useState)(defaultValue);
+	const isProp = propValue !== void 0;
+	const wasProp = wasPropRef.current;
+	wasPropRef.current = isProp;
+	/**
+	* If a prop switches from controlled to Uncontrolled
+	* reset its value to the defaultValue
+	*/
+	if (!isProp && wasProp && stateValue !== defaultValue) setState(defaultValue);
+	return [isProp ? propValue : stateValue, (0, import_react.useCallback)((...args) => {
+		const [value, ...rest] = args;
+		let returnValue = handler == null ? void 0 : handler(value, ...rest);
+		setState(value);
+		return returnValue;
+	}, [handler])];
+}
+//#endregion
+//#region node_modules/@restart/ui/node_modules/@restart/hooks/esm/useForceUpdate.js
+/**
+* Returns a function that triggers a component update. the hook equivalent to
+* `this.forceUpdate()` in a class component. In most cases using a state value directly
+* is preferable but may be required in some advanced usages of refs for interop or
+* when direct DOM manipulation is required.
+*
+* ```ts
+* const forceUpdate = useForceUpdate();
+*
+* const updateOnClick = useCallback(() => {
+*  forceUpdate()
+* }, [forceUpdate])
+*
+* return <button type="button" onClick={updateOnClick}>Hi there</button>
+* ```
+*/
+function useForceUpdate() {
+	const [, dispatch] = (0, import_react.useReducer)((revision) => revision + 1, 0);
+	return dispatch;
+}
+//#endregion
+//#region node_modules/@restart/ui/esm/DropdownContext.js
+var DropdownContext$1 = /* @__PURE__ */ import_react.createContext(null);
 //#endregion
 //#region node_modules/dequal/dist/index.mjs
 var has = Object.prototype.hasOwnProperty;
@@ -12547,13 +13037,13 @@ var createPopper = popperGenerator({ defaultModifiers: [
 ] });
 //#endregion
 //#region node_modules/@restart/ui/esm/usePopper.js
-var _excluded$2 = [
+var _excluded$7 = [
 	"enabled",
 	"placement",
 	"strategy",
 	"modifiers"
 ];
-function _objectWithoutPropertiesLoose$2(r, e) {
+function _objectWithoutPropertiesLoose$7(r, e) {
 	if (null == r) return {};
 	var t = {};
 	for (var n in r) if ({}.hasOwnProperty.call(r, n)) {
@@ -12608,7 +13098,7 @@ var EMPTY_MODIFIERS = [];
 * @returns {UsePopperState} The popper state
 */
 function usePopper(referenceElement, popperElement, _ref = {}) {
-	let { enabled = true, placement = "bottom", strategy = "absolute", modifiers = EMPTY_MODIFIERS } = _ref, config = _objectWithoutPropertiesLoose$2(_ref, _excluded$2);
+	let { enabled = true, placement = "bottom", strategy = "absolute", modifiers = EMPTY_MODIFIERS } = _ref, config = _objectWithoutPropertiesLoose$7(_ref, _excluded$7);
 	const prevModifiers = (0, import_react.useRef)(modifiers);
 	const popperInstanceRef = (0, import_react.useRef)();
 	const update = (0, import_react.useCallback)(() => {
@@ -12752,7 +13242,7 @@ var import_warning = /* @__PURE__ */ __toESM((/* @__PURE__ */ __commonJSMin(((ex
 	}
 	module.exports = warning;
 })))());
-var noop$1 = () => {};
+var noop$4 = () => {};
 function isLeftClickEvent(event) {
 	return event.button === 0;
 }
@@ -12775,7 +13265,7 @@ var InitialTriggerEvents = {
 * @param {boolean=} options.disabled
 * @param {string=}  options.clickTrigger The DOM event name (click, mousedown, etc) to attach listeners on
 */
-function useClickOutside(ref, onClickOutside = noop$1, { disabled, clickTrigger = "click" } = {}) {
+function useClickOutside(ref, onClickOutside = noop$4, { disabled, clickTrigger = "click" } = {}) {
 	const preventMouseClickOutsideRef = (0, import_react.useRef)(false);
 	const waitingForTrigger = (0, import_react.useRef)(false);
 	const handleMouseCapture = (0, import_react.useCallback)((e) => {
@@ -12809,7 +13299,7 @@ function useClickOutside(ref, onClickOutside = noop$1, { disabled, clickTrigger 
 			handleMouse(e);
 		});
 		let mobileSafariHackListeners = [];
-		if ("ontouchstart" in doc.documentElement) mobileSafariHackListeners = [].slice.call(doc.body.children).map((el) => listen(el, "mousemove", noop$1));
+		if ("ontouchstart" in doc.documentElement) mobileSafariHackListeners = [].slice.call(doc.body.children).map((el) => listen(el, "mousemove", noop$4));
 		return () => {
 			removeInitialTriggerListener?.();
 			removeMouseCaptureListener();
@@ -12865,6 +13355,250 @@ function mergeOptionsWithPopperConfig({ enabled, enableEvents, placement, flip, 
 	});
 }
 //#endregion
+//#region node_modules/@restart/ui/esm/DropdownMenu.js
+var _excluded$6 = ["children", "usePopper"];
+function _objectWithoutPropertiesLoose$6(r, e) {
+	if (null == r) return {};
+	var t = {};
+	for (var n in r) if ({}.hasOwnProperty.call(r, n)) {
+		if (e.indexOf(n) >= 0) continue;
+		t[n] = r[n];
+	}
+	return t;
+}
+var noop$3 = () => {};
+/**
+* @memberOf Dropdown
+* @param {object}  options
+* @param {boolean} options.flip Automatically adjust the menu `drop` position based on viewport edge detection
+* @param {[number, number]} options.offset Define an offset distance between the Menu and the Toggle
+* @param {boolean} options.show Display the menu manually, ignored in the context of a `Dropdown`
+* @param {boolean} options.usePopper opt in/out of using PopperJS to position menus. When disabled you must position it yourself.
+* @param {string}  options.rootCloseEvent The pointer event to listen for when determining "clicks outside" the menu for triggering a close.
+* @param {object}  options.popperConfig Options passed to the [`usePopper`](/api/usePopper) hook.
+*/
+function useDropdownMenu(options = {}) {
+	const context = (0, import_react.useContext)(DropdownContext$1);
+	const [arrowElement, attachArrowRef] = useCallbackRef$1();
+	const hasShownRef = (0, import_react.useRef)(false);
+	const { flip, offset, rootCloseEvent, fixed = false, placement: placementOverride, popperConfig = {}, enableEventListeners = true, usePopper: shouldUsePopper = !!context } = options;
+	const show = (context == null ? void 0 : context.show) == null ? !!options.show : context.show;
+	if (show && !hasShownRef.current) hasShownRef.current = true;
+	const handleClose = (e) => {
+		context?.toggle(false, e);
+	};
+	const { placement, setMenu, menuElement, toggleElement } = context || {};
+	const popper = usePopper(toggleElement, menuElement, mergeOptionsWithPopperConfig({
+		placement: placementOverride || placement || "bottom-start",
+		enabled: shouldUsePopper,
+		enableEvents: enableEventListeners == null ? show : enableEventListeners,
+		offset,
+		flip,
+		fixed,
+		arrowElement,
+		popperConfig
+	}));
+	const menuProps = Object.assign({
+		ref: setMenu || noop$3,
+		"aria-labelledby": toggleElement == null ? void 0 : toggleElement.id
+	}, popper.attributes.popper, { style: popper.styles.popper });
+	const metadata = {
+		show,
+		placement,
+		hasShown: hasShownRef.current,
+		toggle: context == null ? void 0 : context.toggle,
+		popper: shouldUsePopper ? popper : null,
+		arrowProps: shouldUsePopper ? Object.assign({ ref: attachArrowRef }, popper.attributes.arrow, { style: popper.styles.arrow }) : {}
+	};
+	useClickOutside(menuElement, handleClose, {
+		clickTrigger: rootCloseEvent,
+		disabled: !show
+	});
+	return [menuProps, metadata];
+}
+/**
+* Also exported as `<Dropdown.Menu>` from `Dropdown`.
+*
+* @displayName DropdownMenu
+* @memberOf Dropdown
+*/
+function DropdownMenu$1(_ref) {
+	let { children, usePopper: usePopperProp = true } = _ref, options = _objectWithoutPropertiesLoose$6(_ref, _excluded$6);
+	const [props, meta] = useDropdownMenu(Object.assign({}, options, { usePopper: usePopperProp }));
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_jsx_runtime.Fragment, { children: children(props, meta) });
+}
+DropdownMenu$1.displayName = "DropdownMenu";
+//#endregion
+//#region node_modules/@react-aria/ssr/dist/SSRProvider.mjs
+var $b5e257d569688ac6$var$defaultContext = {
+	prefix: String(Math.round(Math.random() * 1e10)),
+	current: 0
+};
+var $b5e257d569688ac6$var$SSRContext = /* @__PURE__ */ import_react.createContext($b5e257d569688ac6$var$defaultContext);
+var $b5e257d569688ac6$var$IsSSRContext = /* @__PURE__ */ import_react.createContext(false);
+Boolean(typeof window !== "undefined" && window.document && window.document.createElement);
+var $b5e257d569688ac6$var$componentIds = /* @__PURE__ */ new WeakMap();
+function $b5e257d569688ac6$var$useCounter(isDisabled = false) {
+	let ctx = (0, import_react.useContext)($b5e257d569688ac6$var$SSRContext);
+	let ref = (0, import_react.useRef)(null);
+	if (ref.current === null && !isDisabled) {
+		var _React___SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED_ReactCurrentOwner, _React___SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+		let currentOwner = (_React___SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED = import_react.default.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED) === null || _React___SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED === void 0 ? void 0 : (_React___SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED_ReactCurrentOwner = _React___SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.ReactCurrentOwner) === null || _React___SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED_ReactCurrentOwner === void 0 ? void 0 : _React___SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED_ReactCurrentOwner.current;
+		if (currentOwner) {
+			let prevComponentValue = $b5e257d569688ac6$var$componentIds.get(currentOwner);
+			if (prevComponentValue == null) $b5e257d569688ac6$var$componentIds.set(currentOwner, {
+				id: ctx.current,
+				state: currentOwner.memoizedState
+			});
+			else if (currentOwner.memoizedState !== prevComponentValue.state) {
+				ctx.current = prevComponentValue.id;
+				$b5e257d569688ac6$var$componentIds.delete(currentOwner);
+			}
+		}
+		ref.current = ++ctx.current;
+	}
+	return ref.current;
+}
+function $b5e257d569688ac6$var$useLegacySSRSafeId(defaultId) {
+	let ctx = (0, import_react.useContext)($b5e257d569688ac6$var$SSRContext);
+	let counter = $b5e257d569688ac6$var$useCounter(!!defaultId);
+	let prefix = `react-aria${ctx.prefix}`;
+	return defaultId || `${prefix}-${counter}`;
+}
+function $b5e257d569688ac6$var$useModernSSRSafeId(defaultId) {
+	let id = import_react.useId();
+	let [didSSR] = (0, import_react.useState)($b5e257d569688ac6$export$535bd6ca7f90a273());
+	let prefix = didSSR || false ? "react-aria" : `react-aria${$b5e257d569688ac6$var$defaultContext.prefix}`;
+	return defaultId || `${prefix}-${id}`;
+}
+var $b5e257d569688ac6$export$619500959fc48b26 = typeof import_react.useId === "function" ? $b5e257d569688ac6$var$useModernSSRSafeId : $b5e257d569688ac6$var$useLegacySSRSafeId;
+function $b5e257d569688ac6$var$getSnapshot() {
+	return false;
+}
+function $b5e257d569688ac6$var$getServerSnapshot() {
+	return true;
+}
+function $b5e257d569688ac6$var$subscribe(onStoreChange) {
+	return () => {};
+}
+function $b5e257d569688ac6$export$535bd6ca7f90a273() {
+	if (typeof import_react.useSyncExternalStore === "function") return import_react.useSyncExternalStore($b5e257d569688ac6$var$subscribe, $b5e257d569688ac6$var$getSnapshot, $b5e257d569688ac6$var$getServerSnapshot);
+	return (0, import_react.useContext)($b5e257d569688ac6$var$IsSSRContext);
+}
+//#endregion
+//#region node_modules/@restart/ui/esm/DropdownToggle.js
+var isRoleMenu = (el) => {
+	var _el$getAttribute;
+	return ((_el$getAttribute = el.getAttribute("role")) == null ? void 0 : _el$getAttribute.toLowerCase()) === "menu";
+};
+var noop$2 = () => {};
+/**
+* Wires up Dropdown toggle functionality, returning a set a props to attach
+* to the element that functions as the dropdown toggle (generally a button).
+*
+* @memberOf Dropdown
+*/
+function useDropdownToggle() {
+	const id = $b5e257d569688ac6$export$619500959fc48b26();
+	const { show = false, toggle = noop$2, setToggle, menuElement } = (0, import_react.useContext)(DropdownContext$1) || {};
+	const handleClick = (0, import_react.useCallback)((e) => {
+		toggle(!show, e);
+	}, [show, toggle]);
+	const props = {
+		id,
+		ref: setToggle || noop$2,
+		onClick: handleClick,
+		"aria-expanded": !!show
+	};
+	if (menuElement && isRoleMenu(menuElement)) props["aria-haspopup"] = true;
+	return [props, {
+		show,
+		toggle
+	}];
+}
+/**
+* Also exported as `<Dropdown.Toggle>` from `Dropdown`.
+*
+* @displayName DropdownToggle
+* @memberOf Dropdown
+*/
+function DropdownToggle$1({ children }) {
+	const [props, meta] = useDropdownToggle();
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_jsx_runtime.Fragment, { children: children(props, meta) });
+}
+DropdownToggle$1.displayName = "DropdownToggle";
+//#endregion
+//#region node_modules/@restart/ui/esm/SelectableContext.js
+var SelectableContext = /* @__PURE__ */ import_react.createContext(null);
+var makeEventKey = (eventKey, href = null) => {
+	if (eventKey != null) return String(eventKey);
+	return href || null;
+};
+//#endregion
+//#region node_modules/@restart/ui/esm/NavContext.js
+var NavContext = /* @__PURE__ */ import_react.createContext(null);
+NavContext.displayName = "NavContext";
+//#endregion
+//#region node_modules/@restart/ui/esm/DataKey.js
+var ATTRIBUTE_PREFIX = `data-rr-ui-`;
+var PROPERTY_PREFIX = `rrUi`;
+function dataAttr(property) {
+	return `${ATTRIBUTE_PREFIX}${property}`;
+}
+function dataProp(property) {
+	return `${PROPERTY_PREFIX}${property}`;
+}
+//#endregion
+//#region node_modules/@restart/ui/esm/DropdownItem.js
+var _excluded$5 = [
+	"eventKey",
+	"disabled",
+	"onClick",
+	"active",
+	"as"
+];
+function _objectWithoutPropertiesLoose$5(r, e) {
+	if (null == r) return {};
+	var t = {};
+	for (var n in r) if ({}.hasOwnProperty.call(r, n)) {
+		if (e.indexOf(n) >= 0) continue;
+		t[n] = r[n];
+	}
+	return t;
+}
+/**
+* Create a dropdown item. Returns a set of props for the dropdown item component
+* including an `onClick` handler that prevents selection when the item is disabled
+*/
+function useDropdownItem({ key, href, active, disabled, onClick }) {
+	const onSelectCtx = (0, import_react.useContext)(SelectableContext);
+	const { activeKey } = (0, import_react.useContext)(NavContext) || {};
+	const eventKey = makeEventKey(key, href);
+	const isActive = active == null && key != null ? makeEventKey(activeKey) === eventKey : active;
+	return [{
+		onClick: useEventCallback((event) => {
+			if (disabled) return;
+			onClick?.(event);
+			if (onSelectCtx && !event.isPropagationStopped()) onSelectCtx(eventKey, event);
+		}),
+		"aria-disabled": disabled || void 0,
+		"aria-selected": isActive,
+		[dataAttr("dropdown-item")]: ""
+	}, { isActive }];
+}
+var DropdownItem$1 = /* @__PURE__ */ import_react.forwardRef((_ref, ref) => {
+	let { eventKey, disabled, onClick, active, as: Component = Button$1 } = _ref, props = _objectWithoutPropertiesLoose$5(_ref, _excluded$5);
+	const [dropdownItemProps] = useDropdownItem({
+		key: eventKey,
+		href: props.href,
+		disabled,
+		onClick,
+		active
+	});
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Component, Object.assign({}, props, { ref }, dropdownItemProps));
+});
+DropdownItem$1.displayName = "DropdownItem";
+//#endregion
 //#region node_modules/@restart/ui/esm/useWindow.js
 var Context = /* @__PURE__ */ (0, import_react.createContext)(canUseDOM_default ? window : void 0);
 Context.Provider;
@@ -12878,6 +13612,208 @@ function useWindow() {
 	return (0, import_react.useContext)(Context);
 }
 //#endregion
+//#region node_modules/@restart/ui/esm/Dropdown.js
+function useRefWithUpdate() {
+	const forceUpdate = useForceUpdate();
+	const ref = (0, import_react.useRef)(null);
+	return [ref, (0, import_react.useCallback)((element) => {
+		ref.current = element;
+		forceUpdate();
+	}, [forceUpdate])];
+}
+/**
+* @displayName Dropdown
+* @public
+*/
+function Dropdown$1({ defaultShow, show: rawShow, onSelect, onToggle: rawOnToggle, itemSelector = `* [${dataAttr("dropdown-item")}]`, focusFirstItemOnShow, placement = "bottom-start", children }) {
+	const window = useWindow();
+	const [show, onToggle] = useUncontrolledProp(rawShow, defaultShow, rawOnToggle);
+	const [menuRef, setMenu] = useRefWithUpdate();
+	const menuElement = menuRef.current;
+	const [toggleRef, setToggle] = useRefWithUpdate();
+	const toggleElement = toggleRef.current;
+	const lastShow = usePrevious(show);
+	const lastSourceEvent = (0, import_react.useRef)(null);
+	const focusInDropdown = (0, import_react.useRef)(false);
+	const onSelectCtx = (0, import_react.useContext)(SelectableContext);
+	const toggle = (0, import_react.useCallback)((nextShow, event, source = event == null ? void 0 : event.type) => {
+		onToggle(nextShow, {
+			originalEvent: event,
+			source
+		});
+	}, [onToggle]);
+	const handleSelect = useEventCallback((key, event) => {
+		onSelect?.(key, event);
+		toggle(false, event, "select");
+		if (!event.isPropagationStopped()) onSelectCtx?.(key, event);
+	});
+	const context = (0, import_react.useMemo)(() => ({
+		toggle,
+		placement,
+		show,
+		menuElement,
+		toggleElement,
+		setMenu,
+		setToggle
+	}), [
+		toggle,
+		placement,
+		show,
+		menuElement,
+		toggleElement,
+		setMenu,
+		setToggle
+	]);
+	if (menuElement && lastShow && !show) focusInDropdown.current = menuElement.contains(menuElement.ownerDocument.activeElement);
+	const focusToggle = useEventCallback(() => {
+		if (toggleElement && toggleElement.focus) toggleElement.focus();
+	});
+	const maybeFocusFirst = useEventCallback(() => {
+		const type = lastSourceEvent.current;
+		let focusType = focusFirstItemOnShow;
+		if (focusType == null) focusType = menuRef.current && isRoleMenu(menuRef.current) ? "keyboard" : false;
+		if (focusType === false || focusType === "keyboard" && !/^key.+$/.test(type)) return;
+		const first = qsa(menuRef.current, itemSelector)[0];
+		if (first && first.focus) first.focus();
+	});
+	(0, import_react.useEffect)(() => {
+		if (show) maybeFocusFirst();
+		else if (focusInDropdown.current) {
+			focusInDropdown.current = false;
+			focusToggle();
+		}
+	}, [
+		show,
+		focusInDropdown,
+		focusToggle,
+		maybeFocusFirst
+	]);
+	(0, import_react.useEffect)(() => {
+		lastSourceEvent.current = null;
+	});
+	const getNextFocusedChild = (current, offset) => {
+		if (!menuRef.current) return null;
+		const items = qsa(menuRef.current, itemSelector);
+		let index = items.indexOf(current) + offset;
+		index = Math.max(0, Math.min(index, items.length));
+		return items[index];
+	};
+	useEventListener((0, import_react.useCallback)(() => window.document, [window]), "keydown", (event) => {
+		var _menuRef$current, _toggleRef$current;
+		const { key } = event;
+		const target = event.target;
+		const fromMenu = (_menuRef$current = menuRef.current) == null ? void 0 : _menuRef$current.contains(target);
+		const fromToggle = (_toggleRef$current = toggleRef.current) == null ? void 0 : _toggleRef$current.contains(target);
+		if (/input|textarea/i.test(target.tagName) && (key === " " || key !== "Escape" && fromMenu || key === "Escape" && target.type === "search")) return;
+		if (!fromMenu && !fromToggle) return;
+		if (key === "Tab" && (!menuRef.current || !show)) return;
+		lastSourceEvent.current = event.type;
+		const meta = {
+			originalEvent: event,
+			source: event.type
+		};
+		switch (key) {
+			case "ArrowUp": {
+				const next = getNextFocusedChild(target, -1);
+				if (next && next.focus) next.focus();
+				event.preventDefault();
+				return;
+			}
+			case "ArrowDown":
+				event.preventDefault();
+				if (!show) onToggle(true, meta);
+				else {
+					const next = getNextFocusedChild(target, 1);
+					if (next && next.focus) next.focus();
+				}
+				return;
+			case "Tab":
+				addEventListener(target.ownerDocument, "keyup", (e) => {
+					var _menuRef$current2;
+					if (e.key === "Tab" && !e.target || !((_menuRef$current2 = menuRef.current) != null && _menuRef$current2.contains(e.target))) onToggle(false, meta);
+				}, { once: true });
+				break;
+			case "Escape":
+				if (key === "Escape") {
+					event.preventDefault();
+					event.stopPropagation();
+				}
+				onToggle(false, meta);
+				break;
+			default:
+		}
+	});
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectableContext.Provider, {
+		value: handleSelect,
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DropdownContext$1.Provider, {
+			value: context,
+			children
+		})
+	});
+}
+Dropdown$1.displayName = "Dropdown";
+Dropdown$1.Menu = DropdownMenu$1;
+Dropdown$1.Toggle = DropdownToggle$1;
+Dropdown$1.Item = DropdownItem$1;
+//#endregion
+//#region node_modules/react-bootstrap/esm/DropdownContext.js
+var DropdownContext = /* @__PURE__ */ import_react.createContext({});
+DropdownContext.displayName = "DropdownContext";
+//#endregion
+//#region node_modules/react-bootstrap/esm/DropdownDivider.js
+var DropdownDivider = /* @__PURE__ */ import_react.forwardRef(({ className, bsPrefix, as: Component = "hr", role = "separator", ...props }, ref) => {
+	bsPrefix = useBootstrapPrefix(bsPrefix, "dropdown-divider");
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Component, {
+		ref,
+		className: (0, import_classnames.default)(className, bsPrefix),
+		role,
+		...props
+	});
+});
+DropdownDivider.displayName = "DropdownDivider";
+//#endregion
+//#region node_modules/react-bootstrap/esm/DropdownHeader.js
+var DropdownHeader = /* @__PURE__ */ import_react.forwardRef(({ className, bsPrefix, as: Component = "div", role = "heading", ...props }, ref) => {
+	bsPrefix = useBootstrapPrefix(bsPrefix, "dropdown-header");
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Component, {
+		ref,
+		className: (0, import_classnames.default)(className, bsPrefix),
+		role,
+		...props
+	});
+});
+DropdownHeader.displayName = "DropdownHeader";
+//#endregion
+//#region node_modules/react-bootstrap/esm/DropdownItem.js
+var DropdownItem = /* @__PURE__ */ import_react.forwardRef(({ bsPrefix, className, eventKey, disabled = false, onClick, active, as: Component = Anchor, ...props }, ref) => {
+	const prefix = useBootstrapPrefix(bsPrefix, "dropdown-item");
+	const [dropdownItemProps, meta] = useDropdownItem({
+		key: eventKey,
+		href: props.href,
+		disabled,
+		onClick,
+		active
+	});
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Component, {
+		...props,
+		...dropdownItemProps,
+		ref,
+		className: (0, import_classnames.default)(className, prefix, meta.isActive && "active", disabled && "disabled")
+	});
+});
+DropdownItem.displayName = "DropdownItem";
+//#endregion
+//#region node_modules/react-bootstrap/esm/DropdownItemText.js
+var DropdownItemText = /* @__PURE__ */ import_react.forwardRef(({ className, bsPrefix, as: Component = "span", ...props }, ref) => {
+	bsPrefix = useBootstrapPrefix(bsPrefix, "dropdown-item-text");
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Component, {
+		ref,
+		className: (0, import_classnames.default)(className, bsPrefix),
+		...props
+	});
+});
+DropdownItemText.displayName = "DropdownItemText";
+//#endregion
 //#region node_modules/@restart/hooks/esm/useIsomorphicEffect.js
 var isReactNative = typeof global !== "undefined" && global.navigator && global.navigator.product === "ReactNative";
 /**
@@ -12890,8 +13826,173 @@ var isReactNative = typeof global !== "undefined" && global.navigator && global.
 */
 var useIsomorphicEffect_default = typeof document !== "undefined" || isReactNative ? import_react.useLayoutEffect : import_react.useEffect;
 //#endregion
+//#region node_modules/react-bootstrap/esm/InputGroupContext.js
+var context$1 = /* @__PURE__ */ import_react.createContext(null);
+context$1.displayName = "InputGroupContext";
+//#endregion
+//#region node_modules/react-bootstrap/esm/NavbarContext.js
+var context = /* @__PURE__ */ import_react.createContext(null);
+context.displayName = "NavbarContext";
+//#endregion
+//#region node_modules/react-bootstrap/esm/useWrappedRefWithWarning.js
+function useWrappedRefWithWarning(ref, componentName) {
+	return ref;
+}
+//#endregion
+//#region node_modules/react-bootstrap/esm/DropdownMenu.js
+function getDropdownMenuPlacement(alignEnd, dropDirection, isRTL) {
+	const topStart = isRTL ? "top-end" : "top-start";
+	const topEnd = isRTL ? "top-start" : "top-end";
+	const bottomStart = isRTL ? "bottom-end" : "bottom-start";
+	const bottomEnd = isRTL ? "bottom-start" : "bottom-end";
+	const leftStart = isRTL ? "right-start" : "left-start";
+	const leftEnd = isRTL ? "right-end" : "left-end";
+	const rightStart = isRTL ? "left-start" : "right-start";
+	const rightEnd = isRTL ? "left-end" : "right-end";
+	let placement = alignEnd ? bottomEnd : bottomStart;
+	if (dropDirection === "up") placement = alignEnd ? topEnd : topStart;
+	else if (dropDirection === "end") placement = alignEnd ? rightEnd : rightStart;
+	else if (dropDirection === "start") placement = alignEnd ? leftEnd : leftStart;
+	else if (dropDirection === "down-centered") placement = "bottom";
+	else if (dropDirection === "up-centered") placement = "top";
+	return placement;
+}
+var DropdownMenu = /* @__PURE__ */ import_react.forwardRef(({ bsPrefix, className, align, rootCloseEvent, flip = true, show: showProps, renderOnMount, as: Component = "div", popperConfig, variant, ...props }, ref) => {
+	let alignEnd = false;
+	const isNavbar = (0, import_react.useContext)(context);
+	const prefix = useBootstrapPrefix(bsPrefix, "dropdown-menu");
+	const { align: contextAlign, drop, isRTL } = (0, import_react.useContext)(DropdownContext);
+	align = align || contextAlign;
+	const isInputGroup = (0, import_react.useContext)(context$1);
+	const alignClasses = [];
+	if (align) {
+		if (typeof align === "object") {
+			const keys = Object.keys(align);
+			if (keys.length) {
+				const brkPoint = keys[0];
+				const direction = align[brkPoint];
+				alignEnd = direction === "start";
+				alignClasses.push(`${prefix}-${brkPoint}-${direction}`);
+			}
+		} else if (align === "end") alignEnd = true;
+	}
+	const placement = getDropdownMenuPlacement(alignEnd, drop, isRTL);
+	const [menuProps, { hasShown, popper, show, toggle }] = useDropdownMenu({
+		flip,
+		rootCloseEvent,
+		show: showProps,
+		usePopper: !isNavbar && alignClasses.length === 0,
+		offset: [0, 2],
+		popperConfig,
+		placement
+	});
+	menuProps.ref = useMergedRefs$1(useWrappedRefWithWarning(ref, "DropdownMenu"), menuProps.ref);
+	useIsomorphicEffect_default(() => {
+		if (show) popper?.update();
+	}, [show]);
+	if (!hasShown && !renderOnMount && !isInputGroup) return null;
+	if (typeof Component !== "string") {
+		menuProps.show = show;
+		menuProps.close = () => toggle == null ? void 0 : toggle(false);
+		menuProps.align = align;
+	}
+	let style = props.style;
+	if (popper != null && popper.placement) {
+		style = {
+			...props.style,
+			...menuProps.style
+		};
+		props["x-placement"] = popper.placement;
+	}
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Component, {
+		...props,
+		...menuProps,
+		style,
+		...(alignClasses.length || isNavbar) && { "data-bs-popper": "static" },
+		className: (0, import_classnames.default)(className, prefix, show && "show", alignEnd && `${prefix}-end`, variant && `${prefix}-${variant}`, ...alignClasses)
+	});
+});
+DropdownMenu.displayName = "DropdownMenu";
+//#endregion
+//#region node_modules/react-bootstrap/esm/DropdownToggle.js
+var DropdownToggle = /* @__PURE__ */ import_react.forwardRef(({ bsPrefix, split, className, childBsPrefix, as: Component = Button, ...props }, ref) => {
+	const prefix = useBootstrapPrefix(bsPrefix, "dropdown-toggle");
+	const dropdownContext = (0, import_react.useContext)(DropdownContext$1);
+	if (childBsPrefix !== void 0) props.bsPrefix = childBsPrefix;
+	const [toggleProps] = useDropdownToggle();
+	toggleProps.ref = useMergedRefs$1(toggleProps.ref, useWrappedRefWithWarning(ref, "DropdownToggle"));
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Component, {
+		className: (0, import_classnames.default)(className, prefix, split && `${prefix}-split`, (dropdownContext == null ? void 0 : dropdownContext.show) && "show"),
+		...toggleProps,
+		...props
+	});
+});
+DropdownToggle.displayName = "DropdownToggle";
+//#endregion
+//#region node_modules/react-bootstrap/esm/Dropdown.js
+var Dropdown = /* @__PURE__ */ import_react.forwardRef((pProps, ref) => {
+	const { bsPrefix, drop = "down", show, className, align = "start", onSelect, onToggle, focusFirstItemOnShow, as: Component = "div", navbar: _4, autoClose = true, ...props } = useUncontrolled(pProps, { show: "onToggle" });
+	const isInputGroup = (0, import_react.useContext)(context$1);
+	const prefix = useBootstrapPrefix(bsPrefix, "dropdown");
+	const isRTL = useIsRTL();
+	const isClosingPermitted = (source) => {
+		if (autoClose === false) return source === "click";
+		if (autoClose === "inside") return source !== "rootClose";
+		if (autoClose === "outside") return source !== "select";
+		return true;
+	};
+	const handleToggle = useEventCallback$1((nextShow, meta) => {
+		var _meta$originalEvent;
+		if (((_meta$originalEvent = meta.originalEvent) == null || (_meta$originalEvent = _meta$originalEvent.target) == null ? void 0 : _meta$originalEvent.classList.contains("dropdown-toggle")) && meta.source === "mousedown") return;
+		if (meta.originalEvent.currentTarget === document && (meta.source !== "keydown" || meta.originalEvent.key === "Escape")) meta.source = "rootClose";
+		if (isClosingPermitted(meta.source)) onToggle?.(nextShow, meta);
+	});
+	const placement = getDropdownMenuPlacement(align === "end", drop, isRTL);
+	const contextValue = (0, import_react.useMemo)(() => ({
+		align,
+		drop,
+		isRTL
+	}), [
+		align,
+		drop,
+		isRTL
+	]);
+	const directionClasses = {
+		down: prefix,
+		"down-centered": `${prefix}-center`,
+		up: "dropup",
+		"up-centered": "dropup-center dropup",
+		end: "dropend",
+		start: "dropstart"
+	};
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DropdownContext.Provider, {
+		value: contextValue,
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Dropdown$1, {
+			placement,
+			show,
+			onSelect,
+			onToggle: handleToggle,
+			focusFirstItemOnShow,
+			itemSelector: `.${prefix}-item:not(.disabled):not(:disabled)`,
+			children: isInputGroup ? props.children : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Component, {
+				...props,
+				ref,
+				className: (0, import_classnames.default)(className, show && "show", directionClasses[drop])
+			})
+		})
+	});
+});
+Dropdown.displayName = "Dropdown";
+var Dropdown_default = Object.assign(Dropdown, {
+	Toggle: DropdownToggle,
+	Menu: DropdownMenu,
+	Item: DropdownItem,
+	ItemText: DropdownItemText,
+	Divider: DropdownDivider,
+	Header: DropdownHeader
+});
+//#endregion
 //#region node_modules/react-bootstrap/esm/Feedback.js
-var import_prop_types = /* @__PURE__ */ __toESM(require_prop_types());
 var propTypes$1 = {
 	type: import_prop_types.default.string,
 	tooltip: import_prop_types.default.bool,
@@ -13135,6 +14236,45 @@ var Form_default = Object.assign(Form, {
 	FloatingLabel
 });
 //#endregion
+//#region node_modules/react-bootstrap/esm/InputGroupText.js
+var InputGroupText = /* @__PURE__ */ import_react.forwardRef(({ className, bsPrefix, as: Component = "span", ...props }, ref) => {
+	bsPrefix = useBootstrapPrefix(bsPrefix, "input-group-text");
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Component, {
+		ref,
+		className: (0, import_classnames.default)(className, bsPrefix),
+		...props
+	});
+});
+InputGroupText.displayName = "InputGroupText";
+//#endregion
+//#region node_modules/react-bootstrap/esm/InputGroup.js
+var InputGroupCheckbox = (props) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(InputGroupText, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormCheckInput, {
+	type: "checkbox",
+	...props
+}) });
+var InputGroupRadio = (props) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(InputGroupText, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormCheckInput, {
+	type: "radio",
+	...props
+}) });
+var InputGroup = /* @__PURE__ */ import_react.forwardRef(({ bsPrefix, size, hasValidation, className, as: Component = "div", ...props }, ref) => {
+	bsPrefix = useBootstrapPrefix(bsPrefix, "input-group");
+	const contextValue = (0, import_react.useMemo)(() => ({}), []);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(context$1.Provider, {
+		value: contextValue,
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Component, {
+			ref,
+			...props,
+			className: (0, import_classnames.default)(className, bsPrefix, size && `${bsPrefix}-${size}`, hasValidation && "has-validation")
+		})
+	});
+});
+InputGroup.displayName = "InputGroup";
+var InputGroup_default = Object.assign(InputGroup, {
+	Text: InputGroupText,
+	Radio: InputGroupRadio,
+	Checkbox: InputGroupCheckbox
+});
+//#endregion
 //#region node_modules/@restart/ui/node_modules/@restart/hooks/esm/useMergedRefs.js
 var toFnRef = (ref) => !ref || typeof ref === "function" ? ref : (value) => {
 	ref.current = value;
@@ -13166,6 +14306,385 @@ function mergeRefs(refA, refB) {
 function useMergedRefs(refA, refB) {
 	return (0, import_react.useMemo)(() => mergeRefs(refA, refB), [refA, refB]);
 }
+//#endregion
+//#region node_modules/@restart/ui/esm/TabContext.js
+var TabContext = /* @__PURE__ */ import_react.createContext(null);
+//#endregion
+//#region node_modules/@restart/ui/esm/NavItem.js
+var _excluded$4 = [
+	"as",
+	"active",
+	"eventKey"
+];
+function _objectWithoutPropertiesLoose$4(r, e) {
+	if (null == r) return {};
+	var t = {};
+	for (var n in r) if ({}.hasOwnProperty.call(r, n)) {
+		if (e.indexOf(n) >= 0) continue;
+		t[n] = r[n];
+	}
+	return t;
+}
+function useNavItem({ key, onClick, active, id, role, disabled }) {
+	const parentOnSelect = (0, import_react.useContext)(SelectableContext);
+	const navContext = (0, import_react.useContext)(NavContext);
+	const tabContext = (0, import_react.useContext)(TabContext);
+	let isActive = active;
+	const props = { role };
+	if (navContext) {
+		if (!role && navContext.role === "tablist") props.role = "tab";
+		const contextControllerId = navContext.getControllerId(key != null ? key : null);
+		const contextControlledId = navContext.getControlledId(key != null ? key : null);
+		props[dataAttr("event-key")] = key;
+		props.id = contextControllerId || id;
+		isActive = active == null && key != null ? navContext.activeKey === key : active;
+		/**
+		* Simplified scenario for `mountOnEnter`.
+		*
+		* While it would make sense to keep 'aria-controls' for tabs that have been mounted at least
+		* once, it would also complicate the code quite a bit, for very little gain.
+		* The following implementation is probably good enough.
+		*
+		* @see https://github.com/react-restart/ui/pull/40#issuecomment-1009971561
+		*/
+		if (isActive || !(tabContext != null && tabContext.unmountOnExit) && !(tabContext != null && tabContext.mountOnEnter)) props["aria-controls"] = contextControlledId;
+	}
+	if (props.role === "tab") {
+		props["aria-selected"] = isActive;
+		if (!isActive) props.tabIndex = -1;
+		if (disabled) {
+			props.tabIndex = -1;
+			props["aria-disabled"] = true;
+		}
+	}
+	props.onClick = useEventCallback((e) => {
+		if (disabled) return;
+		onClick?.(e);
+		if (key == null) return;
+		if (parentOnSelect && !e.isPropagationStopped()) parentOnSelect(key, e);
+	});
+	return [props, { isActive }];
+}
+var NavItem = /* @__PURE__ */ import_react.forwardRef((_ref, ref) => {
+	let { as: Component = Button$1, active, eventKey } = _ref, options = _objectWithoutPropertiesLoose$4(_ref, _excluded$4);
+	const [props, meta] = useNavItem(Object.assign({
+		key: makeEventKey(eventKey, options.href),
+		active
+	}, options));
+	props[dataAttr("active")] = meta.isActive;
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Component, Object.assign({}, options, props, { ref }));
+});
+NavItem.displayName = "NavItem";
+//#endregion
+//#region node_modules/@restart/ui/esm/Nav.js
+var _excluded$3 = [
+	"as",
+	"onSelect",
+	"activeKey",
+	"role",
+	"onKeyDown"
+];
+function _objectWithoutPropertiesLoose$3(r, e) {
+	if (null == r) return {};
+	var t = {};
+	for (var n in r) if ({}.hasOwnProperty.call(r, n)) {
+		if (e.indexOf(n) >= 0) continue;
+		t[n] = r[n];
+	}
+	return t;
+}
+var noop$1 = () => {};
+var EVENT_KEY_ATTR = dataAttr("event-key");
+var Nav = /* @__PURE__ */ import_react.forwardRef((_ref, ref) => {
+	let { as: Component = "div", onSelect, activeKey, role, onKeyDown } = _ref, props = _objectWithoutPropertiesLoose$3(_ref, _excluded$3);
+	const forceUpdate = useForceUpdate();
+	const needsRefocusRef = (0, import_react.useRef)(false);
+	const parentOnSelect = (0, import_react.useContext)(SelectableContext);
+	const tabContext = (0, import_react.useContext)(TabContext);
+	let getControlledId, getControllerId;
+	if (tabContext) {
+		role = role || "tablist";
+		activeKey = tabContext.activeKey;
+		getControlledId = tabContext.getControlledId;
+		getControllerId = tabContext.getControllerId;
+	}
+	const listNode = (0, import_react.useRef)(null);
+	const getNextActiveTab = (offset) => {
+		const currentListNode = listNode.current;
+		if (!currentListNode) return null;
+		const items = qsa(currentListNode, `[${EVENT_KEY_ATTR}]:not([aria-disabled=true])`);
+		const activeChild = currentListNode.querySelector("[aria-selected=true]");
+		if (!activeChild || activeChild !== document.activeElement) return null;
+		const index = items.indexOf(activeChild);
+		if (index === -1) return null;
+		let nextIndex = index + offset;
+		if (nextIndex >= items.length) nextIndex = 0;
+		if (nextIndex < 0) nextIndex = items.length - 1;
+		return items[nextIndex];
+	};
+	const handleSelect = (key, event) => {
+		if (key == null) return;
+		onSelect?.(key, event);
+		parentOnSelect?.(key, event);
+	};
+	const handleKeyDown = (event) => {
+		onKeyDown?.(event);
+		if (!tabContext) return;
+		let nextActiveChild;
+		switch (event.key) {
+			case "ArrowLeft":
+			case "ArrowUp":
+				nextActiveChild = getNextActiveTab(-1);
+				break;
+			case "ArrowRight":
+			case "ArrowDown":
+				nextActiveChild = getNextActiveTab(1);
+				break;
+			default: return;
+		}
+		if (!nextActiveChild) return;
+		event.preventDefault();
+		handleSelect(nextActiveChild.dataset[dataProp("EventKey")] || null, event);
+		needsRefocusRef.current = true;
+		forceUpdate();
+	};
+	(0, import_react.useEffect)(() => {
+		if (listNode.current && needsRefocusRef.current) listNode.current.querySelector(`[${EVENT_KEY_ATTR}][aria-selected=true]`)?.focus();
+		needsRefocusRef.current = false;
+	});
+	const mergedRef = useMergedRefs(ref, listNode);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectableContext.Provider, {
+		value: handleSelect,
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(NavContext.Provider, {
+			value: {
+				role,
+				activeKey: makeEventKey(activeKey),
+				getControlledId: getControlledId || noop$1,
+				getControllerId: getControllerId || noop$1
+			},
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Component, Object.assign({}, props, {
+				onKeyDown: handleKeyDown,
+				ref: mergedRef,
+				role
+			}))
+		})
+	});
+});
+Nav.displayName = "Nav";
+var Nav_default = Object.assign(Nav, { Item: NavItem });
+//#endregion
+//#region node_modules/react-bootstrap/esm/ListGroupItem.js
+var ListGroupItem = /* @__PURE__ */ import_react.forwardRef(({ bsPrefix, active, disabled, eventKey, className, variant, action, as, ...props }, ref) => {
+	bsPrefix = useBootstrapPrefix(bsPrefix, "list-group-item");
+	const [navItemProps, meta] = useNavItem({
+		key: makeEventKey(eventKey, props.href),
+		active,
+		...props
+	});
+	const handleClick = useEventCallback$1((event) => {
+		if (disabled) {
+			event.preventDefault();
+			event.stopPropagation();
+			return;
+		}
+		navItemProps.onClick(event);
+	});
+	if (disabled && props.tabIndex === void 0) {
+		props.tabIndex = -1;
+		props["aria-disabled"] = true;
+	}
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(as || (action ? props.href ? "a" : "button" : "div"), {
+		ref,
+		...props,
+		...navItemProps,
+		onClick: handleClick,
+		className: (0, import_classnames.default)(className, bsPrefix, meta.isActive && "active", disabled && "disabled", variant && `${bsPrefix}-${variant}`, action && `${bsPrefix}-action`)
+	});
+});
+ListGroupItem.displayName = "ListGroupItem";
+//#endregion
+//#region node_modules/react-bootstrap/esm/ListGroup.js
+var ListGroup = /* @__PURE__ */ import_react.forwardRef((props, ref) => {
+	const { className, bsPrefix: initialBsPrefix, variant, horizontal, numbered, as = "div", ...controlledProps } = useUncontrolled(props, { activeKey: "onSelect" });
+	const bsPrefix = useBootstrapPrefix(initialBsPrefix, "list-group");
+	let horizontalVariant;
+	if (horizontal) horizontalVariant = horizontal === true ? "horizontal" : `horizontal-${horizontal}`;
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Nav_default, {
+		ref,
+		...controlledProps,
+		as,
+		className: (0, import_classnames.default)(className, bsPrefix, variant && `${bsPrefix}-${variant}`, horizontalVariant && `${bsPrefix}-${horizontalVariant}`, numbered && `${bsPrefix}-numbered`)
+	});
+});
+ListGroup.displayName = "ListGroup";
+var ListGroup_default = Object.assign(ListGroup, { Item: ListGroupItem });
+//#endregion
+//#region node_modules/dom-helpers/esm/scrollbarSize.js
+var size;
+function scrollbarSize(recalc) {
+	if (!size && size !== 0 || recalc) {
+		if (canUseDOM_default) {
+			var scrollDiv = document.createElement("div");
+			scrollDiv.style.position = "absolute";
+			scrollDiv.style.top = "-9999px";
+			scrollDiv.style.width = "50px";
+			scrollDiv.style.height = "50px";
+			scrollDiv.style.overflow = "scroll";
+			document.body.appendChild(scrollDiv);
+			size = scrollDiv.offsetWidth - scrollDiv.clientWidth;
+			document.body.removeChild(scrollDiv);
+		}
+	}
+	return size;
+}
+//#endregion
+//#region node_modules/@restart/hooks/esm/useCallbackRef.js
+/**
+* A convenience hook around `useState` designed to be paired with
+* the component [callback ref](https://reactjs.org/docs/refs-and-the-dom.html#callback-refs) api.
+* Callback refs are useful over `useRef()` when you need to respond to the ref being set
+* instead of lazily accessing it in an effect.
+*
+* ```ts
+* const [element, attachRef] = useCallbackRef<HTMLDivElement>()
+*
+* useEffect(() => {
+*   if (!element) return
+*
+*   const calendar = new FullCalendar.Calendar(element)
+*
+*   return () => {
+*     calendar.destroy()
+*   }
+* }, [element])
+*
+* return <div ref={attachRef} />
+* ```
+*
+* @category refs
+*/
+function useCallbackRef() {
+	return (0, import_react.useState)(null);
+}
+//#endregion
+//#region node_modules/dom-helpers/esm/activeElement.js
+/**
+* Returns the actively focused element safely.
+*
+* @param doc the document to check
+*/
+function activeElement(doc) {
+	if (doc === void 0) doc = ownerDocument();
+	try {
+		var active = doc.activeElement;
+		if (!active || !active.nodeName) return null;
+		return active;
+	} catch (e) {
+		return doc.body;
+	}
+}
+//#endregion
+//#region node_modules/@restart/ui/node_modules/@restart/hooks/esm/useUpdatedRef.js
+/**
+* Returns a ref that is immediately updated with the new value
+*
+* @param value The Ref value
+* @category refs
+*/
+function useUpdatedRef(value) {
+	const valueRef = (0, import_react.useRef)(value);
+	valueRef.current = value;
+	return valueRef;
+}
+//#endregion
+//#region node_modules/@restart/ui/node_modules/@restart/hooks/esm/useWillUnmount.js
+/**
+* Attach a callback that fires when a component unmounts
+*
+* @param fn Handler to run when the component unmounts
+* @deprecated Use `useMounted` and normal effects, this is not StrictMode safe
+* @category effects
+*/
+function useWillUnmount(fn) {
+	const onUnmount = useUpdatedRef(fn);
+	(0, import_react.useEffect)(() => () => onUnmount.current(), []);
+}
+//#endregion
+//#region node_modules/@restart/ui/esm/getScrollbarWidth.js
+/**
+* Get the width of the vertical window scrollbar if it's visible
+*/
+function getBodyScrollbarWidth(ownerDocument = document) {
+	const window = ownerDocument.defaultView;
+	return Math.abs(window.innerWidth - ownerDocument.documentElement.clientWidth);
+}
+//#endregion
+//#region node_modules/@restart/ui/esm/ModalManager.js
+var OPEN_DATA_ATTRIBUTE = dataAttr("modal-open");
+/**
+* Manages a stack of Modals as well as ensuring
+* body scrolling is is disabled and padding accounted for
+*/
+var ModalManager = class {
+	constructor({ ownerDocument, handleContainerOverflow = true, isRTL = false } = {}) {
+		this.handleContainerOverflow = handleContainerOverflow;
+		this.isRTL = isRTL;
+		this.modals = [];
+		this.ownerDocument = ownerDocument;
+	}
+	getScrollbarWidth() {
+		return getBodyScrollbarWidth(this.ownerDocument);
+	}
+	getElement() {
+		return (this.ownerDocument || document).body;
+	}
+	setModalAttributes(_modal) {}
+	removeModalAttributes(_modal) {}
+	setContainerStyle(containerState) {
+		const style$1 = { overflow: "hidden" };
+		const paddingProp = this.isRTL ? "paddingLeft" : "paddingRight";
+		const container = this.getElement();
+		containerState.style = {
+			overflow: container.style.overflow,
+			[paddingProp]: container.style[paddingProp]
+		};
+		if (containerState.scrollBarWidth) style$1[paddingProp] = `${parseInt(style(container, paddingProp) || "0", 10) + containerState.scrollBarWidth}px`;
+		container.setAttribute(OPEN_DATA_ATTRIBUTE, "");
+		style(container, style$1);
+	}
+	reset() {
+		[...this.modals].forEach((m) => this.remove(m));
+	}
+	removeContainerStyle(containerState) {
+		const container = this.getElement();
+		container.removeAttribute(OPEN_DATA_ATTRIBUTE);
+		Object.assign(container.style, containerState.style);
+	}
+	add(modal) {
+		let modalIdx = this.modals.indexOf(modal);
+		if (modalIdx !== -1) return modalIdx;
+		modalIdx = this.modals.length;
+		this.modals.push(modal);
+		this.setModalAttributes(modal);
+		if (modalIdx !== 0) return modalIdx;
+		this.state = {
+			scrollBarWidth: this.getScrollbarWidth(),
+			style: {}
+		};
+		if (this.handleContainerOverflow) this.setContainerStyle(this.state);
+		return modalIdx;
+	}
+	remove(modal) {
+		const modalIdx = this.modals.indexOf(modal);
+		if (modalIdx === -1) return;
+		this.modals.splice(modalIdx, 1);
+		if (!this.modals.length && this.handleContainerOverflow) this.removeContainerStyle(this.state);
+		this.removeModalAttributes(modal);
+	}
+	isTopModal(modal) {
+		return !!this.modals.length && this.modals[this.modals.length - 1] === modal;
+	}
+};
 //#endregion
 //#region node_modules/@restart/ui/esm/useWaitForDOMRef.js
 var resolveContainerRef = (ref, document) => {
@@ -13210,7 +14729,7 @@ function NoopTransition({ children, in: inProp, onExited, mountOnEnter, unmountO
 }
 //#endregion
 //#region node_modules/@restart/ui/esm/useRTGTransitionProps.js
-var _excluded$1 = [
+var _excluded$2 = [
 	"onEnter",
 	"onEntering",
 	"onEntered",
@@ -13220,7 +14739,7 @@ var _excluded$1 = [
 	"addEndListener",
 	"children"
 ];
-function _objectWithoutPropertiesLoose$1(r, e) {
+function _objectWithoutPropertiesLoose$2(r, e) {
 	if (null == r) return {};
 	var t = {};
 	for (var n in r) if ({}.hasOwnProperty.call(r, n)) {
@@ -13237,7 +14756,7 @@ function _objectWithoutPropertiesLoose$1(r, e) {
 * @returns Normalized transition props.
 */
 function useRTGTransitionProps(_ref) {
-	let { onEnter, onEntering, onEntered, onExit, onExiting, onExited, addEndListener, children } = _ref, props = _objectWithoutPropertiesLoose$1(_ref, _excluded$1);
+	let { onEnter, onEntering, onEntered, onExit, onExiting, onExited, addEndListener, children } = _ref, props = _objectWithoutPropertiesLoose$2(_ref, _excluded$2);
 	const nodeRef = (0, import_react.useRef)(null);
 	const mergedRef = useMergedRefs(nodeRef, getChildRef(children));
 	const normalize = (callback) => (param) => {
@@ -13254,8 +14773,8 @@ function useRTGTransitionProps(_ref) {
 }
 //#endregion
 //#region node_modules/@restart/ui/esm/RTGTransition.js
-var _excluded = ["component"];
-function _objectWithoutPropertiesLoose(r, e) {
+var _excluded$1 = ["component"];
+function _objectWithoutPropertiesLoose$1(r, e) {
 	if (null == r) return {};
 	var t = {};
 	for (var n in r) if ({}.hasOwnProperty.call(r, n)) {
@@ -13266,7 +14785,7 @@ function _objectWithoutPropertiesLoose(r, e) {
 }
 var RTGTransition = /* @__PURE__ */ import_react.forwardRef((_ref, ref) => {
 	let { component: Component } = _ref;
-	const transitionProps = useRTGTransitionProps(_objectWithoutPropertiesLoose(_ref, _excluded));
+	const transitionProps = useRTGTransitionProps(_objectWithoutPropertiesLoose$1(_ref, _excluded$1));
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Component, Object.assign({ ref }, transitionProps));
 });
 //#endregion
@@ -13330,6 +14849,187 @@ function renderTransition(component, runTransition, props) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(NoopTransition, Object.assign({}, props));
 }
 //#endregion
+//#region node_modules/@restart/ui/esm/Modal.js
+var _excluded = [
+	"show",
+	"role",
+	"className",
+	"style",
+	"children",
+	"backdrop",
+	"keyboard",
+	"onBackdropClick",
+	"onEscapeKeyDown",
+	"transition",
+	"runTransition",
+	"backdropTransition",
+	"runBackdropTransition",
+	"autoFocus",
+	"enforceFocus",
+	"restoreFocus",
+	"restoreFocusOptions",
+	"renderDialog",
+	"renderBackdrop",
+	"manager",
+	"container",
+	"onShow",
+	"onHide",
+	"onExit",
+	"onExited",
+	"onExiting",
+	"onEnter",
+	"onEntering",
+	"onEntered"
+];
+function _objectWithoutPropertiesLoose(r, e) {
+	if (null == r) return {};
+	var t = {};
+	for (var n in r) if ({}.hasOwnProperty.call(r, n)) {
+		if (e.indexOf(n) >= 0) continue;
+		t[n] = r[n];
+	}
+	return t;
+}
+var manager;
+function getManager(window) {
+	if (!manager) manager = new ModalManager({ ownerDocument: window == null ? void 0 : window.document });
+	return manager;
+}
+function useModalManager(provided) {
+	const window = useWindow();
+	const modalManager = provided || getManager(window);
+	const modal = (0, import_react.useRef)({
+		dialog: null,
+		backdrop: null
+	});
+	return Object.assign(modal.current, {
+		add: () => modalManager.add(modal.current),
+		remove: () => modalManager.remove(modal.current),
+		isTopModal: () => modalManager.isTopModal(modal.current),
+		setDialogRef: (0, import_react.useCallback)((ref) => {
+			modal.current.dialog = ref;
+		}, []),
+		setBackdropRef: (0, import_react.useCallback)((ref) => {
+			modal.current.backdrop = ref;
+		}, [])
+	});
+}
+var Modal$1 = /* @__PURE__ */ (0, import_react.forwardRef)((_ref, ref) => {
+	let { show = false, role = "dialog", className, style, children, backdrop = true, keyboard = true, onBackdropClick, onEscapeKeyDown, transition, runTransition, backdropTransition, runBackdropTransition, autoFocus = true, enforceFocus = true, restoreFocus = true, restoreFocusOptions, renderDialog, renderBackdrop = (props) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", Object.assign({}, props)), manager: providedManager, container: containerRef, onShow, onHide = () => {}, onExit, onExited, onExiting, onEnter, onEntering, onEntered } = _ref, rest = _objectWithoutPropertiesLoose(_ref, _excluded);
+	const ownerWindow = useWindow();
+	const container = useWaitForDOMRef(containerRef);
+	const modal = useModalManager(providedManager);
+	const isMounted = useMounted$1();
+	const prevShow = usePrevious(show);
+	const [exited, setExited] = (0, import_react.useState)(!show);
+	const lastFocusRef = (0, import_react.useRef)(null);
+	(0, import_react.useImperativeHandle)(ref, () => modal, [modal]);
+	if (canUseDOM_default && !prevShow && show) lastFocusRef.current = activeElement(ownerWindow == null ? void 0 : ownerWindow.document);
+	if (show && exited) setExited(false);
+	const handleShow = useEventCallback(() => {
+		modal.add();
+		removeKeydownListenerRef.current = listen(document, "keydown", handleDocumentKeyDown);
+		removeFocusListenerRef.current = listen(document, "focus", () => setTimeout(handleEnforceFocus), true);
+		if (onShow) onShow();
+		if (autoFocus) {
+			var _modal$dialog$ownerDo, _modal$dialog;
+			const currentActiveElement = activeElement((_modal$dialog$ownerDo = (_modal$dialog = modal.dialog) == null ? void 0 : _modal$dialog.ownerDocument) != null ? _modal$dialog$ownerDo : ownerWindow == null ? void 0 : ownerWindow.document);
+			if (modal.dialog && currentActiveElement && !contains(modal.dialog, currentActiveElement)) {
+				lastFocusRef.current = currentActiveElement;
+				modal.dialog.focus();
+			}
+		}
+	});
+	const handleHide = useEventCallback(() => {
+		modal.remove();
+		removeKeydownListenerRef.current == null || removeKeydownListenerRef.current();
+		removeFocusListenerRef.current == null || removeFocusListenerRef.current();
+		if (restoreFocus) {
+			var _lastFocusRef$current;
+			(_lastFocusRef$current = lastFocusRef.current) == null || _lastFocusRef$current.focus == null || _lastFocusRef$current.focus(restoreFocusOptions);
+			lastFocusRef.current = null;
+		}
+	});
+	(0, import_react.useEffect)(() => {
+		if (!show || !container) return;
+		handleShow();
+	}, [
+		show,
+		container,
+		handleShow
+	]);
+	(0, import_react.useEffect)(() => {
+		if (!exited) return;
+		handleHide();
+	}, [exited, handleHide]);
+	useWillUnmount(() => {
+		handleHide();
+	});
+	const handleEnforceFocus = useEventCallback(() => {
+		if (!enforceFocus || !isMounted() || !modal.isTopModal()) return;
+		const currentActiveElement = activeElement(ownerWindow == null ? void 0 : ownerWindow.document);
+		if (modal.dialog && currentActiveElement && !contains(modal.dialog, currentActiveElement)) modal.dialog.focus();
+	});
+	const handleBackdropClick = useEventCallback((e) => {
+		if (e.target !== e.currentTarget) return;
+		onBackdropClick?.(e);
+		if (backdrop === true) onHide();
+	});
+	const handleDocumentKeyDown = useEventCallback((e) => {
+		if (keyboard && isEscKey(e) && modal.isTopModal()) {
+			onEscapeKeyDown?.(e);
+			if (!e.defaultPrevented) onHide();
+		}
+	});
+	const removeFocusListenerRef = (0, import_react.useRef)();
+	const removeKeydownListenerRef = (0, import_react.useRef)();
+	const handleHidden = (...args) => {
+		setExited(true);
+		onExited?.(...args);
+	};
+	if (!container) return null;
+	const dialogProps = Object.assign({
+		role,
+		ref: modal.setDialogRef,
+		"aria-modal": role === "dialog" ? true : void 0
+	}, rest, {
+		style,
+		className,
+		tabIndex: -1
+	});
+	let dialog = renderDialog ? renderDialog(dialogProps) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", Object.assign({}, dialogProps, { children: /* @__PURE__ */ import_react.cloneElement(children, { role: "document" }) }));
+	dialog = renderTransition(transition, runTransition, {
+		unmountOnExit: true,
+		mountOnEnter: true,
+		appear: true,
+		in: !!show,
+		onExit,
+		onExiting,
+		onExited: handleHidden,
+		onEnter,
+		onEntering,
+		onEntered,
+		children: dialog
+	});
+	let backdropElement = null;
+	if (backdrop) {
+		backdropElement = renderBackdrop({
+			ref: modal.setBackdropRef,
+			onClick: handleBackdropClick
+		});
+		backdropElement = renderTransition(backdropTransition, runBackdropTransition, {
+			in: !!show,
+			appear: true,
+			mountOnEnter: true,
+			unmountOnExit: true,
+			children: backdropElement
+		});
+	}
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_jsx_runtime.Fragment, { children: /* @__PURE__ */ import_react_dom.createPortal(/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [backdropElement, dialog] }), container) });
+});
+Modal$1.displayName = "Modal";
+var Modal_default$1 = Object.assign(Modal$1, { Manager: ModalManager });
+//#endregion
 //#region node_modules/dom-helpers/esm/hasClass.js
 /**
 * Checks if a given element has a CSS class.
@@ -13341,6 +15041,337 @@ function hasClass(element, className) {
 	if (element.classList) return !!className && element.classList.contains(className);
 	return (" " + (element.className.baseVal || element.className) + " ").indexOf(" " + className + " ") !== -1;
 }
+//#endregion
+//#region node_modules/dom-helpers/esm/addClass.js
+/**
+* Adds a CSS class to a given element.
+* 
+* @param element the element
+* @param className the CSS class name
+*/
+function addClass(element, className) {
+	if (element.classList) element.classList.add(className);
+	else if (!hasClass(element, className)) if (typeof element.className === "string") element.className = element.className + " " + className;
+	else element.setAttribute("class", (element.className && element.className.baseVal || "") + " " + className);
+}
+//#endregion
+//#region node_modules/dom-helpers/esm/removeClass.js
+function replaceClassName(origClass, classToRemove) {
+	return origClass.replace(new RegExp("(^|\\s)" + classToRemove + "(?:\\s|$)", "g"), "$1").replace(/\s+/g, " ").replace(/^\s*|\s*$/g, "");
+}
+/**
+* Removes a CSS class from a given element.
+* 
+* @param element the element
+* @param className the CSS class name
+*/
+function removeClass(element, className) {
+	if (element.classList) element.classList.remove(className);
+	else if (typeof element.className === "string") element.className = replaceClassName(element.className, className);
+	else element.setAttribute("class", replaceClassName(element.className && element.className.baseVal || "", className));
+}
+//#endregion
+//#region node_modules/react-bootstrap/esm/BootstrapModalManager.js
+var Selector = {
+	FIXED_CONTENT: ".fixed-top, .fixed-bottom, .is-fixed, .sticky-top",
+	STICKY_CONTENT: ".sticky-top",
+	NAVBAR_TOGGLER: ".navbar-toggler"
+};
+var BootstrapModalManager = class extends ModalManager {
+	adjustAndStore(prop, element, adjust) {
+		const actual = element.style[prop];
+		element.dataset[prop] = actual;
+		style(element, { [prop]: `${parseFloat(style(element, prop)) + adjust}px` });
+	}
+	restore(prop, element) {
+		const value = element.dataset[prop];
+		if (value !== void 0) {
+			delete element.dataset[prop];
+			style(element, { [prop]: value });
+		}
+	}
+	setContainerStyle(containerState) {
+		super.setContainerStyle(containerState);
+		const container = this.getElement();
+		addClass(container, "modal-open");
+		if (!containerState.scrollBarWidth) return;
+		const paddingProp = this.isRTL ? "paddingLeft" : "paddingRight";
+		const marginProp = this.isRTL ? "marginLeft" : "marginRight";
+		qsa(container, Selector.FIXED_CONTENT).forEach((el) => this.adjustAndStore(paddingProp, el, containerState.scrollBarWidth));
+		qsa(container, Selector.STICKY_CONTENT).forEach((el) => this.adjustAndStore(marginProp, el, -containerState.scrollBarWidth));
+		qsa(container, Selector.NAVBAR_TOGGLER).forEach((el) => this.adjustAndStore(marginProp, el, containerState.scrollBarWidth));
+	}
+	removeContainerStyle(containerState) {
+		super.removeContainerStyle(containerState);
+		const container = this.getElement();
+		removeClass(container, "modal-open");
+		const paddingProp = this.isRTL ? "paddingLeft" : "paddingRight";
+		const marginProp = this.isRTL ? "marginLeft" : "marginRight";
+		qsa(container, Selector.FIXED_CONTENT).forEach((el) => this.restore(paddingProp, el));
+		qsa(container, Selector.STICKY_CONTENT).forEach((el) => this.restore(marginProp, el));
+		qsa(container, Selector.NAVBAR_TOGGLER).forEach((el) => this.restore(marginProp, el));
+	}
+};
+var sharedManager;
+function getSharedManager(options) {
+	if (!sharedManager) sharedManager = new BootstrapModalManager(options);
+	return sharedManager;
+}
+//#endregion
+//#region node_modules/react-bootstrap/esm/ModalBody.js
+var ModalBody = /* @__PURE__ */ import_react.forwardRef(({ className, bsPrefix, as: Component = "div", ...props }, ref) => {
+	bsPrefix = useBootstrapPrefix(bsPrefix, "modal-body");
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Component, {
+		ref,
+		className: (0, import_classnames.default)(className, bsPrefix),
+		...props
+	});
+});
+ModalBody.displayName = "ModalBody";
+//#endregion
+//#region node_modules/react-bootstrap/esm/ModalContext.js
+var ModalContext = /* @__PURE__ */ import_react.createContext({ onHide() {} });
+//#endregion
+//#region node_modules/react-bootstrap/esm/ModalDialog.js
+var ModalDialog = /* @__PURE__ */ import_react.forwardRef(({ bsPrefix, className, contentClassName, centered, size, fullscreen, children, scrollable, ...props }, ref) => {
+	bsPrefix = useBootstrapPrefix(bsPrefix, "modal");
+	const dialogClass = `${bsPrefix}-dialog`;
+	const fullScreenClass = typeof fullscreen === "string" ? `${bsPrefix}-fullscreen-${fullscreen}` : `${bsPrefix}-fullscreen`;
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		...props,
+		ref,
+		className: (0, import_classnames.default)(dialogClass, className, size && `${bsPrefix}-${size}`, centered && `${dialogClass}-centered`, scrollable && `${dialogClass}-scrollable`, fullscreen && fullScreenClass),
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+			className: (0, import_classnames.default)(`${bsPrefix}-content`, contentClassName),
+			children
+		})
+	});
+});
+ModalDialog.displayName = "ModalDialog";
+//#endregion
+//#region node_modules/react-bootstrap/esm/ModalFooter.js
+var ModalFooter = /* @__PURE__ */ import_react.forwardRef(({ className, bsPrefix, as: Component = "div", ...props }, ref) => {
+	bsPrefix = useBootstrapPrefix(bsPrefix, "modal-footer");
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Component, {
+		ref,
+		className: (0, import_classnames.default)(className, bsPrefix),
+		...props
+	});
+});
+ModalFooter.displayName = "ModalFooter";
+//#endregion
+//#region node_modules/react-bootstrap/esm/AbstractModalHeader.js
+var AbstractModalHeader = /* @__PURE__ */ import_react.forwardRef(({ closeLabel = "Close", closeVariant, closeButton = false, onHide, children, ...props }, ref) => {
+	const context = (0, import_react.useContext)(ModalContext);
+	const handleClick = useEventCallback$1(() => {
+		context?.onHide();
+		onHide?.();
+	});
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		ref,
+		...props,
+		children: [children, closeButton && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CloseButton, {
+			"aria-label": closeLabel,
+			variant: closeVariant,
+			onClick: handleClick
+		})]
+	});
+});
+AbstractModalHeader.displayName = "AbstractModalHeader";
+//#endregion
+//#region node_modules/react-bootstrap/esm/ModalHeader.js
+var ModalHeader = /* @__PURE__ */ import_react.forwardRef(({ bsPrefix, className, closeLabel = "Close", closeButton = false, ...props }, ref) => {
+	bsPrefix = useBootstrapPrefix(bsPrefix, "modal-header");
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AbstractModalHeader, {
+		ref,
+		...props,
+		className: (0, import_classnames.default)(className, bsPrefix),
+		closeLabel,
+		closeButton
+	});
+});
+ModalHeader.displayName = "ModalHeader";
+//#endregion
+//#region node_modules/react-bootstrap/esm/ModalTitle.js
+var DivStyledAsH4 = divWithClassName_default("h4");
+var ModalTitle = /* @__PURE__ */ import_react.forwardRef(({ className, bsPrefix, as: Component = DivStyledAsH4, ...props }, ref) => {
+	bsPrefix = useBootstrapPrefix(bsPrefix, "modal-title");
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Component, {
+		ref,
+		className: (0, import_classnames.default)(className, bsPrefix),
+		...props
+	});
+});
+ModalTitle.displayName = "ModalTitle";
+//#endregion
+//#region node_modules/react-bootstrap/esm/Modal.js
+function DialogTransition(props) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Fade, {
+		...props,
+		timeout: null
+	});
+}
+function BackdropTransition(props) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Fade, {
+		...props,
+		timeout: null
+	});
+}
+var Modal = /* @__PURE__ */ import_react.forwardRef(({ bsPrefix, className, style, dialogClassName, contentClassName, children, dialogAs: Dialog = ModalDialog, "data-bs-theme": dataBsTheme, "aria-labelledby": ariaLabelledby, "aria-describedby": ariaDescribedby, "aria-label": ariaLabel, show = false, animation = true, backdrop = true, keyboard = true, onEscapeKeyDown, onShow, onHide, container, autoFocus = true, enforceFocus = true, restoreFocus = true, restoreFocusOptions, onEntered, onExit, onExiting, onEnter, onEntering, onExited, backdropClassName, manager: propsManager, ...props }, ref) => {
+	const [modalStyle, setStyle] = (0, import_react.useState)({});
+	const [animateStaticModal, setAnimateStaticModal] = (0, import_react.useState)(false);
+	const waitingForMouseUpRef = (0, import_react.useRef)(false);
+	const ignoreBackdropClickRef = (0, import_react.useRef)(false);
+	const removeStaticModalAnimationRef = (0, import_react.useRef)(null);
+	const [modal, setModalRef] = useCallbackRef();
+	const mergedRef = useMergedRefs$1(ref, setModalRef);
+	const handleHide = useEventCallback$1(onHide);
+	const isRTL = useIsRTL();
+	bsPrefix = useBootstrapPrefix(bsPrefix, "modal");
+	const modalContext = (0, import_react.useMemo)(() => ({ onHide: handleHide }), [handleHide]);
+	function getModalManager() {
+		if (propsManager) return propsManager;
+		return getSharedManager({ isRTL });
+	}
+	function updateDialogStyle(node) {
+		if (!canUseDOM_default) return;
+		const containerIsOverflowing = getModalManager().getScrollbarWidth() > 0;
+		const modalIsOverflowing = node.scrollHeight > ownerDocument(node).documentElement.clientHeight;
+		setStyle({
+			paddingRight: containerIsOverflowing && !modalIsOverflowing ? scrollbarSize() : void 0,
+			paddingLeft: !containerIsOverflowing && modalIsOverflowing ? scrollbarSize() : void 0
+		});
+	}
+	const handleWindowResize = useEventCallback$1(() => {
+		if (modal) updateDialogStyle(modal.dialog);
+	});
+	useWillUnmount$1(() => {
+		removeEventListener(window, "resize", handleWindowResize);
+		removeStaticModalAnimationRef.current == null || removeStaticModalAnimationRef.current();
+	});
+	const handleDialogMouseDown = () => {
+		waitingForMouseUpRef.current = true;
+	};
+	const handleMouseUp = (e) => {
+		if (waitingForMouseUpRef.current && modal && e.target === modal.dialog) ignoreBackdropClickRef.current = true;
+		waitingForMouseUpRef.current = false;
+	};
+	const handleStaticModalAnimation = () => {
+		setAnimateStaticModal(true);
+		removeStaticModalAnimationRef.current = transitionEnd(modal.dialog, () => {
+			setAnimateStaticModal(false);
+		});
+	};
+	const handleStaticBackdropClick = (e) => {
+		if (e.target !== e.currentTarget) return;
+		handleStaticModalAnimation();
+	};
+	const handleClick = (e) => {
+		if (backdrop === "static") {
+			handleStaticBackdropClick(e);
+			return;
+		}
+		if (ignoreBackdropClickRef.current || e.target !== e.currentTarget) {
+			ignoreBackdropClickRef.current = false;
+			return;
+		}
+		onHide?.();
+	};
+	const handleEscapeKeyDown = (e) => {
+		if (keyboard) onEscapeKeyDown?.(e);
+		else {
+			e.preventDefault();
+			if (backdrop === "static") handleStaticModalAnimation();
+		}
+	};
+	const handleEnter = (node, isAppearing) => {
+		if (node) updateDialogStyle(node);
+		onEnter?.(node, isAppearing);
+	};
+	const handleExit = (node) => {
+		removeStaticModalAnimationRef.current == null || removeStaticModalAnimationRef.current();
+		onExit?.(node);
+	};
+	const handleEntering = (node, isAppearing) => {
+		onEntering?.(node, isAppearing);
+		addEventListener(window, "resize", handleWindowResize);
+	};
+	const handleExited = (node) => {
+		if (node) node.style.display = "";
+		onExited?.(node);
+		removeEventListener(window, "resize", handleWindowResize);
+	};
+	const renderBackdrop = (0, import_react.useCallback)((backdropProps) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		...backdropProps,
+		className: (0, import_classnames.default)(`${bsPrefix}-backdrop`, backdropClassName, !animation && "show")
+	}), [
+		animation,
+		backdropClassName,
+		bsPrefix
+	]);
+	const baseModalStyle = {
+		...style,
+		...modalStyle
+	};
+	baseModalStyle.display = "block";
+	const renderDialog = (dialogProps) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		role: "dialog",
+		...dialogProps,
+		style: baseModalStyle,
+		className: (0, import_classnames.default)(className, bsPrefix, animateStaticModal && `${bsPrefix}-static`, !animation && "show"),
+		onClick: backdrop ? handleClick : void 0,
+		onMouseUp: handleMouseUp,
+		"data-bs-theme": dataBsTheme,
+		"aria-label": ariaLabel,
+		"aria-labelledby": ariaLabelledby,
+		"aria-describedby": ariaDescribedby,
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Dialog, {
+			...props,
+			onMouseDown: handleDialogMouseDown,
+			className: dialogClassName,
+			contentClassName,
+			children
+		})
+	});
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ModalContext.Provider, {
+		value: modalContext,
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Modal_default$1, {
+			show,
+			ref: mergedRef,
+			backdrop,
+			container,
+			keyboard: true,
+			autoFocus,
+			enforceFocus,
+			restoreFocus,
+			restoreFocusOptions,
+			onEscapeKeyDown: handleEscapeKeyDown,
+			onShow,
+			onHide,
+			onEnter: handleEnter,
+			onEntering: handleEntering,
+			onEntered,
+			onExit: handleExit,
+			onExiting,
+			onExited: handleExited,
+			manager: getModalManager(),
+			transition: animation ? DialogTransition : void 0,
+			backdropTransition: animation ? BackdropTransition : void 0,
+			renderBackdrop,
+			renderDialog
+		})
+	});
+});
+Modal.displayName = "Modal";
+var Modal_default = Object.assign(Modal, {
+	Body: ModalBody,
+	Header: ModalHeader,
+	Title: ModalTitle,
+	Footer: ModalFooter,
+	Dialog: ModalDialog,
+	TRANSITION_DURATION: 300,
+	BACKDROP_TRANSITION_DURATION: 150
+});
 //#endregion
 //#region node_modules/@restart/ui/esm/useRootClose.js
 var noop = () => {};
@@ -13393,8 +15424,8 @@ function useRootClose(ref, onRootClose, { disabled, clickTrigger } = {}) {
 */
 var Overlay$1 = /* @__PURE__ */ import_react.forwardRef((props, outerRef) => {
 	const { flip, offset, placement, containerPadding, popperConfig = {}, transition: Transition, runTransition } = props;
-	const [rootElement, attachRef] = useCallbackRef();
-	const [arrowElement, attachArrowRef] = useCallbackRef();
+	const [rootElement, attachRef] = useCallbackRef$1();
+	const [arrowElement, attachArrowRef] = useCallbackRef$1();
 	const mergedRef = useMergedRefs(attachRef, outerRef);
 	const container = useWaitForDOMRef(props.container);
 	const target = useWaitForDOMRef(props.target);
@@ -13668,7 +15699,7 @@ var OverlayTrigger = ({ trigger = ["hover", "focus"], overlay, children, popperC
 	const mergedRef = useMergedRefs$1(triggerNodeRef, getChildRef(children));
 	const timeout = useTimeout();
 	const hoverStateRef = (0, import_react.useRef)("");
-	const [show, setShow] = useUncontrolledProp(propsShow, defaultShow, onToggle);
+	const [show, setShow] = useUncontrolledProp$1(propsShow, defaultShow, onToggle);
 	const delay = normalizeDelay(propsDelay);
 	const { onFocus, onBlur, onClick } = typeof children !== "function" ? import_react.Children.only(children).props : {};
 	const attachRef = (r) => {
@@ -13785,18 +15816,156 @@ var Spinner = /* @__PURE__ */ import_react.forwardRef(({ bsPrefix, variant, anim
 });
 Spinner.displayName = "Spinner";
 //#endregion
+//#region node_modules/react-bootstrap/esm/Table.js
+var Table = /* @__PURE__ */ import_react.forwardRef(({ bsPrefix, className, striped, bordered, borderless, hover, size, variant, responsive, ...props }, ref) => {
+	const decoratedBsPrefix = useBootstrapPrefix(bsPrefix, "table");
+	const classes = (0, import_classnames.default)(className, decoratedBsPrefix, variant && `${decoratedBsPrefix}-${variant}`, size && `${decoratedBsPrefix}-${size}`, striped && `${decoratedBsPrefix}-${typeof striped === "string" ? `striped-${striped}` : "striped"}`, bordered && `${decoratedBsPrefix}-bordered`, borderless && `${decoratedBsPrefix}-borderless`, hover && `${decoratedBsPrefix}-hover`);
+	const table = /* @__PURE__ */ (0, import_jsx_runtime.jsx)("table", {
+		...props,
+		className: classes,
+		ref
+	});
+	if (responsive) {
+		let responsiveClass = `${decoratedBsPrefix}-responsive`;
+		if (typeof responsive === "string") responsiveClass = `${responsiveClass}-${responsive}`;
+		return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+			className: responsiveClass,
+			children: table
+		});
+	}
+	return table;
+});
+Table.displayName = "Table";
+//#endregion
+//#region node_modules/react-bootstrap/esm/ToastFade.js
+var fadeStyles = {
+	[ENTERING]: "showing",
+	[EXITING]: "showing show"
+};
+var ToastFade = /* @__PURE__ */ import_react.forwardRef((props, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Fade, {
+	...props,
+	ref,
+	transitionClasses: fadeStyles
+}));
+ToastFade.displayName = "ToastFade";
+//#endregion
+//#region node_modules/react-bootstrap/esm/ToastContext.js
+var ToastContext$1 = /* @__PURE__ */ import_react.createContext({ onClose() {} });
+//#endregion
+//#region node_modules/react-bootstrap/esm/ToastHeader.js
+var ToastHeader = /* @__PURE__ */ import_react.forwardRef(({ bsPrefix, closeLabel = "Close", closeVariant, closeButton = true, className, children, ...props }, ref) => {
+	bsPrefix = useBootstrapPrefix(bsPrefix, "toast-header");
+	const context = (0, import_react.useContext)(ToastContext$1);
+	const handleClick = useEventCallback$1((e) => {
+		context == null || context.onClose == null || context.onClose(e);
+	});
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		ref,
+		...props,
+		className: (0, import_classnames.default)(bsPrefix, className),
+		children: [children, closeButton && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CloseButton, {
+			"aria-label": closeLabel,
+			variant: closeVariant,
+			onClick: handleClick,
+			"data-dismiss": "toast"
+		})]
+	});
+});
+ToastHeader.displayName = "ToastHeader";
+//#endregion
+//#region node_modules/react-bootstrap/esm/ToastBody.js
+var ToastBody = /* @__PURE__ */ import_react.forwardRef(({ className, bsPrefix, as: Component = "div", ...props }, ref) => {
+	bsPrefix = useBootstrapPrefix(bsPrefix, "toast-body");
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Component, {
+		ref,
+		className: (0, import_classnames.default)(className, bsPrefix),
+		...props
+	});
+});
+ToastBody.displayName = "ToastBody";
+//#endregion
+//#region node_modules/react-bootstrap/esm/Toast.js
+var Toast = /* @__PURE__ */ import_react.forwardRef(({ bsPrefix, className, transition: Transition = ToastFade, show = true, animation = true, delay = 5e3, autohide = false, onClose, onEntered, onExit, onExiting, onEnter, onEntering, onExited, bg, ...props }, ref) => {
+	bsPrefix = useBootstrapPrefix(bsPrefix, "toast");
+	const delayRef = (0, import_react.useRef)(delay);
+	const onCloseRef = (0, import_react.useRef)(onClose);
+	(0, import_react.useEffect)(() => {
+		delayRef.current = delay;
+		onCloseRef.current = onClose;
+	}, [delay, onClose]);
+	const autohideTimeout = useTimeout();
+	const autohideToast = !!(autohide && show);
+	const autohideFunc = (0, import_react.useCallback)(() => {
+		if (autohideToast) onCloseRef.current == null || onCloseRef.current();
+	}, [autohideToast]);
+	(0, import_react.useEffect)(() => {
+		autohideTimeout.set(autohideFunc, delayRef.current);
+	}, [autohideTimeout, autohideFunc]);
+	const toastContext = (0, import_react.useMemo)(() => ({ onClose }), [onClose]);
+	const hasAnimation = !!(Transition && animation);
+	const toast = /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		...props,
+		ref,
+		className: (0, import_classnames.default)(bsPrefix, className, bg && `bg-${bg}`, !hasAnimation && (show ? "show" : "hide")),
+		role: "alert",
+		"aria-live": "assertive",
+		"aria-atomic": "true"
+	});
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ToastContext$1.Provider, {
+		value: toastContext,
+		children: hasAnimation && Transition ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Transition, {
+			in: show,
+			onEnter,
+			onEntering,
+			onEntered,
+			onExit,
+			onExiting,
+			onExited,
+			unmountOnExit: true,
+			children: toast
+		}) : toast
+	});
+});
+Toast.displayName = "Toast";
+var Toast_default = Object.assign(Toast, {
+	Body: ToastBody,
+	Header: ToastHeader
+});
+//#endregion
+//#region node_modules/react-bootstrap/esm/ToastContainer.js
+var positionClasses = {
+	"top-start": "top-0 start-0",
+	"top-center": "top-0 start-50 translate-middle-x",
+	"top-end": "top-0 end-0",
+	"middle-start": "top-50 start-0 translate-middle-y",
+	"middle-center": "top-50 start-50 translate-middle",
+	"middle-end": "top-50 end-0 translate-middle-y",
+	"bottom-start": "bottom-0 start-0",
+	"bottom-center": "bottom-0 start-50 translate-middle-x",
+	"bottom-end": "bottom-0 end-0"
+};
+var ToastContainer = /* @__PURE__ */ import_react.forwardRef(({ bsPrefix, position, containerPosition, className, as: Component = "div", ...props }, ref) => {
+	bsPrefix = useBootstrapPrefix(bsPrefix, "toast-container");
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Component, {
+		ref,
+		...props,
+		className: (0, import_classnames.default)(bsPrefix, position && positionClasses[position], containerPosition && `position-${containerPosition}`, className)
+	});
+});
+ToastContainer.displayName = "ToastContainer";
+//#endregion
 //#region node_modules/react-hook-form/dist/index.esm.mjs
 var isCheckBoxInput = (element) => element.type === "checkbox";
 var isDateObject = (value) => value instanceof Date;
 var isNullOrUndefined = (value) => value == null;
 var isObjectType = (value) => typeof value === "object";
-var isObject = (value) => !isNullOrUndefined(value) && !Array.isArray(value) && isObjectType(value) && !isDateObject(value);
-var getEventValue = (event) => isObject(event) && event.target ? isCheckBoxInput(event.target) ? event.target.checked : event.target.value : event;
+var isObject$1 = (value) => !isNullOrUndefined(value) && !Array.isArray(value) && isObjectType(value) && !isDateObject(value);
+var getEventValue = (event) => isObject$1(event) && event.target ? isCheckBoxInput(event.target) ? event.target.checked : event.target.value : event;
 var getNodeParentName = (name) => name.substring(0, name.search(/\.\d+(\.|$)/)) || name;
 var isNameInFieldArray = (names, name) => names.has(getNodeParentName(name));
-var isPlainObject = (tempObject) => {
+var isPlainObject$1 = (tempObject) => {
 	const prototypeCopy = tempObject.constructor && tempObject.constructor.prototype;
-	return isObject(prototypeCopy) && prototypeCopy.hasOwnProperty("isPrototypeOf");
+	return isObject$1(prototypeCopy) && prototypeCopy.hasOwnProperty("isPrototypeOf");
 };
 var isWeb = typeof window !== "undefined" && typeof window.HTMLElement !== "undefined" && typeof document !== "undefined";
 function cloneObject(data) {
@@ -13804,7 +15973,7 @@ function cloneObject(data) {
 	const isFileListInstance = typeof FileList !== "undefined" && data instanceof FileList;
 	if (isWeb && (data instanceof Blob || isFileListInstance)) return data;
 	const isArray = Array.isArray(data);
-	if (!isArray && !(isObject(data) && isPlainObject(data))) return data;
+	if (!isArray && !(isObject$1(data) && isPlainObject$1(data))) return data;
 	const copy = isArray ? [] : Object.create(Object.getPrototypeOf(data));
 	for (const key in data) if (Object.prototype.hasOwnProperty.call(data, key)) copy[key] = cloneObject(data[key]);
 	return copy;
@@ -13814,7 +15983,7 @@ var isUndefined = (val) => val === void 0;
 var compact = (value) => Array.isArray(value) ? value.filter(Boolean) : [];
 var stringToPath = (input) => compact(input.replace(/["|']|\]/g, "").split(/\.|\[/));
 var get = (object, path, defaultValue) => {
-	if (!path || !isObject(object)) return defaultValue;
+	if (!path || !isObject$1(object)) return defaultValue;
 	const result = (isKey(path) ? [path] : stringToPath(path)).reduce((result, key) => isNullOrUndefined(result) ? result : result[key], object);
 	return isUndefined(result) || result === object ? isUndefined(object[path]) ? defaultValue : object[path] : result;
 };
@@ -13830,7 +15999,7 @@ var set = (object, path, value) => {
 		let newValue = value;
 		if (index !== lastIndex) {
 			const objValue = object[key];
-			newValue = isObject(objValue) || Array.isArray(objValue) ? objValue : !isNaN(+tempPath[index + 1]) ? [] : {};
+			newValue = isObject$1(objValue) || Array.isArray(objValue) ? objValue : !isNaN(+tempPath[index + 1]) ? [] : {};
 		}
 		if (key === "__proto__" || key === "constructor" || key === "prototype") return;
 		object[key] = newValue;
@@ -13869,6 +16038,10 @@ var ROOT_ERROR_TYPE = "root";
 */
 var HookFormControlContext = import_react.createContext(null);
 HookFormControlContext.displayName = "HookFormControlContext";
+/**
+* @internal Internal hook to access only control from context.
+*/
+var useFormControlContext = () => import_react.useContext(HookFormControlContext);
 var getProxyFormState = (formState, control, localProxyFormState, isRoot = true) => {
 	const result = { defaultValues: control._defaultValues };
 	for (const key in formState) Object.defineProperty(result, key, { get: () => {
@@ -13905,10 +16078,100 @@ function deepEqual(object1, object2, _internal_visited = /* @__PURE__ */ new Wea
 		if (!keys2.includes(key)) return false;
 		if (key !== "ref") {
 			const val2 = object2[key];
-			if (isDateObject(val1) && isDateObject(val2) || isObject(val1) && isObject(val2) || Array.isArray(val1) && Array.isArray(val2) ? !deepEqual(val1, val2, _internal_visited) : !Object.is(val1, val2)) return false;
+			if (isDateObject(val1) && isDateObject(val2) || isObject$1(val1) && isObject$1(val2) || Array.isArray(val1) && Array.isArray(val2) ? !deepEqual(val1, val2, _internal_visited) : !Object.is(val1, val2)) return false;
 		}
 	}
 	return true;
+}
+/**
+* Custom hook to subscribe to field change and isolate re-rendering at the component level.
+*
+* @remarks
+*
+* [API](https://react-hook-form.com/docs/usewatch) • [Demo](https://codesandbox.io/s/react-hook-form-v7-ts-usewatch-h9i5e)
+*
+* @example
+* ```tsx
+* const { control } = useForm();
+* const values = useWatch({
+*   name: "fieldName"
+*   control,
+* })
+* ```
+*/
+function useWatch(props) {
+	const formControl = useFormControlContext();
+	const { control = formControl, name, defaultValue, disabled, exact, compute } = props || {};
+	const _defaultValue = import_react.useRef(defaultValue);
+	const _compute = import_react.useRef(compute);
+	const _computeFormValues = import_react.useRef(void 0);
+	const _prevControl = import_react.useRef(control);
+	const _prevName = import_react.useRef(name);
+	_compute.current = compute;
+	const [value, updateValue] = import_react.useState(() => {
+		const defaultValue = control._getWatch(name, _defaultValue.current);
+		return _compute.current ? _compute.current(defaultValue) : defaultValue;
+	});
+	const getCurrentOutput = import_react.useCallback((values) => {
+		const formValues = generateWatchOutput(name, control._names, values || control._formValues, false, _defaultValue.current);
+		return _compute.current ? _compute.current(formValues) : formValues;
+	}, [
+		control._formValues,
+		control._names,
+		name
+	]);
+	const refreshValue = import_react.useCallback((values) => {
+		if (!disabled) {
+			const formValues = generateWatchOutput(name, control._names, values || control._formValues, false, _defaultValue.current);
+			if (_compute.current) {
+				const computedFormValues = _compute.current(formValues);
+				if (!deepEqual(computedFormValues, _computeFormValues.current)) {
+					updateValue(computedFormValues);
+					_computeFormValues.current = computedFormValues;
+				}
+			} else updateValue(formValues);
+		}
+	}, [
+		control._formValues,
+		control._names,
+		disabled,
+		name
+	]);
+	useIsomorphicLayoutEffect(() => {
+		if (_prevControl.current !== control || !deepEqual(_prevName.current, name)) {
+			_prevControl.current = control;
+			_prevName.current = name;
+			refreshValue();
+		}
+		return control._subscribe({
+			name,
+			formState: { values: true },
+			exact,
+			callback: (formState) => {
+				refreshValue(formState.values);
+			}
+		});
+	}, [
+		control,
+		exact,
+		name,
+		refreshValue
+	]);
+	import_react.useEffect(() => control._removeUnmounted());
+	const controlChanged = _prevControl.current !== control;
+	const prevName = _prevName.current;
+	const computedOutput = import_react.useMemo(() => {
+		if (disabled) return null;
+		const nameChanged = !controlChanged && !deepEqual(prevName, name);
+		return controlChanged || nameChanged ? getCurrentOutput() : null;
+	}, [
+		disabled,
+		controlChanged,
+		name,
+		prevName,
+		getCurrentOutput
+	]);
+	return computedOutput !== null ? computedOutput : value;
 }
 var HookFormContext = import_react.createContext(null);
 HookFormContext.displayName = "HookFormContext";
@@ -13948,14 +16211,14 @@ function extractFormValues(fieldsState, formValues) {
 	for (const key in fieldsState) if (fieldsState.hasOwnProperty(key)) {
 		const fieldState = fieldsState[key];
 		const fieldValue = formValues[key];
-		if (fieldState && isObject(fieldState) && fieldValue) {
+		if (fieldState && isObject$1(fieldState) && fieldValue) {
 			const nestedFieldsState = extractFormValues(fieldState, fieldValue);
-			if (isObject(nestedFieldsState)) values[key] = nestedFieldsState;
+			if (isObject$1(nestedFieldsState)) values[key] = nestedFieldsState;
 		} else if (fieldsState[key]) values[key] = fieldValue;
 	}
 	return values;
 }
-var isEmptyObject = (value) => isObject(value) && !Object.keys(value).length;
+var isEmptyObject = (value) => isObject$1(value) && !Object.keys(value).length;
 var isFileInput = (element) => element.type === "file";
 var isHTMLElement = (value) => {
 	if (!isWeb) return false;
@@ -13982,7 +16245,7 @@ function unset(object, path) {
 	const index = paths.length - 1;
 	const key = paths[index];
 	if (childObject) delete childObject[key];
-	if (index !== 0 && (isObject(childObject) && isEmptyObject(childObject) || Array.isArray(childObject) && isEmptyArray(childObject))) unset(object, paths.slice(0, -1));
+	if (index !== 0 && (isObject$1(childObject) && isEmptyObject(childObject) || Array.isArray(childObject) && isEmptyArray(childObject))) unset(object, paths.slice(0, -1));
 	return object;
 }
 var objectHasFunction = (data) => {
@@ -13990,7 +16253,7 @@ var objectHasFunction = (data) => {
 	return false;
 };
 function isTraversable(value) {
-	return Array.isArray(value) || isObject(value) && !objectHasFunction(value);
+	return Array.isArray(value) || isObject$1(value) && !objectHasFunction(value);
 }
 function markFieldsDirty(data, fields = {}) {
 	for (const key in data) {
@@ -14070,7 +16333,7 @@ var getResolverOptions = (fieldsNames, _fields, criteriaMode, shouldUseNativeVal
 	};
 };
 var isRegex = (value) => value instanceof RegExp;
-var getRuleValue = (rule) => isUndefined(rule) ? rule : isRegex(rule) ? rule.source : isObject(rule) ? isRegex(rule.value) ? rule.value.source : rule.value : rule;
+var getRuleValue = (rule) => isUndefined(rule) ? rule : isRegex(rule) ? rule.source : isObject$1(rule) ? isRegex(rule.value) ? rule.value.source : rule.value : rule;
 var getValidationModes = (mode) => ({
 	isOnSubmit: !mode || mode === VALIDATION_MODE.onSubmit,
 	isOnBlur: mode === VALIDATION_MODE.onBlur,
@@ -14079,7 +16342,7 @@ var getValidationModes = (mode) => ({
 	isOnTouch: mode === VALIDATION_MODE.onTouched
 });
 var ASYNC_FUNCTION = "AsyncFunction";
-var hasPromiseValidation = (fieldReference) => !!fieldReference && !!fieldReference.validate && !!(isFunction(fieldReference.validate) && fieldReference.validate.constructor.name === ASYNC_FUNCTION || isObject(fieldReference.validate) && Object.values(fieldReference.validate).find((validateFunction) => validateFunction.constructor.name === ASYNC_FUNCTION));
+var hasPromiseValidation = (fieldReference) => !!fieldReference && !!fieldReference.validate && !!(isFunction(fieldReference.validate) && fieldReference.validate.constructor.name === ASYNC_FUNCTION || isObject$1(fieldReference.validate) && Object.values(fieldReference.validate).find((validateFunction) => validateFunction.constructor.name === ASYNC_FUNCTION));
 var hasValidation = (options) => options.mount && (options.required || options.min || options.max || options.maxLength || options.minLength || options.pattern || options.validate);
 var isWatched = (name, _names, isBlurEvent) => !isBlurEvent && (_names.watchAll || _names.watch.has(name) || [..._names.watch].some((watchName) => name.startsWith(watchName) && /^\.\w+/.test(name.slice(watchName.length))));
 var iterateFieldsByAction = (fields, action, fieldsNames, abortEarly) => {
@@ -14091,7 +16354,7 @@ var iterateFieldsByAction = (fields, action, fieldsNames, abortEarly) => {
 				if (_f.refs && _f.refs[0] && action(_f.refs[0], key) && !abortEarly) return true;
 				else if (_f.ref && action(_f.ref, _f.name) && !abortEarly) return true;
 				else if (iterateFieldsByAction(currentField, action)) break;
-			} else if (isObject(currentField)) {
+			} else if (isObject$1(currentField)) {
 				if (iterateFieldsByAction(currentField, action)) break;
 			}
 		}
@@ -14148,7 +16411,7 @@ function getValidateError(result, ref, type = "validate") {
 		ref
 	};
 }
-var getValueAndMessage = (validationData) => isObject(validationData) && !isRegex(validationData) ? validationData : {
+var getValueAndMessage = (validationData) => isObject$1(validationData) && !isRegex(validationData) ? validationData : {
 	value: validationData,
 	message: ""
 };
@@ -14262,7 +16525,7 @@ var validateField = async (field, disabledFieldNames, formValues, validateAllFie
 					return error;
 				}
 			}
-		} else if (isObject(validate)) {
+		} else if (isObject$1(validate)) {
 			let validationResult = {};
 			for (const key in validate) {
 				if (!isEmptyObject(validationResult) && !validateAllFieldCriteria) break;
@@ -14315,7 +16578,7 @@ function createFormControl(props = {}) {
 		disabled: _options.disabled || false
 	};
 	let _fields = {};
-	let _defaultValues = isObject(_options.defaultValues) || isObject(_options.values) ? cloneObject(_options.defaultValues || _options.values) || {} : {};
+	let _defaultValues = isObject$1(_options.defaultValues) || isObject$1(_options.values) ? cloneObject(_options.defaultValues || _options.values) || {} : {};
 	let _formValues = _options.shouldUnregister ? {} : cloneObject(_defaultValues);
 	let _state = {
 		action: false,
@@ -14503,7 +16766,7 @@ function createFormControl(props = {}) {
 				name,
 				eventType
 			});
-			if (isObject(result)) {
+			if (isObject$1(result)) {
 				for (const key in result) if (result[key]) setError(`${FORM_ERROR_TYPE}.${key}`, {
 					message: isString(result.message) ? result.message : "",
 					type: INPUT_VALIDATION_RULES.validate
@@ -14602,7 +16865,7 @@ function createFormControl(props = {}) {
 			const fieldValue = value[fieldKey];
 			const fieldName = name + "." + fieldKey;
 			const field = get(_fields, fieldName);
-			(_names.array.has(name) || isObject(fieldValue) || field && !field._f) && !isDateObject(fieldValue) ? setValues(fieldName, fieldValue, options) : setFieldValue(fieldName, fieldValue, options);
+			(_names.array.has(name) || isObject$1(fieldValue) || field && !field._f) && !isDateObject(fieldValue) ? setValues(fieldName, fieldValue, options) : setFieldValue(fieldName, fieldValue, options);
 		}
 	};
 	const setValue = (name, value, options = {}) => {
@@ -15138,6 +17401,285 @@ function createFormControl(props = {}) {
 		formControl: methods
 	};
 }
+var generateId = () => {
+	if (typeof crypto !== "undefined" && crypto.randomUUID) return crypto.randomUUID();
+	const d = typeof performance === "undefined" ? Date.now() : performance.now() * 1e3;
+	return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+		const r = (Math.random() * 16 + d) % 16 | 0;
+		return (c == "x" ? r : r & 3 | 8).toString(16);
+	});
+};
+var getFocusFieldName = (name, index, options = {}) => options.shouldFocus || isUndefined(options.shouldFocus) ? options.focusName || `${name}.${isUndefined(options.focusIndex) ? index : options.focusIndex}.` : "";
+var appendAt = (data, value) => [...data, ...convertToArrayPayload(value)];
+var fillEmptyArray = (value) => Array.isArray(value) ? value.map(() => void 0) : void 0;
+function insert(data, index, value) {
+	return [
+		...data.slice(0, index),
+		...convertToArrayPayload(value),
+		...data.slice(index)
+	];
+}
+var moveArrayAt = (data, from, to) => {
+	if (!Array.isArray(data)) return [];
+	if (isUndefined(data[to])) data[to] = void 0;
+	data.splice(to, 0, data.splice(from, 1)[0]);
+	return data;
+};
+var prependAt = (data, value) => [...convertToArrayPayload(value), ...convertToArrayPayload(data)];
+function removeAtIndexes(data, indexes) {
+	let i = 0;
+	const temp = [...data];
+	for (const index of indexes) {
+		temp.splice(index - i, 1);
+		i++;
+	}
+	return compact(temp).length ? temp : [];
+}
+var removeArrayAt = (data, index) => isUndefined(index) ? [] : removeAtIndexes(data, convertToArrayPayload(index).sort((a, b) => a - b));
+var swapArrayAt = (data, indexA, indexB) => {
+	[data[indexA], data[indexB]] = [data[indexB], data[indexA]];
+};
+var updateAt = (fieldValues, index, value) => {
+	fieldValues[index] = value;
+	return fieldValues;
+};
+/**
+* A custom hook that exposes convenient methods to perform operations with a list of dynamic inputs that need to be appended, updated, removed etc. • [Demo](https://codesandbox.io/s/react-hook-form-usefieldarray-ssugn) • [Video](https://youtu.be/4MrbfGSFY2A)
+*
+* @remarks
+* [API](https://react-hook-form.com/docs/usefieldarray) • [Demo](https://codesandbox.io/s/react-hook-form-usefieldarray-ssugn)
+*
+* @param props - useFieldArray props
+*
+* @returns methods - functions to manipulate with the Field Arrays (dynamic inputs) {@link UseFieldArrayReturn}
+*
+* @example
+* ```tsx
+* function App() {
+*   const { register, control, handleSubmit, reset, trigger, setError } = useForm({
+*     defaultValues: {
+*       test: []
+*     }
+*   });
+*   const { fields, append } = useFieldArray({
+*     control,
+*     name: "test"
+*   });
+*
+*   return (
+*     <form onSubmit={handleSubmit(data => console.log(data))}>
+*       {fields.map((item, index) => (
+*          <input key={item.id} {...register(`test.${index}.firstName`)}  />
+*       ))}
+*       <button type="button" onClick={() => append({ firstName: "bill" })}>
+*         append
+*       </button>
+*       <input type="submit" />
+*     </form>
+*   );
+* }
+* ```
+*/
+function useFieldArray(props) {
+	const formControl = useFormControlContext();
+	const { control = formControl, name, keyName = "id", shouldUnregister, rules } = props;
+	const [fields, setFields] = import_react.useState(control._getFieldArray(name));
+	const ids = import_react.useRef(control._getFieldArray(name).map(generateId));
+	const _actioned = import_react.useRef(false);
+	control._names.array.add(name);
+	import_react.useMemo(() => rules && fields.length >= 0 && control.register(name, rules), [
+		control,
+		name,
+		fields.length,
+		rules
+	]);
+	useIsomorphicLayoutEffect(() => control._subjects.array.subscribe({ next: ({ values, name: fieldArrayName }) => {
+		if (fieldArrayName === name || !fieldArrayName) {
+			const fieldValues = get(values, name);
+			if (Array.isArray(fieldValues)) {
+				setFields(fieldValues);
+				ids.current = fieldValues.map(generateId);
+			}
+		}
+	} }).unsubscribe, [control, name]);
+	const updateValues = import_react.useCallback((updatedFieldArrayValues) => {
+		_actioned.current = true;
+		control._setFieldArray(name, updatedFieldArrayValues);
+	}, [control, name]);
+	const append = (value, options) => {
+		const appendValue = convertToArrayPayload(cloneObject(value));
+		const updatedFieldArrayValues = appendAt(control._getFieldArray(name), appendValue);
+		control._names.focus = getFocusFieldName(name, updatedFieldArrayValues.length - 1, options);
+		ids.current = appendAt(ids.current, appendValue.map(generateId));
+		updateValues(updatedFieldArrayValues);
+		setFields(updatedFieldArrayValues);
+		control._setFieldArray(name, updatedFieldArrayValues, appendAt, { argA: fillEmptyArray(value) });
+	};
+	const prepend = (value, options) => {
+		const prependValue = convertToArrayPayload(cloneObject(value));
+		const updatedFieldArrayValues = prependAt(control._getFieldArray(name), prependValue);
+		control._names.focus = getFocusFieldName(name, 0, options);
+		ids.current = prependAt(ids.current, prependValue.map(generateId));
+		updateValues(updatedFieldArrayValues);
+		setFields(updatedFieldArrayValues);
+		control._setFieldArray(name, updatedFieldArrayValues, prependAt, { argA: fillEmptyArray(value) });
+	};
+	const remove = (index) => {
+		const updatedFieldArrayValues = removeArrayAt(control._getFieldArray(name), index);
+		ids.current = removeArrayAt(ids.current, index);
+		updateValues(updatedFieldArrayValues);
+		setFields(updatedFieldArrayValues);
+		!Array.isArray(get(control._fields, name)) && set(control._fields, name, void 0);
+		control._setFieldArray(name, updatedFieldArrayValues, removeArrayAt, { argA: index });
+	};
+	const insert$1 = (index, value, options) => {
+		const insertValue = convertToArrayPayload(cloneObject(value));
+		const updatedFieldArrayValues = insert(control._getFieldArray(name), index, insertValue);
+		control._names.focus = getFocusFieldName(name, index, options);
+		ids.current = insert(ids.current, index, insertValue.map(generateId));
+		updateValues(updatedFieldArrayValues);
+		setFields(updatedFieldArrayValues);
+		control._setFieldArray(name, updatedFieldArrayValues, insert, {
+			argA: index,
+			argB: fillEmptyArray(value)
+		});
+	};
+	const swap = (indexA, indexB) => {
+		const updatedFieldArrayValues = control._getFieldArray(name);
+		swapArrayAt(updatedFieldArrayValues, indexA, indexB);
+		swapArrayAt(ids.current, indexA, indexB);
+		updateValues(updatedFieldArrayValues);
+		setFields(updatedFieldArrayValues);
+		control._setFieldArray(name, updatedFieldArrayValues, swapArrayAt, {
+			argA: indexA,
+			argB: indexB
+		}, false);
+	};
+	const move = (from, to) => {
+		const updatedFieldArrayValues = control._getFieldArray(name);
+		moveArrayAt(updatedFieldArrayValues, from, to);
+		moveArrayAt(ids.current, from, to);
+		updateValues(updatedFieldArrayValues);
+		setFields(updatedFieldArrayValues);
+		control._setFieldArray(name, updatedFieldArrayValues, moveArrayAt, {
+			argA: from,
+			argB: to
+		}, false);
+	};
+	const update = (index, value) => {
+		const updateValue = cloneObject(value);
+		const updatedFieldArrayValues = updateAt(control._getFieldArray(name), index, updateValue);
+		ids.current = [...updatedFieldArrayValues].map((item, i) => !item || i === index ? generateId() : ids.current[i]);
+		updateValues(updatedFieldArrayValues);
+		setFields([...updatedFieldArrayValues]);
+		control._setFieldArray(name, updatedFieldArrayValues, updateAt, {
+			argA: index,
+			argB: updateValue
+		}, true, false);
+	};
+	const replace = (value) => {
+		const updatedFieldArrayValues = convertToArrayPayload(cloneObject(value));
+		ids.current = updatedFieldArrayValues.map(generateId);
+		updateValues([...updatedFieldArrayValues]);
+		setFields([...updatedFieldArrayValues]);
+		control._setFieldArray(name, [...updatedFieldArrayValues], (data) => data, {}, true, false);
+	};
+	import_react.useEffect(() => {
+		control._state.action = false;
+		isWatched(name, control._names) && control._subjects.state.next({ ...control._formState });
+		if (_actioned.current && (!getValidationModes(control._options.mode).isOnSubmit || control._formState.isSubmitted) && !getValidationModes(control._options.reValidateMode).isOnSubmit) if (control._options.resolver) control._runSchema([name]).then((result) => {
+			control._updateIsValidating([name]);
+			const error = get(result.errors, name);
+			const existingError = get(control._formState.errors, name);
+			if (existingError ? !error && existingError.type || error && (existingError.type !== error.type || existingError.message !== error.message) : error && error.type) {
+				error ? set(control._formState.errors, name, error) : unset(control._formState.errors, name);
+				control._subjects.state.next({ errors: control._formState.errors });
+			}
+		});
+		else {
+			const field = get(control._fields, name);
+			if (field && field._f && !(getValidationModes(control._options.reValidateMode).isOnSubmit && getValidationModes(control._options.mode).isOnSubmit)) validateField(field, control._names.disabled, control._formValues, control._options.criteriaMode === VALIDATION_MODE.all, control._options.shouldUseNativeValidation, true).then((error) => !isEmptyObject(error) && control._subjects.state.next({ errors: updateFieldArrayRootError(control._formState.errors, error, name) }));
+		}
+		control._subjects.state.next({
+			name,
+			values: cloneObject(control._formValues)
+		});
+		control._names.focus && iterateFieldsByAction(control._fields, (ref, key) => {
+			if (control._names.focus && key.startsWith(control._names.focus) && ref.focus) {
+				ref.focus();
+				return 1;
+			}
+		});
+		control._names.focus = "";
+		control._setValid();
+		_actioned.current = false;
+	}, [
+		fields,
+		name,
+		control
+	]);
+	import_react.useEffect(() => {
+		!get(control._formValues, name) && control._setFieldArray(name);
+		return () => {
+			const updateMounted = (name, value) => {
+				const field = get(control._fields, name);
+				if (field && field._f) field._f.mount = value;
+			};
+			control._options.shouldUnregister || shouldUnregister ? control.unregister(name) : updateMounted(name, false);
+		};
+	}, [
+		name,
+		control,
+		keyName,
+		shouldUnregister
+	]);
+	return {
+		swap: import_react.useCallback(swap, [
+			updateValues,
+			name,
+			control
+		]),
+		move: import_react.useCallback(move, [
+			updateValues,
+			name,
+			control
+		]),
+		prepend: import_react.useCallback(prepend, [
+			updateValues,
+			name,
+			control
+		]),
+		append: import_react.useCallback(append, [
+			updateValues,
+			name,
+			control
+		]),
+		remove: import_react.useCallback(remove, [
+			updateValues,
+			name,
+			control
+		]),
+		insert: import_react.useCallback(insert$1, [
+			updateValues,
+			name,
+			control
+		]),
+		update: import_react.useCallback(update, [
+			updateValues,
+			name,
+			control
+		]),
+		replace: import_react.useCallback(replace, [
+			updateValues,
+			name,
+			control
+		]),
+		fields: import_react.useMemo(() => fields.map((field, index) => ({
+			...field,
+			[keyName]: ids.current[index] || generateId()
+		})), [fields, keyName])
+	};
+}
 /**
 * Custom hook to manage the entire form.
 *
@@ -15265,19 +17807,3870 @@ function useForm(props = {}) {
 	_formControl.current.formState = import_react.useMemo(() => getProxyFormState(formState, control), [control, formState]);
 	return _formControl.current;
 }
+Object.freeze({ status: "aborted" });
+function $constructor(name, initializer, params) {
+	function init(inst, def) {
+		if (!inst._zod) Object.defineProperty(inst, "_zod", {
+			value: {
+				def,
+				constr: _,
+				traits: /* @__PURE__ */ new Set()
+			},
+			enumerable: false
+		});
+		if (inst._zod.traits.has(name)) return;
+		inst._zod.traits.add(name);
+		initializer(inst, def);
+		const proto = _.prototype;
+		const keys = Object.keys(proto);
+		for (let i = 0; i < keys.length; i++) {
+			const k = keys[i];
+			if (!(k in inst)) inst[k] = proto[k].bind(inst);
+		}
+	}
+	const Parent = params?.Parent ?? Object;
+	class Definition extends Parent {}
+	Object.defineProperty(Definition, "name", { value: name });
+	function _(def) {
+		var _a;
+		const inst = params?.Parent ? new Definition() : this;
+		init(inst, def);
+		(_a = inst._zod).deferred ?? (_a.deferred = []);
+		for (const fn of inst._zod.deferred) fn();
+		return inst;
+	}
+	Object.defineProperty(_, "init", { value: init });
+	Object.defineProperty(_, Symbol.hasInstance, { value: (inst) => {
+		if (params?.Parent && inst instanceof params.Parent) return true;
+		return inst?._zod?.traits?.has(name);
+	} });
+	Object.defineProperty(_, "name", { value: name });
+	return _;
+}
+var $ZodAsyncError = class extends Error {
+	constructor() {
+		super(`Encountered Promise during synchronous parse. Use .parseAsync() instead.`);
+	}
+};
+var $ZodEncodeError = class extends Error {
+	constructor(name) {
+		super(`Encountered unidirectional transform during encode: ${name}`);
+		this.name = "ZodEncodeError";
+	}
+};
+var globalConfig = {};
+function config(newConfig) {
+	if (newConfig) Object.assign(globalConfig, newConfig);
+	return globalConfig;
+}
 //#endregion
-//#region src/components/Display.jsx
-function InvalidFeedback({ message }) {
-	return Feedback({
-		type: "invalid",
-		message
+//#region node_modules/zod/v4/core/util.js
+function getEnumValues(entries) {
+	const numericValues = Object.values(entries).filter((v) => typeof v === "number");
+	return Object.entries(entries).filter(([k, _]) => numericValues.indexOf(+k) === -1).map(([_, v]) => v);
+}
+function jsonStringifyReplacer(_, value) {
+	if (typeof value === "bigint") return value.toString();
+	return value;
+}
+function cached(getter) {
+	return { get value() {
+		{
+			const value = getter();
+			Object.defineProperty(this, "value", { value });
+			return value;
+		}
+		throw new Error("cached value already set");
+	} };
+}
+function nullish(input) {
+	return input === null || input === void 0;
+}
+function cleanRegex(source) {
+	const start = source.startsWith("^") ? 1 : 0;
+	const end = source.endsWith("$") ? source.length - 1 : source.length;
+	return source.slice(start, end);
+}
+function floatSafeRemainder(val, step) {
+	const valDecCount = (val.toString().split(".")[1] || "").length;
+	const stepString = step.toString();
+	let stepDecCount = (stepString.split(".")[1] || "").length;
+	if (stepDecCount === 0 && /\d?e-\d?/.test(stepString)) {
+		const match = stepString.match(/\d?e-(\d?)/);
+		if (match?.[1]) stepDecCount = Number.parseInt(match[1]);
+	}
+	const decCount = valDecCount > stepDecCount ? valDecCount : stepDecCount;
+	return Number.parseInt(val.toFixed(decCount).replace(".", "")) % Number.parseInt(step.toFixed(decCount).replace(".", "")) / 10 ** decCount;
+}
+var EVALUATING = Symbol("evaluating");
+function defineLazy(object, key, getter) {
+	let value = void 0;
+	Object.defineProperty(object, key, {
+		get() {
+			if (value === EVALUATING) return;
+			if (value === void 0) {
+				value = EVALUATING;
+				value = getter();
+			}
+			return value;
+		},
+		set(v) {
+			Object.defineProperty(object, key, { value: v });
+		},
+		configurable: true
 	});
 }
-function Feedback({ type, message }) {
+function assignProp(target, prop, value) {
+	Object.defineProperty(target, prop, {
+		value,
+		writable: true,
+		enumerable: true,
+		configurable: true
+	});
+}
+function mergeDefs(...defs) {
+	const mergedDescriptors = {};
+	for (const def of defs) Object.assign(mergedDescriptors, Object.getOwnPropertyDescriptors(def));
+	return Object.defineProperties({}, mergedDescriptors);
+}
+function esc(str) {
+	return JSON.stringify(str);
+}
+function slugify(input) {
+	return input.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/[\s_-]+/g, "-").replace(/^-+|-+$/g, "");
+}
+var captureStackTrace = "captureStackTrace" in Error ? Error.captureStackTrace : (..._args) => {};
+function isObject(data) {
+	return typeof data === "object" && data !== null && !Array.isArray(data);
+}
+var allowsEval = cached(() => {
+	if (typeof navigator !== "undefined" && navigator?.userAgent?.includes("Cloudflare")) return false;
+	try {
+		new Function("");
+		return true;
+	} catch (_) {
+		return false;
+	}
+});
+function isPlainObject(o) {
+	if (isObject(o) === false) return false;
+	const ctor = o.constructor;
+	if (ctor === void 0) return true;
+	if (typeof ctor !== "function") return true;
+	const prot = ctor.prototype;
+	if (isObject(prot) === false) return false;
+	if (Object.prototype.hasOwnProperty.call(prot, "isPrototypeOf") === false) return false;
+	return true;
+}
+function shallowClone(o) {
+	if (isPlainObject(o)) return { ...o };
+	if (Array.isArray(o)) return [...o];
+	return o;
+}
+var propertyKeyTypes = new Set([
+	"string",
+	"number",
+	"symbol"
+]);
+function escapeRegex(str) {
+	return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+function clone(inst, def, params) {
+	const cl = new inst._zod.constr(def ?? inst._zod.def);
+	if (!def || params?.parent) cl._zod.parent = inst;
+	return cl;
+}
+function normalizeParams(_params) {
+	const params = _params;
+	if (!params) return {};
+	if (typeof params === "string") return { error: () => params };
+	if (params?.message !== void 0) {
+		if (params?.error !== void 0) throw new Error("Cannot specify both `message` and `error` params");
+		params.error = params.message;
+	}
+	delete params.message;
+	if (typeof params.error === "string") return {
+		...params,
+		error: () => params.error
+	};
+	return params;
+}
+function optionalKeys(shape) {
+	return Object.keys(shape).filter((k) => {
+		return shape[k]._zod.optin === "optional" && shape[k]._zod.optout === "optional";
+	});
+}
+var NUMBER_FORMAT_RANGES = {
+	safeint: [Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER],
+	int32: [-2147483648, 2147483647],
+	uint32: [0, 4294967295],
+	float32: [-34028234663852886e22, 34028234663852886e22],
+	float64: [-Number.MAX_VALUE, Number.MAX_VALUE]
+};
+function pick(schema, mask) {
+	const currDef = schema._zod.def;
+	const checks = currDef.checks;
+	if (checks && checks.length > 0) throw new Error(".pick() cannot be used on object schemas containing refinements");
+	return clone(schema, mergeDefs(schema._zod.def, {
+		get shape() {
+			const newShape = {};
+			for (const key in mask) {
+				if (!(key in currDef.shape)) throw new Error(`Unrecognized key: "${key}"`);
+				if (!mask[key]) continue;
+				newShape[key] = currDef.shape[key];
+			}
+			assignProp(this, "shape", newShape);
+			return newShape;
+		},
+		checks: []
+	}));
+}
+function omit(schema, mask) {
+	const currDef = schema._zod.def;
+	const checks = currDef.checks;
+	if (checks && checks.length > 0) throw new Error(".omit() cannot be used on object schemas containing refinements");
+	return clone(schema, mergeDefs(schema._zod.def, {
+		get shape() {
+			const newShape = { ...schema._zod.def.shape };
+			for (const key in mask) {
+				if (!(key in currDef.shape)) throw new Error(`Unrecognized key: "${key}"`);
+				if (!mask[key]) continue;
+				delete newShape[key];
+			}
+			assignProp(this, "shape", newShape);
+			return newShape;
+		},
+		checks: []
+	}));
+}
+function extend(schema, shape) {
+	if (!isPlainObject(shape)) throw new Error("Invalid input to extend: expected a plain object");
+	const checks = schema._zod.def.checks;
+	if (checks && checks.length > 0) {
+		const existingShape = schema._zod.def.shape;
+		for (const key in shape) if (Object.getOwnPropertyDescriptor(existingShape, key) !== void 0) throw new Error("Cannot overwrite keys on object schemas containing refinements. Use `.safeExtend()` instead.");
+	}
+	return clone(schema, mergeDefs(schema._zod.def, { get shape() {
+		const _shape = {
+			...schema._zod.def.shape,
+			...shape
+		};
+		assignProp(this, "shape", _shape);
+		return _shape;
+	} }));
+}
+function safeExtend(schema, shape) {
+	if (!isPlainObject(shape)) throw new Error("Invalid input to safeExtend: expected a plain object");
+	return clone(schema, mergeDefs(schema._zod.def, { get shape() {
+		const _shape = {
+			...schema._zod.def.shape,
+			...shape
+		};
+		assignProp(this, "shape", _shape);
+		return _shape;
+	} }));
+}
+function merge(a, b) {
+	return clone(a, mergeDefs(a._zod.def, {
+		get shape() {
+			const _shape = {
+				...a._zod.def.shape,
+				...b._zod.def.shape
+			};
+			assignProp(this, "shape", _shape);
+			return _shape;
+		},
+		get catchall() {
+			return b._zod.def.catchall;
+		},
+		checks: []
+	}));
+}
+function partial(Class, schema, mask) {
+	const checks = schema._zod.def.checks;
+	if (checks && checks.length > 0) throw new Error(".partial() cannot be used on object schemas containing refinements");
+	return clone(schema, mergeDefs(schema._zod.def, {
+		get shape() {
+			const oldShape = schema._zod.def.shape;
+			const shape = { ...oldShape };
+			if (mask) for (const key in mask) {
+				if (!(key in oldShape)) throw new Error(`Unrecognized key: "${key}"`);
+				if (!mask[key]) continue;
+				shape[key] = Class ? new Class({
+					type: "optional",
+					innerType: oldShape[key]
+				}) : oldShape[key];
+			}
+			else for (const key in oldShape) shape[key] = Class ? new Class({
+				type: "optional",
+				innerType: oldShape[key]
+			}) : oldShape[key];
+			assignProp(this, "shape", shape);
+			return shape;
+		},
+		checks: []
+	}));
+}
+function required(Class, schema, mask) {
+	return clone(schema, mergeDefs(schema._zod.def, { get shape() {
+		const oldShape = schema._zod.def.shape;
+		const shape = { ...oldShape };
+		if (mask) for (const key in mask) {
+			if (!(key in shape)) throw new Error(`Unrecognized key: "${key}"`);
+			if (!mask[key]) continue;
+			shape[key] = new Class({
+				type: "nonoptional",
+				innerType: oldShape[key]
+			});
+		}
+		else for (const key in oldShape) shape[key] = new Class({
+			type: "nonoptional",
+			innerType: oldShape[key]
+		});
+		assignProp(this, "shape", shape);
+		return shape;
+	} }));
+}
+function aborted(x, startIndex = 0) {
+	if (x.aborted === true) return true;
+	for (let i = startIndex; i < x.issues.length; i++) if (x.issues[i]?.continue !== true) return true;
+	return false;
+}
+function prefixIssues(path, issues) {
+	return issues.map((iss) => {
+		var _a;
+		(_a = iss).path ?? (_a.path = []);
+		iss.path.unshift(path);
+		return iss;
+	});
+}
+function unwrapMessage(message) {
+	return typeof message === "string" ? message : message?.message;
+}
+function finalizeIssue(iss, ctx, config) {
+	const full = {
+		...iss,
+		path: iss.path ?? []
+	};
+	if (!iss.message) full.message = unwrapMessage(iss.inst?._zod.def?.error?.(iss)) ?? unwrapMessage(ctx?.error?.(iss)) ?? unwrapMessage(config.customError?.(iss)) ?? unwrapMessage(config.localeError?.(iss)) ?? "Invalid input";
+	delete full.inst;
+	delete full.continue;
+	if (!ctx?.reportInput) delete full.input;
+	return full;
+}
+function getLengthableOrigin(input) {
+	if (Array.isArray(input)) return "array";
+	if (typeof input === "string") return "string";
+	return "unknown";
+}
+function issue(...args) {
+	const [iss, input, inst] = args;
+	if (typeof iss === "string") return {
+		message: iss,
+		code: "custom",
+		input,
+		inst
+	};
+	return { ...iss };
+}
+//#endregion
+//#region node_modules/zod/v4/core/errors.js
+var initializer$1 = (inst, def) => {
+	inst.name = "$ZodError";
+	Object.defineProperty(inst, "_zod", {
+		value: inst._zod,
+		enumerable: false
+	});
+	Object.defineProperty(inst, "issues", {
+		value: def,
+		enumerable: false
+	});
+	inst.message = JSON.stringify(def, jsonStringifyReplacer, 2);
+	Object.defineProperty(inst, "toString", {
+		value: () => inst.message,
+		enumerable: false
+	});
+};
+var $ZodError = $constructor("$ZodError", initializer$1);
+var $ZodRealError = $constructor("$ZodError", initializer$1, { Parent: Error });
+function flattenError(error, mapper = (issue) => issue.message) {
+	const fieldErrors = {};
+	const formErrors = [];
+	for (const sub of error.issues) if (sub.path.length > 0) {
+		fieldErrors[sub.path[0]] = fieldErrors[sub.path[0]] || [];
+		fieldErrors[sub.path[0]].push(mapper(sub));
+	} else formErrors.push(mapper(sub));
+	return {
+		formErrors,
+		fieldErrors
+	};
+}
+function formatError(error, mapper = (issue) => issue.message) {
+	const fieldErrors = { _errors: [] };
+	const processError = (error) => {
+		for (const issue of error.issues) if (issue.code === "invalid_union" && issue.errors.length) issue.errors.map((issues) => processError({ issues }));
+		else if (issue.code === "invalid_key") processError({ issues: issue.issues });
+		else if (issue.code === "invalid_element") processError({ issues: issue.issues });
+		else if (issue.path.length === 0) fieldErrors._errors.push(mapper(issue));
+		else {
+			let curr = fieldErrors;
+			let i = 0;
+			while (i < issue.path.length) {
+				const el = issue.path[i];
+				if (!(i === issue.path.length - 1)) curr[el] = curr[el] || { _errors: [] };
+				else {
+					curr[el] = curr[el] || { _errors: [] };
+					curr[el]._errors.push(mapper(issue));
+				}
+				curr = curr[el];
+				i++;
+			}
+		}
+	};
+	processError(error);
+	return fieldErrors;
+}
+//#endregion
+//#region node_modules/zod/v4/core/parse.js
+var _parse = (_Err) => (schema, value, _ctx, _params) => {
+	const ctx = _ctx ? Object.assign(_ctx, { async: false }) : { async: false };
+	const result = schema._zod.run({
+		value,
+		issues: []
+	}, ctx);
+	if (result instanceof Promise) throw new $ZodAsyncError();
+	if (result.issues.length) {
+		const e = new (_params?.Err ?? _Err)(result.issues.map((iss) => finalizeIssue(iss, ctx, config())));
+		captureStackTrace(e, _params?.callee);
+		throw e;
+	}
+	return result.value;
+};
+var parse$1 = /* @__PURE__ */ _parse($ZodRealError);
+var _parseAsync = (_Err) => async (schema, value, _ctx, params) => {
+	const ctx = _ctx ? Object.assign(_ctx, { async: true }) : { async: true };
+	let result = schema._zod.run({
+		value,
+		issues: []
+	}, ctx);
+	if (result instanceof Promise) result = await result;
+	if (result.issues.length) {
+		const e = new (params?.Err ?? _Err)(result.issues.map((iss) => finalizeIssue(iss, ctx, config())));
+		captureStackTrace(e, params?.callee);
+		throw e;
+	}
+	return result.value;
+};
+var parseAsync$1 = /* @__PURE__ */ _parseAsync($ZodRealError);
+var _safeParse = (_Err) => (schema, value, _ctx) => {
+	const ctx = _ctx ? {
+		..._ctx,
+		async: false
+	} : { async: false };
+	const result = schema._zod.run({
+		value,
+		issues: []
+	}, ctx);
+	if (result instanceof Promise) throw new $ZodAsyncError();
+	return result.issues.length ? {
+		success: false,
+		error: new (_Err ?? $ZodError)(result.issues.map((iss) => finalizeIssue(iss, ctx, config())))
+	} : {
+		success: true,
+		data: result.value
+	};
+};
+var safeParse$1 = /* @__PURE__ */ _safeParse($ZodRealError);
+var _safeParseAsync = (_Err) => async (schema, value, _ctx) => {
+	const ctx = _ctx ? Object.assign(_ctx, { async: true }) : { async: true };
+	let result = schema._zod.run({
+		value,
+		issues: []
+	}, ctx);
+	if (result instanceof Promise) result = await result;
+	return result.issues.length ? {
+		success: false,
+		error: new _Err(result.issues.map((iss) => finalizeIssue(iss, ctx, config())))
+	} : {
+		success: true,
+		data: result.value
+	};
+};
+var safeParseAsync$1 = /* @__PURE__ */ _safeParseAsync($ZodRealError);
+var _encode = (_Err) => (schema, value, _ctx) => {
+	const ctx = _ctx ? Object.assign(_ctx, { direction: "backward" }) : { direction: "backward" };
+	return _parse(_Err)(schema, value, ctx);
+};
+var _decode = (_Err) => (schema, value, _ctx) => {
+	return _parse(_Err)(schema, value, _ctx);
+};
+var _encodeAsync = (_Err) => async (schema, value, _ctx) => {
+	const ctx = _ctx ? Object.assign(_ctx, { direction: "backward" }) : { direction: "backward" };
+	return _parseAsync(_Err)(schema, value, ctx);
+};
+var _decodeAsync = (_Err) => async (schema, value, _ctx) => {
+	return _parseAsync(_Err)(schema, value, _ctx);
+};
+var _safeEncode = (_Err) => (schema, value, _ctx) => {
+	const ctx = _ctx ? Object.assign(_ctx, { direction: "backward" }) : { direction: "backward" };
+	return _safeParse(_Err)(schema, value, ctx);
+};
+var _safeDecode = (_Err) => (schema, value, _ctx) => {
+	return _safeParse(_Err)(schema, value, _ctx);
+};
+var _safeEncodeAsync = (_Err) => async (schema, value, _ctx) => {
+	const ctx = _ctx ? Object.assign(_ctx, { direction: "backward" }) : { direction: "backward" };
+	return _safeParseAsync(_Err)(schema, value, ctx);
+};
+var _safeDecodeAsync = (_Err) => async (schema, value, _ctx) => {
+	return _safeParseAsync(_Err)(schema, value, _ctx);
+};
+//#endregion
+//#region node_modules/zod/v4/core/regexes.js
+var cuid = /^[cC][^\s-]{8,}$/;
+var cuid2 = /^[0-9a-z]+$/;
+var ulid = /^[0-9A-HJKMNP-TV-Za-hjkmnp-tv-z]{26}$/;
+var xid = /^[0-9a-vA-V]{20}$/;
+var ksuid = /^[A-Za-z0-9]{27}$/;
+var nanoid = /^[a-zA-Z0-9_-]{21}$/;
+/** ISO 8601-1 duration regex. Does not support the 8601-2 extensions like negative durations or fractional/negative components. */
+var duration$1 = /^P(?:(\d+W)|(?!.*W)(?=\d|T\d)(\d+Y)?(\d+M)?(\d+D)?(T(?=\d)(\d+H)?(\d+M)?(\d+([.,]\d+)?S)?)?)$/;
+/** A regex for any UUID-like identifier: 8-4-4-4-12 hex pattern */
+var guid = /^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$/;
+/** Returns a regex for validating an RFC 9562/4122 UUID.
+*
+* @param version Optionally specify a version 1-8. If no version is specified, all versions are supported. */
+var uuid = (version) => {
+	if (!version) return /^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$/;
+	return new RegExp(`^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-${version}[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$`);
+};
+/** Practical email validation */
+var email = /^(?!\.)(?!.*\.\.)([A-Za-z0-9_'+\-\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$/;
+var _emoji$1 = `^(\\p{Extended_Pictographic}|\\p{Emoji_Component})+$`;
+function emoji() {
+	return new RegExp(_emoji$1, "u");
+}
+var ipv4 = /^(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])$/;
+var ipv6 = /^(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:))$/;
+var cidrv4 = /^((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\/([0-9]|[1-2][0-9]|3[0-2])$/;
+var cidrv6 = /^(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|::|([0-9a-fA-F]{1,4})?::([0-9a-fA-F]{1,4}:?){0,6})\/(12[0-8]|1[01][0-9]|[1-9]?[0-9])$/;
+var base64 = /^$|^(?:[0-9a-zA-Z+/]{4})*(?:(?:[0-9a-zA-Z+/]{2}==)|(?:[0-9a-zA-Z+/]{3}=))?$/;
+var base64url = /^[A-Za-z0-9_-]*$/;
+var e164 = /^\+[1-9]\d{6,14}$/;
+var dateSource = `(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))`;
+var date$1 = /* @__PURE__ */ new RegExp(`^${dateSource}$`);
+function timeSource(args) {
+	const hhmm = `(?:[01]\\d|2[0-3]):[0-5]\\d`;
+	return typeof args.precision === "number" ? args.precision === -1 ? `${hhmm}` : args.precision === 0 ? `${hhmm}:[0-5]\\d` : `${hhmm}:[0-5]\\d\\.\\d{${args.precision}}` : `${hhmm}(?::[0-5]\\d(?:\\.\\d+)?)?`;
+}
+function time$1(args) {
+	return new RegExp(`^${timeSource(args)}$`);
+}
+function datetime$1(args) {
+	const time = timeSource({ precision: args.precision });
+	const opts = ["Z"];
+	if (args.local) opts.push("");
+	if (args.offset) opts.push(`([+-](?:[01]\\d|2[0-3]):[0-5]\\d)`);
+	const timeRegex = `${time}(?:${opts.join("|")})`;
+	return new RegExp(`^${dateSource}T(?:${timeRegex})$`);
+}
+var string$1 = (params) => {
+	const regex = params ? `[\\s\\S]{${params?.minimum ?? 0},${params?.maximum ?? ""}}` : `[\\s\\S]*`;
+	return new RegExp(`^${regex}$`);
+};
+var integer = /^-?\d+$/;
+var number$1 = /^-?\d+(?:\.\d+)?$/;
+var boolean$1 = /^(?:true|false)$/i;
+var lowercase = /^[^A-Z]*$/;
+var uppercase = /^[^a-z]*$/;
+//#endregion
+//#region node_modules/zod/v4/core/checks.js
+var $ZodCheck = /* @__PURE__ */ $constructor("$ZodCheck", (inst, def) => {
+	var _a;
+	inst._zod ?? (inst._zod = {});
+	inst._zod.def = def;
+	(_a = inst._zod).onattach ?? (_a.onattach = []);
+});
+var numericOriginMap = {
+	number: "number",
+	bigint: "bigint",
+	object: "date"
+};
+var $ZodCheckLessThan = /* @__PURE__ */ $constructor("$ZodCheckLessThan", (inst, def) => {
+	$ZodCheck.init(inst, def);
+	const origin = numericOriginMap[typeof def.value];
+	inst._zod.onattach.push((inst) => {
+		const bag = inst._zod.bag;
+		const curr = (def.inclusive ? bag.maximum : bag.exclusiveMaximum) ?? Number.POSITIVE_INFINITY;
+		if (def.value < curr) if (def.inclusive) bag.maximum = def.value;
+		else bag.exclusiveMaximum = def.value;
+	});
+	inst._zod.check = (payload) => {
+		if (def.inclusive ? payload.value <= def.value : payload.value < def.value) return;
+		payload.issues.push({
+			origin,
+			code: "too_big",
+			maximum: typeof def.value === "object" ? def.value.getTime() : def.value,
+			input: payload.value,
+			inclusive: def.inclusive,
+			inst,
+			continue: !def.abort
+		});
+	};
+});
+var $ZodCheckGreaterThan = /* @__PURE__ */ $constructor("$ZodCheckGreaterThan", (inst, def) => {
+	$ZodCheck.init(inst, def);
+	const origin = numericOriginMap[typeof def.value];
+	inst._zod.onattach.push((inst) => {
+		const bag = inst._zod.bag;
+		const curr = (def.inclusive ? bag.minimum : bag.exclusiveMinimum) ?? Number.NEGATIVE_INFINITY;
+		if (def.value > curr) if (def.inclusive) bag.minimum = def.value;
+		else bag.exclusiveMinimum = def.value;
+	});
+	inst._zod.check = (payload) => {
+		if (def.inclusive ? payload.value >= def.value : payload.value > def.value) return;
+		payload.issues.push({
+			origin,
+			code: "too_small",
+			minimum: typeof def.value === "object" ? def.value.getTime() : def.value,
+			input: payload.value,
+			inclusive: def.inclusive,
+			inst,
+			continue: !def.abort
+		});
+	};
+});
+var $ZodCheckMultipleOf = /* @__PURE__ */ $constructor("$ZodCheckMultipleOf", (inst, def) => {
+	$ZodCheck.init(inst, def);
+	inst._zod.onattach.push((inst) => {
+		var _a;
+		(_a = inst._zod.bag).multipleOf ?? (_a.multipleOf = def.value);
+	});
+	inst._zod.check = (payload) => {
+		if (typeof payload.value !== typeof def.value) throw new Error("Cannot mix number and bigint in multiple_of check.");
+		if (typeof payload.value === "bigint" ? payload.value % def.value === BigInt(0) : floatSafeRemainder(payload.value, def.value) === 0) return;
+		payload.issues.push({
+			origin: typeof payload.value,
+			code: "not_multiple_of",
+			divisor: def.value,
+			input: payload.value,
+			inst,
+			continue: !def.abort
+		});
+	};
+});
+var $ZodCheckNumberFormat = /* @__PURE__ */ $constructor("$ZodCheckNumberFormat", (inst, def) => {
+	$ZodCheck.init(inst, def);
+	def.format = def.format || "float64";
+	const isInt = def.format?.includes("int");
+	const origin = isInt ? "int" : "number";
+	const [minimum, maximum] = NUMBER_FORMAT_RANGES[def.format];
+	inst._zod.onattach.push((inst) => {
+		const bag = inst._zod.bag;
+		bag.format = def.format;
+		bag.minimum = minimum;
+		bag.maximum = maximum;
+		if (isInt) bag.pattern = integer;
+	});
+	inst._zod.check = (payload) => {
+		const input = payload.value;
+		if (isInt) {
+			if (!Number.isInteger(input)) {
+				payload.issues.push({
+					expected: origin,
+					format: def.format,
+					code: "invalid_type",
+					continue: false,
+					input,
+					inst
+				});
+				return;
+			}
+			if (!Number.isSafeInteger(input)) {
+				if (input > 0) payload.issues.push({
+					input,
+					code: "too_big",
+					maximum: Number.MAX_SAFE_INTEGER,
+					note: "Integers must be within the safe integer range.",
+					inst,
+					origin,
+					inclusive: true,
+					continue: !def.abort
+				});
+				else payload.issues.push({
+					input,
+					code: "too_small",
+					minimum: Number.MIN_SAFE_INTEGER,
+					note: "Integers must be within the safe integer range.",
+					inst,
+					origin,
+					inclusive: true,
+					continue: !def.abort
+				});
+				return;
+			}
+		}
+		if (input < minimum) payload.issues.push({
+			origin: "number",
+			input,
+			code: "too_small",
+			minimum,
+			inclusive: true,
+			inst,
+			continue: !def.abort
+		});
+		if (input > maximum) payload.issues.push({
+			origin: "number",
+			input,
+			code: "too_big",
+			maximum,
+			inclusive: true,
+			inst,
+			continue: !def.abort
+		});
+	};
+});
+var $ZodCheckMaxLength = /* @__PURE__ */ $constructor("$ZodCheckMaxLength", (inst, def) => {
+	var _a;
+	$ZodCheck.init(inst, def);
+	(_a = inst._zod.def).when ?? (_a.when = (payload) => {
+		const val = payload.value;
+		return !nullish(val) && val.length !== void 0;
+	});
+	inst._zod.onattach.push((inst) => {
+		const curr = inst._zod.bag.maximum ?? Number.POSITIVE_INFINITY;
+		if (def.maximum < curr) inst._zod.bag.maximum = def.maximum;
+	});
+	inst._zod.check = (payload) => {
+		const input = payload.value;
+		if (input.length <= def.maximum) return;
+		const origin = getLengthableOrigin(input);
+		payload.issues.push({
+			origin,
+			code: "too_big",
+			maximum: def.maximum,
+			inclusive: true,
+			input,
+			inst,
+			continue: !def.abort
+		});
+	};
+});
+var $ZodCheckMinLength = /* @__PURE__ */ $constructor("$ZodCheckMinLength", (inst, def) => {
+	var _a;
+	$ZodCheck.init(inst, def);
+	(_a = inst._zod.def).when ?? (_a.when = (payload) => {
+		const val = payload.value;
+		return !nullish(val) && val.length !== void 0;
+	});
+	inst._zod.onattach.push((inst) => {
+		const curr = inst._zod.bag.minimum ?? Number.NEGATIVE_INFINITY;
+		if (def.minimum > curr) inst._zod.bag.minimum = def.minimum;
+	});
+	inst._zod.check = (payload) => {
+		const input = payload.value;
+		if (input.length >= def.minimum) return;
+		const origin = getLengthableOrigin(input);
+		payload.issues.push({
+			origin,
+			code: "too_small",
+			minimum: def.minimum,
+			inclusive: true,
+			input,
+			inst,
+			continue: !def.abort
+		});
+	};
+});
+var $ZodCheckLengthEquals = /* @__PURE__ */ $constructor("$ZodCheckLengthEquals", (inst, def) => {
+	var _a;
+	$ZodCheck.init(inst, def);
+	(_a = inst._zod.def).when ?? (_a.when = (payload) => {
+		const val = payload.value;
+		return !nullish(val) && val.length !== void 0;
+	});
+	inst._zod.onattach.push((inst) => {
+		const bag = inst._zod.bag;
+		bag.minimum = def.length;
+		bag.maximum = def.length;
+		bag.length = def.length;
+	});
+	inst._zod.check = (payload) => {
+		const input = payload.value;
+		const length = input.length;
+		if (length === def.length) return;
+		const origin = getLengthableOrigin(input);
+		const tooBig = length > def.length;
+		payload.issues.push({
+			origin,
+			...tooBig ? {
+				code: "too_big",
+				maximum: def.length
+			} : {
+				code: "too_small",
+				minimum: def.length
+			},
+			inclusive: true,
+			exact: true,
+			input: payload.value,
+			inst,
+			continue: !def.abort
+		});
+	};
+});
+var $ZodCheckStringFormat = /* @__PURE__ */ $constructor("$ZodCheckStringFormat", (inst, def) => {
+	var _a, _b;
+	$ZodCheck.init(inst, def);
+	inst._zod.onattach.push((inst) => {
+		const bag = inst._zod.bag;
+		bag.format = def.format;
+		if (def.pattern) {
+			bag.patterns ?? (bag.patterns = /* @__PURE__ */ new Set());
+			bag.patterns.add(def.pattern);
+		}
+	});
+	if (def.pattern) (_a = inst._zod).check ?? (_a.check = (payload) => {
+		def.pattern.lastIndex = 0;
+		if (def.pattern.test(payload.value)) return;
+		payload.issues.push({
+			origin: "string",
+			code: "invalid_format",
+			format: def.format,
+			input: payload.value,
+			...def.pattern ? { pattern: def.pattern.toString() } : {},
+			inst,
+			continue: !def.abort
+		});
+	});
+	else (_b = inst._zod).check ?? (_b.check = () => {});
+});
+var $ZodCheckRegex = /* @__PURE__ */ $constructor("$ZodCheckRegex", (inst, def) => {
+	$ZodCheckStringFormat.init(inst, def);
+	inst._zod.check = (payload) => {
+		def.pattern.lastIndex = 0;
+		if (def.pattern.test(payload.value)) return;
+		payload.issues.push({
+			origin: "string",
+			code: "invalid_format",
+			format: "regex",
+			input: payload.value,
+			pattern: def.pattern.toString(),
+			inst,
+			continue: !def.abort
+		});
+	};
+});
+var $ZodCheckLowerCase = /* @__PURE__ */ $constructor("$ZodCheckLowerCase", (inst, def) => {
+	def.pattern ?? (def.pattern = lowercase);
+	$ZodCheckStringFormat.init(inst, def);
+});
+var $ZodCheckUpperCase = /* @__PURE__ */ $constructor("$ZodCheckUpperCase", (inst, def) => {
+	def.pattern ?? (def.pattern = uppercase);
+	$ZodCheckStringFormat.init(inst, def);
+});
+var $ZodCheckIncludes = /* @__PURE__ */ $constructor("$ZodCheckIncludes", (inst, def) => {
+	$ZodCheck.init(inst, def);
+	const escapedRegex = escapeRegex(def.includes);
+	const pattern = new RegExp(typeof def.position === "number" ? `^.{${def.position}}${escapedRegex}` : escapedRegex);
+	def.pattern = pattern;
+	inst._zod.onattach.push((inst) => {
+		const bag = inst._zod.bag;
+		bag.patterns ?? (bag.patterns = /* @__PURE__ */ new Set());
+		bag.patterns.add(pattern);
+	});
+	inst._zod.check = (payload) => {
+		if (payload.value.includes(def.includes, def.position)) return;
+		payload.issues.push({
+			origin: "string",
+			code: "invalid_format",
+			format: "includes",
+			includes: def.includes,
+			input: payload.value,
+			inst,
+			continue: !def.abort
+		});
+	};
+});
+var $ZodCheckStartsWith = /* @__PURE__ */ $constructor("$ZodCheckStartsWith", (inst, def) => {
+	$ZodCheck.init(inst, def);
+	const pattern = new RegExp(`^${escapeRegex(def.prefix)}.*`);
+	def.pattern ?? (def.pattern = pattern);
+	inst._zod.onattach.push((inst) => {
+		const bag = inst._zod.bag;
+		bag.patterns ?? (bag.patterns = /* @__PURE__ */ new Set());
+		bag.patterns.add(pattern);
+	});
+	inst._zod.check = (payload) => {
+		if (payload.value.startsWith(def.prefix)) return;
+		payload.issues.push({
+			origin: "string",
+			code: "invalid_format",
+			format: "starts_with",
+			prefix: def.prefix,
+			input: payload.value,
+			inst,
+			continue: !def.abort
+		});
+	};
+});
+var $ZodCheckEndsWith = /* @__PURE__ */ $constructor("$ZodCheckEndsWith", (inst, def) => {
+	$ZodCheck.init(inst, def);
+	const pattern = new RegExp(`.*${escapeRegex(def.suffix)}$`);
+	def.pattern ?? (def.pattern = pattern);
+	inst._zod.onattach.push((inst) => {
+		const bag = inst._zod.bag;
+		bag.patterns ?? (bag.patterns = /* @__PURE__ */ new Set());
+		bag.patterns.add(pattern);
+	});
+	inst._zod.check = (payload) => {
+		if (payload.value.endsWith(def.suffix)) return;
+		payload.issues.push({
+			origin: "string",
+			code: "invalid_format",
+			format: "ends_with",
+			suffix: def.suffix,
+			input: payload.value,
+			inst,
+			continue: !def.abort
+		});
+	};
+});
+var $ZodCheckOverwrite = /* @__PURE__ */ $constructor("$ZodCheckOverwrite", (inst, def) => {
+	$ZodCheck.init(inst, def);
+	inst._zod.check = (payload) => {
+		payload.value = def.tx(payload.value);
+	};
+});
+//#endregion
+//#region node_modules/zod/v4/core/doc.js
+var Doc = class {
+	constructor(args = []) {
+		this.content = [];
+		this.indent = 0;
+		if (this) this.args = args;
+	}
+	indented(fn) {
+		this.indent += 1;
+		fn(this);
+		this.indent -= 1;
+	}
+	write(arg) {
+		if (typeof arg === "function") {
+			arg(this, { execution: "sync" });
+			arg(this, { execution: "async" });
+			return;
+		}
+		const lines = arg.split("\n").filter((x) => x);
+		const minIndent = Math.min(...lines.map((x) => x.length - x.trimStart().length));
+		const dedented = lines.map((x) => x.slice(minIndent)).map((x) => " ".repeat(this.indent * 2) + x);
+		for (const line of dedented) this.content.push(line);
+	}
+	compile() {
+		const F = Function;
+		const args = this?.args;
+		const lines = [...(this?.content ?? [``]).map((x) => `  ${x}`)];
+		return new F(...args, lines.join("\n"));
+	}
+};
+//#endregion
+//#region node_modules/zod/v4/core/versions.js
+var version = {
+	major: 4,
+	minor: 3,
+	patch: 6
+};
+//#endregion
+//#region node_modules/zod/v4/core/schemas.js
+var $ZodType = /* @__PURE__ */ $constructor("$ZodType", (inst, def) => {
+	var _a;
+	inst ?? (inst = {});
+	inst._zod.def = def;
+	inst._zod.bag = inst._zod.bag || {};
+	inst._zod.version = version;
+	const checks = [...inst._zod.def.checks ?? []];
+	if (inst._zod.traits.has("$ZodCheck")) checks.unshift(inst);
+	for (const ch of checks) for (const fn of ch._zod.onattach) fn(inst);
+	if (checks.length === 0) {
+		(_a = inst._zod).deferred ?? (_a.deferred = []);
+		inst._zod.deferred?.push(() => {
+			inst._zod.run = inst._zod.parse;
+		});
+	} else {
+		const runChecks = (payload, checks, ctx) => {
+			let isAborted = aborted(payload);
+			let asyncResult;
+			for (const ch of checks) {
+				if (ch._zod.def.when) {
+					if (!ch._zod.def.when(payload)) continue;
+				} else if (isAborted) continue;
+				const currLen = payload.issues.length;
+				const _ = ch._zod.check(payload);
+				if (_ instanceof Promise && ctx?.async === false) throw new $ZodAsyncError();
+				if (asyncResult || _ instanceof Promise) asyncResult = (asyncResult ?? Promise.resolve()).then(async () => {
+					await _;
+					if (payload.issues.length === currLen) return;
+					if (!isAborted) isAborted = aborted(payload, currLen);
+				});
+				else {
+					if (payload.issues.length === currLen) continue;
+					if (!isAborted) isAborted = aborted(payload, currLen);
+				}
+			}
+			if (asyncResult) return asyncResult.then(() => {
+				return payload;
+			});
+			return payload;
+		};
+		const handleCanaryResult = (canary, payload, ctx) => {
+			if (aborted(canary)) {
+				canary.aborted = true;
+				return canary;
+			}
+			const checkResult = runChecks(payload, checks, ctx);
+			if (checkResult instanceof Promise) {
+				if (ctx.async === false) throw new $ZodAsyncError();
+				return checkResult.then((checkResult) => inst._zod.parse(checkResult, ctx));
+			}
+			return inst._zod.parse(checkResult, ctx);
+		};
+		inst._zod.run = (payload, ctx) => {
+			if (ctx.skipChecks) return inst._zod.parse(payload, ctx);
+			if (ctx.direction === "backward") {
+				const canary = inst._zod.parse({
+					value: payload.value,
+					issues: []
+				}, {
+					...ctx,
+					skipChecks: true
+				});
+				if (canary instanceof Promise) return canary.then((canary) => {
+					return handleCanaryResult(canary, payload, ctx);
+				});
+				return handleCanaryResult(canary, payload, ctx);
+			}
+			const result = inst._zod.parse(payload, ctx);
+			if (result instanceof Promise) {
+				if (ctx.async === false) throw new $ZodAsyncError();
+				return result.then((result) => runChecks(result, checks, ctx));
+			}
+			return runChecks(result, checks, ctx);
+		};
+	}
+	defineLazy(inst, "~standard", () => ({
+		validate: (value) => {
+			try {
+				const r = safeParse$1(inst, value);
+				return r.success ? { value: r.data } : { issues: r.error?.issues };
+			} catch (_) {
+				return safeParseAsync$1(inst, value).then((r) => r.success ? { value: r.data } : { issues: r.error?.issues });
+			}
+		},
+		vendor: "zod",
+		version: 1
+	}));
+});
+var $ZodString = /* @__PURE__ */ $constructor("$ZodString", (inst, def) => {
+	$ZodType.init(inst, def);
+	inst._zod.pattern = [...inst?._zod.bag?.patterns ?? []].pop() ?? string$1(inst._zod.bag);
+	inst._zod.parse = (payload, _) => {
+		if (def.coerce) try {
+			payload.value = String(payload.value);
+		} catch (_) {}
+		if (typeof payload.value === "string") return payload;
+		payload.issues.push({
+			expected: "string",
+			code: "invalid_type",
+			input: payload.value,
+			inst
+		});
+		return payload;
+	};
+});
+var $ZodStringFormat = /* @__PURE__ */ $constructor("$ZodStringFormat", (inst, def) => {
+	$ZodCheckStringFormat.init(inst, def);
+	$ZodString.init(inst, def);
+});
+var $ZodGUID = /* @__PURE__ */ $constructor("$ZodGUID", (inst, def) => {
+	def.pattern ?? (def.pattern = guid);
+	$ZodStringFormat.init(inst, def);
+});
+var $ZodUUID = /* @__PURE__ */ $constructor("$ZodUUID", (inst, def) => {
+	if (def.version) {
+		const v = {
+			v1: 1,
+			v2: 2,
+			v3: 3,
+			v4: 4,
+			v5: 5,
+			v6: 6,
+			v7: 7,
+			v8: 8
+		}[def.version];
+		if (v === void 0) throw new Error(`Invalid UUID version: "${def.version}"`);
+		def.pattern ?? (def.pattern = uuid(v));
+	} else def.pattern ?? (def.pattern = uuid());
+	$ZodStringFormat.init(inst, def);
+});
+var $ZodEmail = /* @__PURE__ */ $constructor("$ZodEmail", (inst, def) => {
+	def.pattern ?? (def.pattern = email);
+	$ZodStringFormat.init(inst, def);
+});
+var $ZodURL = /* @__PURE__ */ $constructor("$ZodURL", (inst, def) => {
+	$ZodStringFormat.init(inst, def);
+	inst._zod.check = (payload) => {
+		try {
+			const trimmed = payload.value.trim();
+			const url = new URL(trimmed);
+			if (def.hostname) {
+				def.hostname.lastIndex = 0;
+				if (!def.hostname.test(url.hostname)) payload.issues.push({
+					code: "invalid_format",
+					format: "url",
+					note: "Invalid hostname",
+					pattern: def.hostname.source,
+					input: payload.value,
+					inst,
+					continue: !def.abort
+				});
+			}
+			if (def.protocol) {
+				def.protocol.lastIndex = 0;
+				if (!def.protocol.test(url.protocol.endsWith(":") ? url.protocol.slice(0, -1) : url.protocol)) payload.issues.push({
+					code: "invalid_format",
+					format: "url",
+					note: "Invalid protocol",
+					pattern: def.protocol.source,
+					input: payload.value,
+					inst,
+					continue: !def.abort
+				});
+			}
+			if (def.normalize) payload.value = url.href;
+			else payload.value = trimmed;
+			return;
+		} catch (_) {
+			payload.issues.push({
+				code: "invalid_format",
+				format: "url",
+				input: payload.value,
+				inst,
+				continue: !def.abort
+			});
+		}
+	};
+});
+var $ZodEmoji = /* @__PURE__ */ $constructor("$ZodEmoji", (inst, def) => {
+	def.pattern ?? (def.pattern = emoji());
+	$ZodStringFormat.init(inst, def);
+});
+var $ZodNanoID = /* @__PURE__ */ $constructor("$ZodNanoID", (inst, def) => {
+	def.pattern ?? (def.pattern = nanoid);
+	$ZodStringFormat.init(inst, def);
+});
+var $ZodCUID = /* @__PURE__ */ $constructor("$ZodCUID", (inst, def) => {
+	def.pattern ?? (def.pattern = cuid);
+	$ZodStringFormat.init(inst, def);
+});
+var $ZodCUID2 = /* @__PURE__ */ $constructor("$ZodCUID2", (inst, def) => {
+	def.pattern ?? (def.pattern = cuid2);
+	$ZodStringFormat.init(inst, def);
+});
+var $ZodULID = /* @__PURE__ */ $constructor("$ZodULID", (inst, def) => {
+	def.pattern ?? (def.pattern = ulid);
+	$ZodStringFormat.init(inst, def);
+});
+var $ZodXID = /* @__PURE__ */ $constructor("$ZodXID", (inst, def) => {
+	def.pattern ?? (def.pattern = xid);
+	$ZodStringFormat.init(inst, def);
+});
+var $ZodKSUID = /* @__PURE__ */ $constructor("$ZodKSUID", (inst, def) => {
+	def.pattern ?? (def.pattern = ksuid);
+	$ZodStringFormat.init(inst, def);
+});
+var $ZodISODateTime = /* @__PURE__ */ $constructor("$ZodISODateTime", (inst, def) => {
+	def.pattern ?? (def.pattern = datetime$1(def));
+	$ZodStringFormat.init(inst, def);
+});
+var $ZodISODate = /* @__PURE__ */ $constructor("$ZodISODate", (inst, def) => {
+	def.pattern ?? (def.pattern = date$1);
+	$ZodStringFormat.init(inst, def);
+});
+var $ZodISOTime = /* @__PURE__ */ $constructor("$ZodISOTime", (inst, def) => {
+	def.pattern ?? (def.pattern = time$1(def));
+	$ZodStringFormat.init(inst, def);
+});
+var $ZodISODuration = /* @__PURE__ */ $constructor("$ZodISODuration", (inst, def) => {
+	def.pattern ?? (def.pattern = duration$1);
+	$ZodStringFormat.init(inst, def);
+});
+var $ZodIPv4 = /* @__PURE__ */ $constructor("$ZodIPv4", (inst, def) => {
+	def.pattern ?? (def.pattern = ipv4);
+	$ZodStringFormat.init(inst, def);
+	inst._zod.bag.format = `ipv4`;
+});
+var $ZodIPv6 = /* @__PURE__ */ $constructor("$ZodIPv6", (inst, def) => {
+	def.pattern ?? (def.pattern = ipv6);
+	$ZodStringFormat.init(inst, def);
+	inst._zod.bag.format = `ipv6`;
+	inst._zod.check = (payload) => {
+		try {
+			new URL(`http://[${payload.value}]`);
+		} catch {
+			payload.issues.push({
+				code: "invalid_format",
+				format: "ipv6",
+				input: payload.value,
+				inst,
+				continue: !def.abort
+			});
+		}
+	};
+});
+var $ZodCIDRv4 = /* @__PURE__ */ $constructor("$ZodCIDRv4", (inst, def) => {
+	def.pattern ?? (def.pattern = cidrv4);
+	$ZodStringFormat.init(inst, def);
+});
+var $ZodCIDRv6 = /* @__PURE__ */ $constructor("$ZodCIDRv6", (inst, def) => {
+	def.pattern ?? (def.pattern = cidrv6);
+	$ZodStringFormat.init(inst, def);
+	inst._zod.check = (payload) => {
+		const parts = payload.value.split("/");
+		try {
+			if (parts.length !== 2) throw new Error();
+			const [address, prefix] = parts;
+			if (!prefix) throw new Error();
+			const prefixNum = Number(prefix);
+			if (`${prefixNum}` !== prefix) throw new Error();
+			if (prefixNum < 0 || prefixNum > 128) throw new Error();
+			new URL(`http://[${address}]`);
+		} catch {
+			payload.issues.push({
+				code: "invalid_format",
+				format: "cidrv6",
+				input: payload.value,
+				inst,
+				continue: !def.abort
+			});
+		}
+	};
+});
+function isValidBase64(data) {
+	if (data === "") return true;
+	if (data.length % 4 !== 0) return false;
+	try {
+		atob(data);
+		return true;
+	} catch {
+		return false;
+	}
+}
+var $ZodBase64 = /* @__PURE__ */ $constructor("$ZodBase64", (inst, def) => {
+	def.pattern ?? (def.pattern = base64);
+	$ZodStringFormat.init(inst, def);
+	inst._zod.bag.contentEncoding = "base64";
+	inst._zod.check = (payload) => {
+		if (isValidBase64(payload.value)) return;
+		payload.issues.push({
+			code: "invalid_format",
+			format: "base64",
+			input: payload.value,
+			inst,
+			continue: !def.abort
+		});
+	};
+});
+function isValidBase64URL(data) {
+	if (!base64url.test(data)) return false;
+	const base64 = data.replace(/[-_]/g, (c) => c === "-" ? "+" : "/");
+	return isValidBase64(base64.padEnd(Math.ceil(base64.length / 4) * 4, "="));
+}
+var $ZodBase64URL = /* @__PURE__ */ $constructor("$ZodBase64URL", (inst, def) => {
+	def.pattern ?? (def.pattern = base64url);
+	$ZodStringFormat.init(inst, def);
+	inst._zod.bag.contentEncoding = "base64url";
+	inst._zod.check = (payload) => {
+		if (isValidBase64URL(payload.value)) return;
+		payload.issues.push({
+			code: "invalid_format",
+			format: "base64url",
+			input: payload.value,
+			inst,
+			continue: !def.abort
+		});
+	};
+});
+var $ZodE164 = /* @__PURE__ */ $constructor("$ZodE164", (inst, def) => {
+	def.pattern ?? (def.pattern = e164);
+	$ZodStringFormat.init(inst, def);
+});
+function isValidJWT(token, algorithm = null) {
+	try {
+		const tokensParts = token.split(".");
+		if (tokensParts.length !== 3) return false;
+		const [header] = tokensParts;
+		if (!header) return false;
+		const parsedHeader = JSON.parse(atob(header));
+		if ("typ" in parsedHeader && parsedHeader?.typ !== "JWT") return false;
+		if (!parsedHeader.alg) return false;
+		if (algorithm && (!("alg" in parsedHeader) || parsedHeader.alg !== algorithm)) return false;
+		return true;
+	} catch {
+		return false;
+	}
+}
+var $ZodJWT = /* @__PURE__ */ $constructor("$ZodJWT", (inst, def) => {
+	$ZodStringFormat.init(inst, def);
+	inst._zod.check = (payload) => {
+		if (isValidJWT(payload.value, def.alg)) return;
+		payload.issues.push({
+			code: "invalid_format",
+			format: "jwt",
+			input: payload.value,
+			inst,
+			continue: !def.abort
+		});
+	};
+});
+var $ZodNumber = /* @__PURE__ */ $constructor("$ZodNumber", (inst, def) => {
+	$ZodType.init(inst, def);
+	inst._zod.pattern = inst._zod.bag.pattern ?? number$1;
+	inst._zod.parse = (payload, _ctx) => {
+		if (def.coerce) try {
+			payload.value = Number(payload.value);
+		} catch (_) {}
+		const input = payload.value;
+		if (typeof input === "number" && !Number.isNaN(input) && Number.isFinite(input)) return payload;
+		const received = typeof input === "number" ? Number.isNaN(input) ? "NaN" : !Number.isFinite(input) ? "Infinity" : void 0 : void 0;
+		payload.issues.push({
+			expected: "number",
+			code: "invalid_type",
+			input,
+			inst,
+			...received ? { received } : {}
+		});
+		return payload;
+	};
+});
+var $ZodNumberFormat = /* @__PURE__ */ $constructor("$ZodNumberFormat", (inst, def) => {
+	$ZodCheckNumberFormat.init(inst, def);
+	$ZodNumber.init(inst, def);
+});
+var $ZodBoolean = /* @__PURE__ */ $constructor("$ZodBoolean", (inst, def) => {
+	$ZodType.init(inst, def);
+	inst._zod.pattern = boolean$1;
+	inst._zod.parse = (payload, _ctx) => {
+		if (def.coerce) try {
+			payload.value = Boolean(payload.value);
+		} catch (_) {}
+		const input = payload.value;
+		if (typeof input === "boolean") return payload;
+		payload.issues.push({
+			expected: "boolean",
+			code: "invalid_type",
+			input,
+			inst
+		});
+		return payload;
+	};
+});
+var $ZodUnknown = /* @__PURE__ */ $constructor("$ZodUnknown", (inst, def) => {
+	$ZodType.init(inst, def);
+	inst._zod.parse = (payload) => payload;
+});
+var $ZodNever = /* @__PURE__ */ $constructor("$ZodNever", (inst, def) => {
+	$ZodType.init(inst, def);
+	inst._zod.parse = (payload, _ctx) => {
+		payload.issues.push({
+			expected: "never",
+			code: "invalid_type",
+			input: payload.value,
+			inst
+		});
+		return payload;
+	};
+});
+function handleArrayResult(result, final, index) {
+	if (result.issues.length) final.issues.push(...prefixIssues(index, result.issues));
+	final.value[index] = result.value;
+}
+var $ZodArray = /* @__PURE__ */ $constructor("$ZodArray", (inst, def) => {
+	$ZodType.init(inst, def);
+	inst._zod.parse = (payload, ctx) => {
+		const input = payload.value;
+		if (!Array.isArray(input)) {
+			payload.issues.push({
+				expected: "array",
+				code: "invalid_type",
+				input,
+				inst
+			});
+			return payload;
+		}
+		payload.value = Array(input.length);
+		const proms = [];
+		for (let i = 0; i < input.length; i++) {
+			const item = input[i];
+			const result = def.element._zod.run({
+				value: item,
+				issues: []
+			}, ctx);
+			if (result instanceof Promise) proms.push(result.then((result) => handleArrayResult(result, payload, i)));
+			else handleArrayResult(result, payload, i);
+		}
+		if (proms.length) return Promise.all(proms).then(() => payload);
+		return payload;
+	};
+});
+function handlePropertyResult(result, final, key, input, isOptionalOut) {
+	if (result.issues.length) {
+		if (isOptionalOut && !(key in input)) return;
+		final.issues.push(...prefixIssues(key, result.issues));
+	}
+	if (result.value === void 0) {
+		if (key in input) final.value[key] = void 0;
+	} else final.value[key] = result.value;
+}
+function normalizeDef(def) {
+	const keys = Object.keys(def.shape);
+	for (const k of keys) if (!def.shape?.[k]?._zod?.traits?.has("$ZodType")) throw new Error(`Invalid element at key "${k}": expected a Zod schema`);
+	const okeys = optionalKeys(def.shape);
+	return {
+		...def,
+		keys,
+		keySet: new Set(keys),
+		numKeys: keys.length,
+		optionalKeys: new Set(okeys)
+	};
+}
+function handleCatchall(proms, input, payload, ctx, def, inst) {
+	const unrecognized = [];
+	const keySet = def.keySet;
+	const _catchall = def.catchall._zod;
+	const t = _catchall.def.type;
+	const isOptionalOut = _catchall.optout === "optional";
+	for (const key in input) {
+		if (keySet.has(key)) continue;
+		if (t === "never") {
+			unrecognized.push(key);
+			continue;
+		}
+		const r = _catchall.run({
+			value: input[key],
+			issues: []
+		}, ctx);
+		if (r instanceof Promise) proms.push(r.then((r) => handlePropertyResult(r, payload, key, input, isOptionalOut)));
+		else handlePropertyResult(r, payload, key, input, isOptionalOut);
+	}
+	if (unrecognized.length) payload.issues.push({
+		code: "unrecognized_keys",
+		keys: unrecognized,
+		input,
+		inst
+	});
+	if (!proms.length) return payload;
+	return Promise.all(proms).then(() => {
+		return payload;
+	});
+}
+var $ZodObject = /* @__PURE__ */ $constructor("$ZodObject", (inst, def) => {
+	$ZodType.init(inst, def);
+	if (!Object.getOwnPropertyDescriptor(def, "shape")?.get) {
+		const sh = def.shape;
+		Object.defineProperty(def, "shape", { get: () => {
+			const newSh = { ...sh };
+			Object.defineProperty(def, "shape", { value: newSh });
+			return newSh;
+		} });
+	}
+	const _normalized = cached(() => normalizeDef(def));
+	defineLazy(inst._zod, "propValues", () => {
+		const shape = def.shape;
+		const propValues = {};
+		for (const key in shape) {
+			const field = shape[key]._zod;
+			if (field.values) {
+				propValues[key] ?? (propValues[key] = /* @__PURE__ */ new Set());
+				for (const v of field.values) propValues[key].add(v);
+			}
+		}
+		return propValues;
+	});
+	const isObject$3 = isObject;
+	const catchall = def.catchall;
+	let value;
+	inst._zod.parse = (payload, ctx) => {
+		value ?? (value = _normalized.value);
+		const input = payload.value;
+		if (!isObject$3(input)) {
+			payload.issues.push({
+				expected: "object",
+				code: "invalid_type",
+				input,
+				inst
+			});
+			return payload;
+		}
+		payload.value = {};
+		const proms = [];
+		const shape = value.shape;
+		for (const key of value.keys) {
+			const el = shape[key];
+			const isOptionalOut = el._zod.optout === "optional";
+			const r = el._zod.run({
+				value: input[key],
+				issues: []
+			}, ctx);
+			if (r instanceof Promise) proms.push(r.then((r) => handlePropertyResult(r, payload, key, input, isOptionalOut)));
+			else handlePropertyResult(r, payload, key, input, isOptionalOut);
+		}
+		if (!catchall) return proms.length ? Promise.all(proms).then(() => payload) : payload;
+		return handleCatchall(proms, input, payload, ctx, _normalized.value, inst);
+	};
+});
+var $ZodObjectJIT = /* @__PURE__ */ $constructor("$ZodObjectJIT", (inst, def) => {
+	$ZodObject.init(inst, def);
+	const superParse = inst._zod.parse;
+	const _normalized = cached(() => normalizeDef(def));
+	const generateFastpass = (shape) => {
+		const doc = new Doc([
+			"shape",
+			"payload",
+			"ctx"
+		]);
+		const normalized = _normalized.value;
+		const parseStr = (key) => {
+			const k = esc(key);
+			return `shape[${k}]._zod.run({ value: input[${k}], issues: [] }, ctx)`;
+		};
+		doc.write(`const input = payload.value;`);
+		const ids = Object.create(null);
+		let counter = 0;
+		for (const key of normalized.keys) ids[key] = `key_${counter++}`;
+		doc.write(`const newResult = {};`);
+		for (const key of normalized.keys) {
+			const id = ids[key];
+			const k = esc(key);
+			const isOptionalOut = shape[key]?._zod?.optout === "optional";
+			doc.write(`const ${id} = ${parseStr(key)};`);
+			if (isOptionalOut) doc.write(`
+        if (${id}.issues.length) {
+          if (${k} in input) {
+            payload.issues = payload.issues.concat(${id}.issues.map(iss => ({
+              ...iss,
+              path: iss.path ? [${k}, ...iss.path] : [${k}]
+            })));
+          }
+        }
+        
+        if (${id}.value === undefined) {
+          if (${k} in input) {
+            newResult[${k}] = undefined;
+          }
+        } else {
+          newResult[${k}] = ${id}.value;
+        }
+        
+      `);
+			else doc.write(`
+        if (${id}.issues.length) {
+          payload.issues = payload.issues.concat(${id}.issues.map(iss => ({
+            ...iss,
+            path: iss.path ? [${k}, ...iss.path] : [${k}]
+          })));
+        }
+        
+        if (${id}.value === undefined) {
+          if (${k} in input) {
+            newResult[${k}] = undefined;
+          }
+        } else {
+          newResult[${k}] = ${id}.value;
+        }
+        
+      `);
+		}
+		doc.write(`payload.value = newResult;`);
+		doc.write(`return payload;`);
+		const fn = doc.compile();
+		return (payload, ctx) => fn(shape, payload, ctx);
+	};
+	let fastpass;
+	const isObject$2 = isObject;
+	const jit = !globalConfig.jitless;
+	const fastEnabled = jit && allowsEval.value;
+	const catchall = def.catchall;
+	let value;
+	inst._zod.parse = (payload, ctx) => {
+		value ?? (value = _normalized.value);
+		const input = payload.value;
+		if (!isObject$2(input)) {
+			payload.issues.push({
+				expected: "object",
+				code: "invalid_type",
+				input,
+				inst
+			});
+			return payload;
+		}
+		if (jit && fastEnabled && ctx?.async === false && ctx.jitless !== true) {
+			if (!fastpass) fastpass = generateFastpass(def.shape);
+			payload = fastpass(payload, ctx);
+			if (!catchall) return payload;
+			return handleCatchall([], input, payload, ctx, value, inst);
+		}
+		return superParse(payload, ctx);
+	};
+});
+function handleUnionResults(results, final, inst, ctx) {
+	for (const result of results) if (result.issues.length === 0) {
+		final.value = result.value;
+		return final;
+	}
+	const nonaborted = results.filter((r) => !aborted(r));
+	if (nonaborted.length === 1) {
+		final.value = nonaborted[0].value;
+		return nonaborted[0];
+	}
+	final.issues.push({
+		code: "invalid_union",
+		input: final.value,
+		inst,
+		errors: results.map((result) => result.issues.map((iss) => finalizeIssue(iss, ctx, config())))
+	});
+	return final;
+}
+var $ZodUnion = /* @__PURE__ */ $constructor("$ZodUnion", (inst, def) => {
+	$ZodType.init(inst, def);
+	defineLazy(inst._zod, "optin", () => def.options.some((o) => o._zod.optin === "optional") ? "optional" : void 0);
+	defineLazy(inst._zod, "optout", () => def.options.some((o) => o._zod.optout === "optional") ? "optional" : void 0);
+	defineLazy(inst._zod, "values", () => {
+		if (def.options.every((o) => o._zod.values)) return new Set(def.options.flatMap((option) => Array.from(option._zod.values)));
+	});
+	defineLazy(inst._zod, "pattern", () => {
+		if (def.options.every((o) => o._zod.pattern)) {
+			const patterns = def.options.map((o) => o._zod.pattern);
+			return new RegExp(`^(${patterns.map((p) => cleanRegex(p.source)).join("|")})$`);
+		}
+	});
+	const single = def.options.length === 1;
+	const first = def.options[0]._zod.run;
+	inst._zod.parse = (payload, ctx) => {
+		if (single) return first(payload, ctx);
+		let async = false;
+		const results = [];
+		for (const option of def.options) {
+			const result = option._zod.run({
+				value: payload.value,
+				issues: []
+			}, ctx);
+			if (result instanceof Promise) {
+				results.push(result);
+				async = true;
+			} else {
+				if (result.issues.length === 0) return result;
+				results.push(result);
+			}
+		}
+		if (!async) return handleUnionResults(results, payload, inst, ctx);
+		return Promise.all(results).then((results) => {
+			return handleUnionResults(results, payload, inst, ctx);
+		});
+	};
+});
+var $ZodIntersection = /* @__PURE__ */ $constructor("$ZodIntersection", (inst, def) => {
+	$ZodType.init(inst, def);
+	inst._zod.parse = (payload, ctx) => {
+		const input = payload.value;
+		const left = def.left._zod.run({
+			value: input,
+			issues: []
+		}, ctx);
+		const right = def.right._zod.run({
+			value: input,
+			issues: []
+		}, ctx);
+		if (left instanceof Promise || right instanceof Promise) return Promise.all([left, right]).then(([left, right]) => {
+			return handleIntersectionResults(payload, left, right);
+		});
+		return handleIntersectionResults(payload, left, right);
+	};
+});
+function mergeValues(a, b) {
+	if (a === b) return {
+		valid: true,
+		data: a
+	};
+	if (a instanceof Date && b instanceof Date && +a === +b) return {
+		valid: true,
+		data: a
+	};
+	if (isPlainObject(a) && isPlainObject(b)) {
+		const bKeys = Object.keys(b);
+		const sharedKeys = Object.keys(a).filter((key) => bKeys.indexOf(key) !== -1);
+		const newObj = {
+			...a,
+			...b
+		};
+		for (const key of sharedKeys) {
+			const sharedValue = mergeValues(a[key], b[key]);
+			if (!sharedValue.valid) return {
+				valid: false,
+				mergeErrorPath: [key, ...sharedValue.mergeErrorPath]
+			};
+			newObj[key] = sharedValue.data;
+		}
+		return {
+			valid: true,
+			data: newObj
+		};
+	}
+	if (Array.isArray(a) && Array.isArray(b)) {
+		if (a.length !== b.length) return {
+			valid: false,
+			mergeErrorPath: []
+		};
+		const newArray = [];
+		for (let index = 0; index < a.length; index++) {
+			const itemA = a[index];
+			const itemB = b[index];
+			const sharedValue = mergeValues(itemA, itemB);
+			if (!sharedValue.valid) return {
+				valid: false,
+				mergeErrorPath: [index, ...sharedValue.mergeErrorPath]
+			};
+			newArray.push(sharedValue.data);
+		}
+		return {
+			valid: true,
+			data: newArray
+		};
+	}
+	return {
+		valid: false,
+		mergeErrorPath: []
+	};
+}
+function handleIntersectionResults(result, left, right) {
+	const unrecKeys = /* @__PURE__ */ new Map();
+	let unrecIssue;
+	for (const iss of left.issues) if (iss.code === "unrecognized_keys") {
+		unrecIssue ?? (unrecIssue = iss);
+		for (const k of iss.keys) {
+			if (!unrecKeys.has(k)) unrecKeys.set(k, {});
+			unrecKeys.get(k).l = true;
+		}
+	} else result.issues.push(iss);
+	for (const iss of right.issues) if (iss.code === "unrecognized_keys") for (const k of iss.keys) {
+		if (!unrecKeys.has(k)) unrecKeys.set(k, {});
+		unrecKeys.get(k).r = true;
+	}
+	else result.issues.push(iss);
+	const bothKeys = [...unrecKeys].filter(([, f]) => f.l && f.r).map(([k]) => k);
+	if (bothKeys.length && unrecIssue) result.issues.push({
+		...unrecIssue,
+		keys: bothKeys
+	});
+	if (aborted(result)) return result;
+	const merged = mergeValues(left.value, right.value);
+	if (!merged.valid) throw new Error(`Unmergable intersection. Error path: ${JSON.stringify(merged.mergeErrorPath)}`);
+	result.value = merged.data;
+	return result;
+}
+var $ZodEnum = /* @__PURE__ */ $constructor("$ZodEnum", (inst, def) => {
+	$ZodType.init(inst, def);
+	const values = getEnumValues(def.entries);
+	const valuesSet = new Set(values);
+	inst._zod.values = valuesSet;
+	inst._zod.pattern = new RegExp(`^(${values.filter((k) => propertyKeyTypes.has(typeof k)).map((o) => typeof o === "string" ? escapeRegex(o) : o.toString()).join("|")})$`);
+	inst._zod.parse = (payload, _ctx) => {
+		const input = payload.value;
+		if (valuesSet.has(input)) return payload;
+		payload.issues.push({
+			code: "invalid_value",
+			values,
+			input,
+			inst
+		});
+		return payload;
+	};
+});
+var $ZodTransform = /* @__PURE__ */ $constructor("$ZodTransform", (inst, def) => {
+	$ZodType.init(inst, def);
+	inst._zod.parse = (payload, ctx) => {
+		if (ctx.direction === "backward") throw new $ZodEncodeError(inst.constructor.name);
+		const _out = def.transform(payload.value, payload);
+		if (ctx.async) return (_out instanceof Promise ? _out : Promise.resolve(_out)).then((output) => {
+			payload.value = output;
+			return payload;
+		});
+		if (_out instanceof Promise) throw new $ZodAsyncError();
+		payload.value = _out;
+		return payload;
+	};
+});
+function handleOptionalResult(result, input) {
+	if (result.issues.length && input === void 0) return {
+		issues: [],
+		value: void 0
+	};
+	return result;
+}
+var $ZodOptional = /* @__PURE__ */ $constructor("$ZodOptional", (inst, def) => {
+	$ZodType.init(inst, def);
+	inst._zod.optin = "optional";
+	inst._zod.optout = "optional";
+	defineLazy(inst._zod, "values", () => {
+		return def.innerType._zod.values ? new Set([...def.innerType._zod.values, void 0]) : void 0;
+	});
+	defineLazy(inst._zod, "pattern", () => {
+		const pattern = def.innerType._zod.pattern;
+		return pattern ? new RegExp(`^(${cleanRegex(pattern.source)})?$`) : void 0;
+	});
+	inst._zod.parse = (payload, ctx) => {
+		if (def.innerType._zod.optin === "optional") {
+			const result = def.innerType._zod.run(payload, ctx);
+			if (result instanceof Promise) return result.then((r) => handleOptionalResult(r, payload.value));
+			return handleOptionalResult(result, payload.value);
+		}
+		if (payload.value === void 0) return payload;
+		return def.innerType._zod.run(payload, ctx);
+	};
+});
+var $ZodExactOptional = /* @__PURE__ */ $constructor("$ZodExactOptional", (inst, def) => {
+	$ZodOptional.init(inst, def);
+	defineLazy(inst._zod, "values", () => def.innerType._zod.values);
+	defineLazy(inst._zod, "pattern", () => def.innerType._zod.pattern);
+	inst._zod.parse = (payload, ctx) => {
+		return def.innerType._zod.run(payload, ctx);
+	};
+});
+var $ZodNullable = /* @__PURE__ */ $constructor("$ZodNullable", (inst, def) => {
+	$ZodType.init(inst, def);
+	defineLazy(inst._zod, "optin", () => def.innerType._zod.optin);
+	defineLazy(inst._zod, "optout", () => def.innerType._zod.optout);
+	defineLazy(inst._zod, "pattern", () => {
+		const pattern = def.innerType._zod.pattern;
+		return pattern ? new RegExp(`^(${cleanRegex(pattern.source)}|null)$`) : void 0;
+	});
+	defineLazy(inst._zod, "values", () => {
+		return def.innerType._zod.values ? new Set([...def.innerType._zod.values, null]) : void 0;
+	});
+	inst._zod.parse = (payload, ctx) => {
+		if (payload.value === null) return payload;
+		return def.innerType._zod.run(payload, ctx);
+	};
+});
+var $ZodDefault = /* @__PURE__ */ $constructor("$ZodDefault", (inst, def) => {
+	$ZodType.init(inst, def);
+	inst._zod.optin = "optional";
+	defineLazy(inst._zod, "values", () => def.innerType._zod.values);
+	inst._zod.parse = (payload, ctx) => {
+		if (ctx.direction === "backward") return def.innerType._zod.run(payload, ctx);
+		if (payload.value === void 0) {
+			payload.value = def.defaultValue;
+			/**
+			* $ZodDefault returns the default value immediately in forward direction.
+			* It doesn't pass the default value into the validator ("prefault"). There's no reason to pass the default value through validation. The validity of the default is enforced by TypeScript statically. Otherwise, it's the responsibility of the user to ensure the default is valid. In the case of pipes with divergent in/out types, you can specify the default on the `in` schema of your ZodPipe to set a "prefault" for the pipe.   */
+			return payload;
+		}
+		const result = def.innerType._zod.run(payload, ctx);
+		if (result instanceof Promise) return result.then((result) => handleDefaultResult(result, def));
+		return handleDefaultResult(result, def);
+	};
+});
+function handleDefaultResult(payload, def) {
+	if (payload.value === void 0) payload.value = def.defaultValue;
+	return payload;
+}
+var $ZodPrefault = /* @__PURE__ */ $constructor("$ZodPrefault", (inst, def) => {
+	$ZodType.init(inst, def);
+	inst._zod.optin = "optional";
+	defineLazy(inst._zod, "values", () => def.innerType._zod.values);
+	inst._zod.parse = (payload, ctx) => {
+		if (ctx.direction === "backward") return def.innerType._zod.run(payload, ctx);
+		if (payload.value === void 0) payload.value = def.defaultValue;
+		return def.innerType._zod.run(payload, ctx);
+	};
+});
+var $ZodNonOptional = /* @__PURE__ */ $constructor("$ZodNonOptional", (inst, def) => {
+	$ZodType.init(inst, def);
+	defineLazy(inst._zod, "values", () => {
+		const v = def.innerType._zod.values;
+		return v ? new Set([...v].filter((x) => x !== void 0)) : void 0;
+	});
+	inst._zod.parse = (payload, ctx) => {
+		const result = def.innerType._zod.run(payload, ctx);
+		if (result instanceof Promise) return result.then((result) => handleNonOptionalResult(result, inst));
+		return handleNonOptionalResult(result, inst);
+	};
+});
+function handleNonOptionalResult(payload, inst) {
+	if (!payload.issues.length && payload.value === void 0) payload.issues.push({
+		code: "invalid_type",
+		expected: "nonoptional",
+		input: payload.value,
+		inst
+	});
+	return payload;
+}
+var $ZodCatch = /* @__PURE__ */ $constructor("$ZodCatch", (inst, def) => {
+	$ZodType.init(inst, def);
+	defineLazy(inst._zod, "optin", () => def.innerType._zod.optin);
+	defineLazy(inst._zod, "optout", () => def.innerType._zod.optout);
+	defineLazy(inst._zod, "values", () => def.innerType._zod.values);
+	inst._zod.parse = (payload, ctx) => {
+		if (ctx.direction === "backward") return def.innerType._zod.run(payload, ctx);
+		const result = def.innerType._zod.run(payload, ctx);
+		if (result instanceof Promise) return result.then((result) => {
+			payload.value = result.value;
+			if (result.issues.length) {
+				payload.value = def.catchValue({
+					...payload,
+					error: { issues: result.issues.map((iss) => finalizeIssue(iss, ctx, config())) },
+					input: payload.value
+				});
+				payload.issues = [];
+			}
+			return payload;
+		});
+		payload.value = result.value;
+		if (result.issues.length) {
+			payload.value = def.catchValue({
+				...payload,
+				error: { issues: result.issues.map((iss) => finalizeIssue(iss, ctx, config())) },
+				input: payload.value
+			});
+			payload.issues = [];
+		}
+		return payload;
+	};
+});
+var $ZodPipe = /* @__PURE__ */ $constructor("$ZodPipe", (inst, def) => {
+	$ZodType.init(inst, def);
+	defineLazy(inst._zod, "values", () => def.in._zod.values);
+	defineLazy(inst._zod, "optin", () => def.in._zod.optin);
+	defineLazy(inst._zod, "optout", () => def.out._zod.optout);
+	defineLazy(inst._zod, "propValues", () => def.in._zod.propValues);
+	inst._zod.parse = (payload, ctx) => {
+		if (ctx.direction === "backward") {
+			const right = def.out._zod.run(payload, ctx);
+			if (right instanceof Promise) return right.then((right) => handlePipeResult(right, def.in, ctx));
+			return handlePipeResult(right, def.in, ctx);
+		}
+		const left = def.in._zod.run(payload, ctx);
+		if (left instanceof Promise) return left.then((left) => handlePipeResult(left, def.out, ctx));
+		return handlePipeResult(left, def.out, ctx);
+	};
+});
+function handlePipeResult(left, next, ctx) {
+	if (left.issues.length) {
+		left.aborted = true;
+		return left;
+	}
+	return next._zod.run({
+		value: left.value,
+		issues: left.issues
+	}, ctx);
+}
+var $ZodReadonly = /* @__PURE__ */ $constructor("$ZodReadonly", (inst, def) => {
+	$ZodType.init(inst, def);
+	defineLazy(inst._zod, "propValues", () => def.innerType._zod.propValues);
+	defineLazy(inst._zod, "values", () => def.innerType._zod.values);
+	defineLazy(inst._zod, "optin", () => def.innerType?._zod?.optin);
+	defineLazy(inst._zod, "optout", () => def.innerType?._zod?.optout);
+	inst._zod.parse = (payload, ctx) => {
+		if (ctx.direction === "backward") return def.innerType._zod.run(payload, ctx);
+		const result = def.innerType._zod.run(payload, ctx);
+		if (result instanceof Promise) return result.then(handleReadonlyResult);
+		return handleReadonlyResult(result);
+	};
+});
+function handleReadonlyResult(payload) {
+	payload.value = Object.freeze(payload.value);
+	return payload;
+}
+var $ZodCustom = /* @__PURE__ */ $constructor("$ZodCustom", (inst, def) => {
+	$ZodCheck.init(inst, def);
+	$ZodType.init(inst, def);
+	inst._zod.parse = (payload, _) => {
+		return payload;
+	};
+	inst._zod.check = (payload) => {
+		const input = payload.value;
+		const r = def.fn(input);
+		if (r instanceof Promise) return r.then((r) => handleRefineResult(r, payload, input, inst));
+		handleRefineResult(r, payload, input, inst);
+	};
+});
+function handleRefineResult(result, payload, input, inst) {
+	if (!result) {
+		const _iss = {
+			code: "custom",
+			input,
+			inst,
+			path: [...inst._zod.def.path ?? []],
+			continue: !inst._zod.def.abort
+		};
+		if (inst._zod.def.params) _iss.params = inst._zod.def.params;
+		payload.issues.push(issue(_iss));
+	}
+}
+//#endregion
+//#region node_modules/zod/v4/core/registries.js
+var _a;
+var $ZodRegistry = class {
+	constructor() {
+		this._map = /* @__PURE__ */ new WeakMap();
+		this._idmap = /* @__PURE__ */ new Map();
+	}
+	add(schema, ..._meta) {
+		const meta = _meta[0];
+		this._map.set(schema, meta);
+		if (meta && typeof meta === "object" && "id" in meta) this._idmap.set(meta.id, schema);
+		return this;
+	}
+	clear() {
+		this._map = /* @__PURE__ */ new WeakMap();
+		this._idmap = /* @__PURE__ */ new Map();
+		return this;
+	}
+	remove(schema) {
+		const meta = this._map.get(schema);
+		if (meta && typeof meta === "object" && "id" in meta) this._idmap.delete(meta.id);
+		this._map.delete(schema);
+		return this;
+	}
+	get(schema) {
+		const p = schema._zod.parent;
+		if (p) {
+			const pm = { ...this.get(p) ?? {} };
+			delete pm.id;
+			const f = {
+				...pm,
+				...this._map.get(schema)
+			};
+			return Object.keys(f).length ? f : void 0;
+		}
+		return this._map.get(schema);
+	}
+	has(schema) {
+		return this._map.has(schema);
+	}
+};
+function registry() {
+	return new $ZodRegistry();
+}
+(_a = globalThis).__zod_globalRegistry ?? (_a.__zod_globalRegistry = registry());
+var globalRegistry = globalThis.__zod_globalRegistry;
+//#endregion
+//#region node_modules/zod/v4/core/api.js
+/* @__NO_SIDE_EFFECTS__ */
+function _string(Class, params) {
+	return new Class({
+		type: "string",
+		...normalizeParams(params)
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _email(Class, params) {
+	return new Class({
+		type: "string",
+		format: "email",
+		check: "string_format",
+		abort: false,
+		...normalizeParams(params)
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _guid(Class, params) {
+	return new Class({
+		type: "string",
+		format: "guid",
+		check: "string_format",
+		abort: false,
+		...normalizeParams(params)
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _uuid(Class, params) {
+	return new Class({
+		type: "string",
+		format: "uuid",
+		check: "string_format",
+		abort: false,
+		...normalizeParams(params)
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _uuidv4(Class, params) {
+	return new Class({
+		type: "string",
+		format: "uuid",
+		check: "string_format",
+		abort: false,
+		version: "v4",
+		...normalizeParams(params)
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _uuidv6(Class, params) {
+	return new Class({
+		type: "string",
+		format: "uuid",
+		check: "string_format",
+		abort: false,
+		version: "v6",
+		...normalizeParams(params)
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _uuidv7(Class, params) {
+	return new Class({
+		type: "string",
+		format: "uuid",
+		check: "string_format",
+		abort: false,
+		version: "v7",
+		...normalizeParams(params)
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _url(Class, params) {
+	return new Class({
+		type: "string",
+		format: "url",
+		check: "string_format",
+		abort: false,
+		...normalizeParams(params)
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _emoji(Class, params) {
+	return new Class({
+		type: "string",
+		format: "emoji",
+		check: "string_format",
+		abort: false,
+		...normalizeParams(params)
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _nanoid(Class, params) {
+	return new Class({
+		type: "string",
+		format: "nanoid",
+		check: "string_format",
+		abort: false,
+		...normalizeParams(params)
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _cuid(Class, params) {
+	return new Class({
+		type: "string",
+		format: "cuid",
+		check: "string_format",
+		abort: false,
+		...normalizeParams(params)
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _cuid2(Class, params) {
+	return new Class({
+		type: "string",
+		format: "cuid2",
+		check: "string_format",
+		abort: false,
+		...normalizeParams(params)
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _ulid(Class, params) {
+	return new Class({
+		type: "string",
+		format: "ulid",
+		check: "string_format",
+		abort: false,
+		...normalizeParams(params)
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _xid(Class, params) {
+	return new Class({
+		type: "string",
+		format: "xid",
+		check: "string_format",
+		abort: false,
+		...normalizeParams(params)
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _ksuid(Class, params) {
+	return new Class({
+		type: "string",
+		format: "ksuid",
+		check: "string_format",
+		abort: false,
+		...normalizeParams(params)
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _ipv4(Class, params) {
+	return new Class({
+		type: "string",
+		format: "ipv4",
+		check: "string_format",
+		abort: false,
+		...normalizeParams(params)
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _ipv6(Class, params) {
+	return new Class({
+		type: "string",
+		format: "ipv6",
+		check: "string_format",
+		abort: false,
+		...normalizeParams(params)
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _cidrv4(Class, params) {
+	return new Class({
+		type: "string",
+		format: "cidrv4",
+		check: "string_format",
+		abort: false,
+		...normalizeParams(params)
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _cidrv6(Class, params) {
+	return new Class({
+		type: "string",
+		format: "cidrv6",
+		check: "string_format",
+		abort: false,
+		...normalizeParams(params)
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _base64(Class, params) {
+	return new Class({
+		type: "string",
+		format: "base64",
+		check: "string_format",
+		abort: false,
+		...normalizeParams(params)
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _base64url(Class, params) {
+	return new Class({
+		type: "string",
+		format: "base64url",
+		check: "string_format",
+		abort: false,
+		...normalizeParams(params)
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _e164(Class, params) {
+	return new Class({
+		type: "string",
+		format: "e164",
+		check: "string_format",
+		abort: false,
+		...normalizeParams(params)
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _jwt(Class, params) {
+	return new Class({
+		type: "string",
+		format: "jwt",
+		check: "string_format",
+		abort: false,
+		...normalizeParams(params)
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _isoDateTime(Class, params) {
+	return new Class({
+		type: "string",
+		format: "datetime",
+		check: "string_format",
+		offset: false,
+		local: false,
+		precision: null,
+		...normalizeParams(params)
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _isoDate(Class, params) {
+	return new Class({
+		type: "string",
+		format: "date",
+		check: "string_format",
+		...normalizeParams(params)
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _isoTime(Class, params) {
+	return new Class({
+		type: "string",
+		format: "time",
+		check: "string_format",
+		precision: null,
+		...normalizeParams(params)
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _isoDuration(Class, params) {
+	return new Class({
+		type: "string",
+		format: "duration",
+		check: "string_format",
+		...normalizeParams(params)
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _number(Class, params) {
+	return new Class({
+		type: "number",
+		checks: [],
+		...normalizeParams(params)
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _int(Class, params) {
+	return new Class({
+		type: "number",
+		check: "number_format",
+		abort: false,
+		format: "safeint",
+		...normalizeParams(params)
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _boolean(Class, params) {
+	return new Class({
+		type: "boolean",
+		...normalizeParams(params)
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _unknown(Class) {
+	return new Class({ type: "unknown" });
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _never(Class, params) {
+	return new Class({
+		type: "never",
+		...normalizeParams(params)
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _lt(value, params) {
+	return new $ZodCheckLessThan({
+		check: "less_than",
+		...normalizeParams(params),
+		value,
+		inclusive: false
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _lte(value, params) {
+	return new $ZodCheckLessThan({
+		check: "less_than",
+		...normalizeParams(params),
+		value,
+		inclusive: true
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _gt(value, params) {
+	return new $ZodCheckGreaterThan({
+		check: "greater_than",
+		...normalizeParams(params),
+		value,
+		inclusive: false
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _gte(value, params) {
+	return new $ZodCheckGreaterThan({
+		check: "greater_than",
+		...normalizeParams(params),
+		value,
+		inclusive: true
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _multipleOf(value, params) {
+	return new $ZodCheckMultipleOf({
+		check: "multiple_of",
+		...normalizeParams(params),
+		value
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _maxLength(maximum, params) {
+	return new $ZodCheckMaxLength({
+		check: "max_length",
+		...normalizeParams(params),
+		maximum
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _minLength(minimum, params) {
+	return new $ZodCheckMinLength({
+		check: "min_length",
+		...normalizeParams(params),
+		minimum
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _length(length, params) {
+	return new $ZodCheckLengthEquals({
+		check: "length_equals",
+		...normalizeParams(params),
+		length
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _regex(pattern, params) {
+	return new $ZodCheckRegex({
+		check: "string_format",
+		format: "regex",
+		...normalizeParams(params),
+		pattern
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _lowercase(params) {
+	return new $ZodCheckLowerCase({
+		check: "string_format",
+		format: "lowercase",
+		...normalizeParams(params)
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _uppercase(params) {
+	return new $ZodCheckUpperCase({
+		check: "string_format",
+		format: "uppercase",
+		...normalizeParams(params)
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _includes(includes, params) {
+	return new $ZodCheckIncludes({
+		check: "string_format",
+		format: "includes",
+		...normalizeParams(params),
+		includes
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _startsWith(prefix, params) {
+	return new $ZodCheckStartsWith({
+		check: "string_format",
+		format: "starts_with",
+		...normalizeParams(params),
+		prefix
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _endsWith(suffix, params) {
+	return new $ZodCheckEndsWith({
+		check: "string_format",
+		format: "ends_with",
+		...normalizeParams(params),
+		suffix
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _overwrite(tx) {
+	return new $ZodCheckOverwrite({
+		check: "overwrite",
+		tx
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _normalize(form) {
+	return /* @__PURE__ */ _overwrite((input) => input.normalize(form));
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _trim() {
+	return /* @__PURE__ */ _overwrite((input) => input.trim());
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _toLowerCase() {
+	return /* @__PURE__ */ _overwrite((input) => input.toLowerCase());
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _toUpperCase() {
+	return /* @__PURE__ */ _overwrite((input) => input.toUpperCase());
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _slugify() {
+	return /* @__PURE__ */ _overwrite((input) => slugify(input));
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _array(Class, element, params) {
+	return new Class({
+		type: "array",
+		element,
+		...normalizeParams(params)
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _custom(Class, fn, _params) {
+	const norm = normalizeParams(_params);
+	norm.abort ?? (norm.abort = true);
+	return new Class({
+		type: "custom",
+		check: "custom",
+		fn,
+		...norm
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _refine(Class, fn, _params) {
+	return new Class({
+		type: "custom",
+		check: "custom",
+		fn,
+		...normalizeParams(_params)
+	});
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _superRefine(fn) {
+	const ch = /* @__PURE__ */ _check((payload) => {
+		payload.addIssue = (issue$2) => {
+			if (typeof issue$2 === "string") payload.issues.push(issue(issue$2, payload.value, ch._zod.def));
+			else {
+				const _issue = issue$2;
+				if (_issue.fatal) _issue.continue = false;
+				_issue.code ?? (_issue.code = "custom");
+				_issue.input ?? (_issue.input = payload.value);
+				_issue.inst ?? (_issue.inst = ch);
+				_issue.continue ?? (_issue.continue = !ch._zod.def.abort);
+				payload.issues.push(issue(_issue));
+			}
+		};
+		return fn(payload.value, payload);
+	});
+	return ch;
+}
+/* @__NO_SIDE_EFFECTS__ */
+function _check(fn, params) {
+	const ch = new $ZodCheck({
+		check: "custom",
+		...normalizeParams(params)
+	});
+	ch._zod.check = fn;
+	return ch;
+}
+//#endregion
+//#region node_modules/zod/v4/core/to-json-schema.js
+function initializeContext(params) {
+	let target = params?.target ?? "draft-2020-12";
+	if (target === "draft-4") target = "draft-04";
+	if (target === "draft-7") target = "draft-07";
+	return {
+		processors: params.processors ?? {},
+		metadataRegistry: params?.metadata ?? globalRegistry,
+		target,
+		unrepresentable: params?.unrepresentable ?? "throw",
+		override: params?.override ?? (() => {}),
+		io: params?.io ?? "output",
+		counter: 0,
+		seen: /* @__PURE__ */ new Map(),
+		cycles: params?.cycles ?? "ref",
+		reused: params?.reused ?? "inline",
+		external: params?.external ?? void 0
+	};
+}
+function process$1(schema, ctx, _params = {
+	path: [],
+	schemaPath: []
+}) {
+	var _a;
+	const def = schema._zod.def;
+	const seen = ctx.seen.get(schema);
+	if (seen) {
+		seen.count++;
+		if (_params.schemaPath.includes(schema)) seen.cycle = _params.path;
+		return seen.schema;
+	}
+	const result = {
+		schema: {},
+		count: 1,
+		cycle: void 0,
+		path: _params.path
+	};
+	ctx.seen.set(schema, result);
+	const overrideSchema = schema._zod.toJSONSchema?.();
+	if (overrideSchema) result.schema = overrideSchema;
+	else {
+		const params = {
+			..._params,
+			schemaPath: [..._params.schemaPath, schema],
+			path: _params.path
+		};
+		if (schema._zod.processJSONSchema) schema._zod.processJSONSchema(ctx, result.schema, params);
+		else {
+			const _json = result.schema;
+			const processor = ctx.processors[def.type];
+			if (!processor) throw new Error(`[toJSONSchema]: Non-representable type encountered: ${def.type}`);
+			processor(schema, ctx, _json, params);
+		}
+		const parent = schema._zod.parent;
+		if (parent) {
+			if (!result.ref) result.ref = parent;
+			process$1(parent, ctx, params);
+			ctx.seen.get(parent).isParent = true;
+		}
+	}
+	const meta = ctx.metadataRegistry.get(schema);
+	if (meta) Object.assign(result.schema, meta);
+	if (ctx.io === "input" && isTransforming(schema)) {
+		delete result.schema.examples;
+		delete result.schema.default;
+	}
+	if (ctx.io === "input" && result.schema._prefault) (_a = result.schema).default ?? (_a.default = result.schema._prefault);
+	delete result.schema._prefault;
+	return ctx.seen.get(schema).schema;
+}
+function extractDefs(ctx, schema) {
+	const root = ctx.seen.get(schema);
+	if (!root) throw new Error("Unprocessed schema. This is a bug in Zod.");
+	const idToSchema = /* @__PURE__ */ new Map();
+	for (const entry of ctx.seen.entries()) {
+		const id = ctx.metadataRegistry.get(entry[0])?.id;
+		if (id) {
+			const existing = idToSchema.get(id);
+			if (existing && existing !== entry[0]) throw new Error(`Duplicate schema id "${id}" detected during JSON Schema conversion. Two different schemas cannot share the same id when converted together.`);
+			idToSchema.set(id, entry[0]);
+		}
+	}
+	const makeURI = (entry) => {
+		const defsSegment = ctx.target === "draft-2020-12" ? "$defs" : "definitions";
+		if (ctx.external) {
+			const externalId = ctx.external.registry.get(entry[0])?.id;
+			const uriGenerator = ctx.external.uri ?? ((id) => id);
+			if (externalId) return { ref: uriGenerator(externalId) };
+			const id = entry[1].defId ?? entry[1].schema.id ?? `schema${ctx.counter++}`;
+			entry[1].defId = id;
+			return {
+				defId: id,
+				ref: `${uriGenerator("__shared")}#/${defsSegment}/${id}`
+			};
+		}
+		if (entry[1] === root) return { ref: "#" };
+		const defUriPrefix = `#/${defsSegment}/`;
+		const defId = entry[1].schema.id ?? `__schema${ctx.counter++}`;
+		return {
+			defId,
+			ref: defUriPrefix + defId
+		};
+	};
+	const extractToDef = (entry) => {
+		if (entry[1].schema.$ref) return;
+		const seen = entry[1];
+		const { ref, defId } = makeURI(entry);
+		seen.def = { ...seen.schema };
+		if (defId) seen.defId = defId;
+		const schema = seen.schema;
+		for (const key in schema) delete schema[key];
+		schema.$ref = ref;
+	};
+	if (ctx.cycles === "throw") for (const entry of ctx.seen.entries()) {
+		const seen = entry[1];
+		if (seen.cycle) throw new Error(`Cycle detected: #/${seen.cycle?.join("/")}/<root>
+
+Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.`);
+	}
+	for (const entry of ctx.seen.entries()) {
+		const seen = entry[1];
+		if (schema === entry[0]) {
+			extractToDef(entry);
+			continue;
+		}
+		if (ctx.external) {
+			const ext = ctx.external.registry.get(entry[0])?.id;
+			if (schema !== entry[0] && ext) {
+				extractToDef(entry);
+				continue;
+			}
+		}
+		if (ctx.metadataRegistry.get(entry[0])?.id) {
+			extractToDef(entry);
+			continue;
+		}
+		if (seen.cycle) {
+			extractToDef(entry);
+			continue;
+		}
+		if (seen.count > 1) {
+			if (ctx.reused === "ref") {
+				extractToDef(entry);
+				continue;
+			}
+		}
+	}
+}
+function finalize(ctx, schema) {
+	const root = ctx.seen.get(schema);
+	if (!root) throw new Error("Unprocessed schema. This is a bug in Zod.");
+	const flattenRef = (zodSchema) => {
+		const seen = ctx.seen.get(zodSchema);
+		if (seen.ref === null) return;
+		const schema = seen.def ?? seen.schema;
+		const _cached = { ...schema };
+		const ref = seen.ref;
+		seen.ref = null;
+		if (ref) {
+			flattenRef(ref);
+			const refSeen = ctx.seen.get(ref);
+			const refSchema = refSeen.schema;
+			if (refSchema.$ref && (ctx.target === "draft-07" || ctx.target === "draft-04" || ctx.target === "openapi-3.0")) {
+				schema.allOf = schema.allOf ?? [];
+				schema.allOf.push(refSchema);
+			} else Object.assign(schema, refSchema);
+			Object.assign(schema, _cached);
+			if (zodSchema._zod.parent === ref) for (const key in schema) {
+				if (key === "$ref" || key === "allOf") continue;
+				if (!(key in _cached)) delete schema[key];
+			}
+			if (refSchema.$ref && refSeen.def) for (const key in schema) {
+				if (key === "$ref" || key === "allOf") continue;
+				if (key in refSeen.def && JSON.stringify(schema[key]) === JSON.stringify(refSeen.def[key])) delete schema[key];
+			}
+		}
+		const parent = zodSchema._zod.parent;
+		if (parent && parent !== ref) {
+			flattenRef(parent);
+			const parentSeen = ctx.seen.get(parent);
+			if (parentSeen?.schema.$ref) {
+				schema.$ref = parentSeen.schema.$ref;
+				if (parentSeen.def) for (const key in schema) {
+					if (key === "$ref" || key === "allOf") continue;
+					if (key in parentSeen.def && JSON.stringify(schema[key]) === JSON.stringify(parentSeen.def[key])) delete schema[key];
+				}
+			}
+		}
+		ctx.override({
+			zodSchema,
+			jsonSchema: schema,
+			path: seen.path ?? []
+		});
+	};
+	for (const entry of [...ctx.seen.entries()].reverse()) flattenRef(entry[0]);
+	const result = {};
+	if (ctx.target === "draft-2020-12") result.$schema = "https://json-schema.org/draft/2020-12/schema";
+	else if (ctx.target === "draft-07") result.$schema = "http://json-schema.org/draft-07/schema#";
+	else if (ctx.target === "draft-04") result.$schema = "http://json-schema.org/draft-04/schema#";
+	else if (ctx.target === "openapi-3.0") {}
+	if (ctx.external?.uri) {
+		const id = ctx.external.registry.get(schema)?.id;
+		if (!id) throw new Error("Schema is missing an `id` property");
+		result.$id = ctx.external.uri(id);
+	}
+	Object.assign(result, root.def ?? root.schema);
+	const defs = ctx.external?.defs ?? {};
+	for (const entry of ctx.seen.entries()) {
+		const seen = entry[1];
+		if (seen.def && seen.defId) defs[seen.defId] = seen.def;
+	}
+	if (ctx.external) {} else if (Object.keys(defs).length > 0) if (ctx.target === "draft-2020-12") result.$defs = defs;
+	else result.definitions = defs;
+	try {
+		const finalized = JSON.parse(JSON.stringify(result));
+		Object.defineProperty(finalized, "~standard", {
+			value: {
+				...schema["~standard"],
+				jsonSchema: {
+					input: createStandardJSONSchemaMethod(schema, "input", ctx.processors),
+					output: createStandardJSONSchemaMethod(schema, "output", ctx.processors)
+				}
+			},
+			enumerable: false,
+			writable: false
+		});
+		return finalized;
+	} catch (_err) {
+		throw new Error("Error converting schema to JSON.");
+	}
+}
+function isTransforming(_schema, _ctx) {
+	const ctx = _ctx ?? { seen: /* @__PURE__ */ new Set() };
+	if (ctx.seen.has(_schema)) return false;
+	ctx.seen.add(_schema);
+	const def = _schema._zod.def;
+	if (def.type === "transform") return true;
+	if (def.type === "array") return isTransforming(def.element, ctx);
+	if (def.type === "set") return isTransforming(def.valueType, ctx);
+	if (def.type === "lazy") return isTransforming(def.getter(), ctx);
+	if (def.type === "promise" || def.type === "optional" || def.type === "nonoptional" || def.type === "nullable" || def.type === "readonly" || def.type === "default" || def.type === "prefault") return isTransforming(def.innerType, ctx);
+	if (def.type === "intersection") return isTransforming(def.left, ctx) || isTransforming(def.right, ctx);
+	if (def.type === "record" || def.type === "map") return isTransforming(def.keyType, ctx) || isTransforming(def.valueType, ctx);
+	if (def.type === "pipe") return isTransforming(def.in, ctx) || isTransforming(def.out, ctx);
+	if (def.type === "object") {
+		for (const key in def.shape) if (isTransforming(def.shape[key], ctx)) return true;
+		return false;
+	}
+	if (def.type === "union") {
+		for (const option of def.options) if (isTransforming(option, ctx)) return true;
+		return false;
+	}
+	if (def.type === "tuple") {
+		for (const item of def.items) if (isTransforming(item, ctx)) return true;
+		if (def.rest && isTransforming(def.rest, ctx)) return true;
+		return false;
+	}
+	return false;
+}
+/**
+* Creates a toJSONSchema method for a schema instance.
+* This encapsulates the logic of initializing context, processing, extracting defs, and finalizing.
+*/
+var createToJSONSchemaMethod = (schema, processors = {}) => (params) => {
+	const ctx = initializeContext({
+		...params,
+		processors
+	});
+	process$1(schema, ctx);
+	extractDefs(ctx, schema);
+	return finalize(ctx, schema);
+};
+var createStandardJSONSchemaMethod = (schema, io, processors = {}) => (params) => {
+	const { libraryOptions, target } = params ?? {};
+	const ctx = initializeContext({
+		...libraryOptions ?? {},
+		target,
+		io,
+		processors
+	});
+	process$1(schema, ctx);
+	extractDefs(ctx, schema);
+	return finalize(ctx, schema);
+};
+//#endregion
+//#region node_modules/zod/v4/core/json-schema-processors.js
+var formatMap = {
+	guid: "uuid",
+	url: "uri",
+	datetime: "date-time",
+	json_string: "json-string",
+	regex: ""
+};
+var stringProcessor = (schema, ctx, _json, _params) => {
+	const json = _json;
+	json.type = "string";
+	const { minimum, maximum, format, patterns, contentEncoding } = schema._zod.bag;
+	if (typeof minimum === "number") json.minLength = minimum;
+	if (typeof maximum === "number") json.maxLength = maximum;
+	if (format) {
+		json.format = formatMap[format] ?? format;
+		if (json.format === "") delete json.format;
+		if (format === "time") delete json.format;
+	}
+	if (contentEncoding) json.contentEncoding = contentEncoding;
+	if (patterns && patterns.size > 0) {
+		const regexes = [...patterns];
+		if (regexes.length === 1) json.pattern = regexes[0].source;
+		else if (regexes.length > 1) json.allOf = [...regexes.map((regex) => ({
+			...ctx.target === "draft-07" || ctx.target === "draft-04" || ctx.target === "openapi-3.0" ? { type: "string" } : {},
+			pattern: regex.source
+		}))];
+	}
+};
+var numberProcessor = (schema, ctx, _json, _params) => {
+	const json = _json;
+	const { minimum, maximum, format, multipleOf, exclusiveMaximum, exclusiveMinimum } = schema._zod.bag;
+	if (typeof format === "string" && format.includes("int")) json.type = "integer";
+	else json.type = "number";
+	if (typeof exclusiveMinimum === "number") if (ctx.target === "draft-04" || ctx.target === "openapi-3.0") {
+		json.minimum = exclusiveMinimum;
+		json.exclusiveMinimum = true;
+	} else json.exclusiveMinimum = exclusiveMinimum;
+	if (typeof minimum === "number") {
+		json.minimum = minimum;
+		if (typeof exclusiveMinimum === "number" && ctx.target !== "draft-04") if (exclusiveMinimum >= minimum) delete json.minimum;
+		else delete json.exclusiveMinimum;
+	}
+	if (typeof exclusiveMaximum === "number") if (ctx.target === "draft-04" || ctx.target === "openapi-3.0") {
+		json.maximum = exclusiveMaximum;
+		json.exclusiveMaximum = true;
+	} else json.exclusiveMaximum = exclusiveMaximum;
+	if (typeof maximum === "number") {
+		json.maximum = maximum;
+		if (typeof exclusiveMaximum === "number" && ctx.target !== "draft-04") if (exclusiveMaximum <= maximum) delete json.maximum;
+		else delete json.exclusiveMaximum;
+	}
+	if (typeof multipleOf === "number") json.multipleOf = multipleOf;
+};
+var booleanProcessor = (_schema, _ctx, json, _params) => {
+	json.type = "boolean";
+};
+var neverProcessor = (_schema, _ctx, json, _params) => {
+	json.not = {};
+};
+var unknownProcessor = (_schema, _ctx, _json, _params) => {};
+var enumProcessor = (schema, _ctx, json, _params) => {
+	const def = schema._zod.def;
+	const values = getEnumValues(def.entries);
+	if (values.every((v) => typeof v === "number")) json.type = "number";
+	if (values.every((v) => typeof v === "string")) json.type = "string";
+	json.enum = values;
+};
+var customProcessor = (_schema, ctx, _json, _params) => {
+	if (ctx.unrepresentable === "throw") throw new Error("Custom types cannot be represented in JSON Schema");
+};
+var transformProcessor = (_schema, ctx, _json, _params) => {
+	if (ctx.unrepresentable === "throw") throw new Error("Transforms cannot be represented in JSON Schema");
+};
+var arrayProcessor = (schema, ctx, _json, params) => {
+	const json = _json;
+	const def = schema._zod.def;
+	const { minimum, maximum } = schema._zod.bag;
+	if (typeof minimum === "number") json.minItems = minimum;
+	if (typeof maximum === "number") json.maxItems = maximum;
+	json.type = "array";
+	json.items = process$1(def.element, ctx, {
+		...params,
+		path: [...params.path, "items"]
+	});
+};
+var objectProcessor = (schema, ctx, _json, params) => {
+	const json = _json;
+	const def = schema._zod.def;
+	json.type = "object";
+	json.properties = {};
+	const shape = def.shape;
+	for (const key in shape) json.properties[key] = process$1(shape[key], ctx, {
+		...params,
+		path: [
+			...params.path,
+			"properties",
+			key
+		]
+	});
+	const allKeys = new Set(Object.keys(shape));
+	const requiredKeys = new Set([...allKeys].filter((key) => {
+		const v = def.shape[key]._zod;
+		if (ctx.io === "input") return v.optin === void 0;
+		else return v.optout === void 0;
+	}));
+	if (requiredKeys.size > 0) json.required = Array.from(requiredKeys);
+	if (def.catchall?._zod.def.type === "never") json.additionalProperties = false;
+	else if (!def.catchall) {
+		if (ctx.io === "output") json.additionalProperties = false;
+	} else if (def.catchall) json.additionalProperties = process$1(def.catchall, ctx, {
+		...params,
+		path: [...params.path, "additionalProperties"]
+	});
+};
+var unionProcessor = (schema, ctx, json, params) => {
+	const def = schema._zod.def;
+	const isExclusive = def.inclusive === false;
+	const options = def.options.map((x, i) => process$1(x, ctx, {
+		...params,
+		path: [
+			...params.path,
+			isExclusive ? "oneOf" : "anyOf",
+			i
+		]
+	}));
+	if (isExclusive) json.oneOf = options;
+	else json.anyOf = options;
+};
+var intersectionProcessor = (schema, ctx, json, params) => {
+	const def = schema._zod.def;
+	const a = process$1(def.left, ctx, {
+		...params,
+		path: [
+			...params.path,
+			"allOf",
+			0
+		]
+	});
+	const b = process$1(def.right, ctx, {
+		...params,
+		path: [
+			...params.path,
+			"allOf",
+			1
+		]
+	});
+	const isSimpleIntersection = (val) => "allOf" in val && Object.keys(val).length === 1;
+	json.allOf = [...isSimpleIntersection(a) ? a.allOf : [a], ...isSimpleIntersection(b) ? b.allOf : [b]];
+};
+var nullableProcessor = (schema, ctx, json, params) => {
+	const def = schema._zod.def;
+	const inner = process$1(def.innerType, ctx, params);
+	const seen = ctx.seen.get(schema);
+	if (ctx.target === "openapi-3.0") {
+		seen.ref = def.innerType;
+		json.nullable = true;
+	} else json.anyOf = [inner, { type: "null" }];
+};
+var nonoptionalProcessor = (schema, ctx, _json, params) => {
+	const def = schema._zod.def;
+	process$1(def.innerType, ctx, params);
+	const seen = ctx.seen.get(schema);
+	seen.ref = def.innerType;
+};
+var defaultProcessor = (schema, ctx, json, params) => {
+	const def = schema._zod.def;
+	process$1(def.innerType, ctx, params);
+	const seen = ctx.seen.get(schema);
+	seen.ref = def.innerType;
+	json.default = JSON.parse(JSON.stringify(def.defaultValue));
+};
+var prefaultProcessor = (schema, ctx, json, params) => {
+	const def = schema._zod.def;
+	process$1(def.innerType, ctx, params);
+	const seen = ctx.seen.get(schema);
+	seen.ref = def.innerType;
+	if (ctx.io === "input") json._prefault = JSON.parse(JSON.stringify(def.defaultValue));
+};
+var catchProcessor = (schema, ctx, json, params) => {
+	const def = schema._zod.def;
+	process$1(def.innerType, ctx, params);
+	const seen = ctx.seen.get(schema);
+	seen.ref = def.innerType;
+	let catchValue;
+	try {
+		catchValue = def.catchValue(void 0);
+	} catch {
+		throw new Error("Dynamic catch values are not supported in JSON Schema");
+	}
+	json.default = catchValue;
+};
+var pipeProcessor = (schema, ctx, _json, params) => {
+	const def = schema._zod.def;
+	const innerType = ctx.io === "input" ? def.in._zod.def.type === "transform" ? def.out : def.in : def.out;
+	process$1(innerType, ctx, params);
+	const seen = ctx.seen.get(schema);
+	seen.ref = innerType;
+};
+var readonlyProcessor = (schema, ctx, json, params) => {
+	const def = schema._zod.def;
+	process$1(def.innerType, ctx, params);
+	const seen = ctx.seen.get(schema);
+	seen.ref = def.innerType;
+	json.readOnly = true;
+};
+var optionalProcessor = (schema, ctx, _json, params) => {
+	const def = schema._zod.def;
+	process$1(def.innerType, ctx, params);
+	const seen = ctx.seen.get(schema);
+	seen.ref = def.innerType;
+};
+//#endregion
+//#region node_modules/zod/v4/classic/iso.js
+var ZodISODateTime = /* @__PURE__ */ $constructor("ZodISODateTime", (inst, def) => {
+	$ZodISODateTime.init(inst, def);
+	ZodStringFormat.init(inst, def);
+});
+function datetime(params) {
+	return /* @__PURE__ */ _isoDateTime(ZodISODateTime, params);
+}
+var ZodISODate = /* @__PURE__ */ $constructor("ZodISODate", (inst, def) => {
+	$ZodISODate.init(inst, def);
+	ZodStringFormat.init(inst, def);
+});
+function date(params) {
+	return /* @__PURE__ */ _isoDate(ZodISODate, params);
+}
+var ZodISOTime = /* @__PURE__ */ $constructor("ZodISOTime", (inst, def) => {
+	$ZodISOTime.init(inst, def);
+	ZodStringFormat.init(inst, def);
+});
+function time(params) {
+	return /* @__PURE__ */ _isoTime(ZodISOTime, params);
+}
+var ZodISODuration = /* @__PURE__ */ $constructor("ZodISODuration", (inst, def) => {
+	$ZodISODuration.init(inst, def);
+	ZodStringFormat.init(inst, def);
+});
+function duration(params) {
+	return /* @__PURE__ */ _isoDuration(ZodISODuration, params);
+}
+//#endregion
+//#region node_modules/zod/v4/classic/errors.js
+var initializer = (inst, issues) => {
+	$ZodError.init(inst, issues);
+	inst.name = "ZodError";
+	Object.defineProperties(inst, {
+		format: { value: (mapper) => formatError(inst, mapper) },
+		flatten: { value: (mapper) => flattenError(inst, mapper) },
+		addIssue: { value: (issue) => {
+			inst.issues.push(issue);
+			inst.message = JSON.stringify(inst.issues, jsonStringifyReplacer, 2);
+		} },
+		addIssues: { value: (issues) => {
+			inst.issues.push(...issues);
+			inst.message = JSON.stringify(inst.issues, jsonStringifyReplacer, 2);
+		} },
+		isEmpty: { get() {
+			return inst.issues.length === 0;
+		} }
+	});
+};
+$constructor("ZodError", initializer);
+var ZodRealError = $constructor("ZodError", initializer, { Parent: Error });
+//#endregion
+//#region node_modules/zod/v4/classic/parse.js
+var parse = /* @__PURE__ */ _parse(ZodRealError);
+var parseAsync = /* @__PURE__ */ _parseAsync(ZodRealError);
+var safeParse = /* @__PURE__ */ _safeParse(ZodRealError);
+var safeParseAsync = /* @__PURE__ */ _safeParseAsync(ZodRealError);
+var encode = /* @__PURE__ */ _encode(ZodRealError);
+var decode = /* @__PURE__ */ _decode(ZodRealError);
+var encodeAsync = /* @__PURE__ */ _encodeAsync(ZodRealError);
+var decodeAsync = /* @__PURE__ */ _decodeAsync(ZodRealError);
+var safeEncode = /* @__PURE__ */ _safeEncode(ZodRealError);
+var safeDecode = /* @__PURE__ */ _safeDecode(ZodRealError);
+var safeEncodeAsync = /* @__PURE__ */ _safeEncodeAsync(ZodRealError);
+var safeDecodeAsync = /* @__PURE__ */ _safeDecodeAsync(ZodRealError);
+//#endregion
+//#region node_modules/zod/v4/classic/schemas.js
+var ZodType = /* @__PURE__ */ $constructor("ZodType", (inst, def) => {
+	$ZodType.init(inst, def);
+	Object.assign(inst["~standard"], { jsonSchema: {
+		input: createStandardJSONSchemaMethod(inst, "input"),
+		output: createStandardJSONSchemaMethod(inst, "output")
+	} });
+	inst.toJSONSchema = createToJSONSchemaMethod(inst, {});
+	inst.def = def;
+	inst.type = def.type;
+	Object.defineProperty(inst, "_def", { value: def });
+	inst.check = (...checks) => {
+		return inst.clone(mergeDefs(def, { checks: [...def.checks ?? [], ...checks.map((ch) => typeof ch === "function" ? { _zod: {
+			check: ch,
+			def: { check: "custom" },
+			onattach: []
+		} } : ch)] }), { parent: true });
+	};
+	inst.with = inst.check;
+	inst.clone = (def, params) => clone(inst, def, params);
+	inst.brand = () => inst;
+	inst.register = ((reg, meta) => {
+		reg.add(inst, meta);
+		return inst;
+	});
+	inst.parse = (data, params) => parse(inst, data, params, { callee: inst.parse });
+	inst.safeParse = (data, params) => safeParse(inst, data, params);
+	inst.parseAsync = async (data, params) => parseAsync(inst, data, params, { callee: inst.parseAsync });
+	inst.safeParseAsync = async (data, params) => safeParseAsync(inst, data, params);
+	inst.spa = inst.safeParseAsync;
+	inst.encode = (data, params) => encode(inst, data, params);
+	inst.decode = (data, params) => decode(inst, data, params);
+	inst.encodeAsync = async (data, params) => encodeAsync(inst, data, params);
+	inst.decodeAsync = async (data, params) => decodeAsync(inst, data, params);
+	inst.safeEncode = (data, params) => safeEncode(inst, data, params);
+	inst.safeDecode = (data, params) => safeDecode(inst, data, params);
+	inst.safeEncodeAsync = async (data, params) => safeEncodeAsync(inst, data, params);
+	inst.safeDecodeAsync = async (data, params) => safeDecodeAsync(inst, data, params);
+	inst.refine = (check, params) => inst.check(refine(check, params));
+	inst.superRefine = (refinement) => inst.check(superRefine(refinement));
+	inst.overwrite = (fn) => inst.check(/* @__PURE__ */ _overwrite(fn));
+	inst.optional = () => optional(inst);
+	inst.exactOptional = () => exactOptional(inst);
+	inst.nullable = () => nullable(inst);
+	inst.nullish = () => optional(nullable(inst));
+	inst.nonoptional = (params) => nonoptional(inst, params);
+	inst.array = () => array(inst);
+	inst.or = (arg) => union([inst, arg]);
+	inst.and = (arg) => intersection(inst, arg);
+	inst.transform = (tx) => pipe(inst, transform(tx));
+	inst.default = (def) => _default(inst, def);
+	inst.prefault = (def) => prefault(inst, def);
+	inst.catch = (params) => _catch(inst, params);
+	inst.pipe = (target) => pipe(inst, target);
+	inst.readonly = () => readonly(inst);
+	inst.describe = (description) => {
+		const cl = inst.clone();
+		globalRegistry.add(cl, { description });
+		return cl;
+	};
+	Object.defineProperty(inst, "description", {
+		get() {
+			return globalRegistry.get(inst)?.description;
+		},
+		configurable: true
+	});
+	inst.meta = (...args) => {
+		if (args.length === 0) return globalRegistry.get(inst);
+		const cl = inst.clone();
+		globalRegistry.add(cl, args[0]);
+		return cl;
+	};
+	inst.isOptional = () => inst.safeParse(void 0).success;
+	inst.isNullable = () => inst.safeParse(null).success;
+	inst.apply = (fn) => fn(inst);
+	return inst;
+});
+/** @internal */
+var _ZodString = /* @__PURE__ */ $constructor("_ZodString", (inst, def) => {
+	$ZodString.init(inst, def);
+	ZodType.init(inst, def);
+	inst._zod.processJSONSchema = (ctx, json, params) => stringProcessor(inst, ctx, json, params);
+	const bag = inst._zod.bag;
+	inst.format = bag.format ?? null;
+	inst.minLength = bag.minimum ?? null;
+	inst.maxLength = bag.maximum ?? null;
+	inst.regex = (...args) => inst.check(/* @__PURE__ */ _regex(...args));
+	inst.includes = (...args) => inst.check(/* @__PURE__ */ _includes(...args));
+	inst.startsWith = (...args) => inst.check(/* @__PURE__ */ _startsWith(...args));
+	inst.endsWith = (...args) => inst.check(/* @__PURE__ */ _endsWith(...args));
+	inst.min = (...args) => inst.check(/* @__PURE__ */ _minLength(...args));
+	inst.max = (...args) => inst.check(/* @__PURE__ */ _maxLength(...args));
+	inst.length = (...args) => inst.check(/* @__PURE__ */ _length(...args));
+	inst.nonempty = (...args) => inst.check(/* @__PURE__ */ _minLength(1, ...args));
+	inst.lowercase = (params) => inst.check(/* @__PURE__ */ _lowercase(params));
+	inst.uppercase = (params) => inst.check(/* @__PURE__ */ _uppercase(params));
+	inst.trim = () => inst.check(/* @__PURE__ */ _trim());
+	inst.normalize = (...args) => inst.check(/* @__PURE__ */ _normalize(...args));
+	inst.toLowerCase = () => inst.check(/* @__PURE__ */ _toLowerCase());
+	inst.toUpperCase = () => inst.check(/* @__PURE__ */ _toUpperCase());
+	inst.slugify = () => inst.check(/* @__PURE__ */ _slugify());
+});
+var ZodString = /* @__PURE__ */ $constructor("ZodString", (inst, def) => {
+	$ZodString.init(inst, def);
+	_ZodString.init(inst, def);
+	inst.email = (params) => inst.check(/* @__PURE__ */ _email(ZodEmail, params));
+	inst.url = (params) => inst.check(/* @__PURE__ */ _url(ZodURL, params));
+	inst.jwt = (params) => inst.check(/* @__PURE__ */ _jwt(ZodJWT, params));
+	inst.emoji = (params) => inst.check(/* @__PURE__ */ _emoji(ZodEmoji, params));
+	inst.guid = (params) => inst.check(/* @__PURE__ */ _guid(ZodGUID, params));
+	inst.uuid = (params) => inst.check(/* @__PURE__ */ _uuid(ZodUUID, params));
+	inst.uuidv4 = (params) => inst.check(/* @__PURE__ */ _uuidv4(ZodUUID, params));
+	inst.uuidv6 = (params) => inst.check(/* @__PURE__ */ _uuidv6(ZodUUID, params));
+	inst.uuidv7 = (params) => inst.check(/* @__PURE__ */ _uuidv7(ZodUUID, params));
+	inst.nanoid = (params) => inst.check(/* @__PURE__ */ _nanoid(ZodNanoID, params));
+	inst.guid = (params) => inst.check(/* @__PURE__ */ _guid(ZodGUID, params));
+	inst.cuid = (params) => inst.check(/* @__PURE__ */ _cuid(ZodCUID, params));
+	inst.cuid2 = (params) => inst.check(/* @__PURE__ */ _cuid2(ZodCUID2, params));
+	inst.ulid = (params) => inst.check(/* @__PURE__ */ _ulid(ZodULID, params));
+	inst.base64 = (params) => inst.check(/* @__PURE__ */ _base64(ZodBase64, params));
+	inst.base64url = (params) => inst.check(/* @__PURE__ */ _base64url(ZodBase64URL, params));
+	inst.xid = (params) => inst.check(/* @__PURE__ */ _xid(ZodXID, params));
+	inst.ksuid = (params) => inst.check(/* @__PURE__ */ _ksuid(ZodKSUID, params));
+	inst.ipv4 = (params) => inst.check(/* @__PURE__ */ _ipv4(ZodIPv4, params));
+	inst.ipv6 = (params) => inst.check(/* @__PURE__ */ _ipv6(ZodIPv6, params));
+	inst.cidrv4 = (params) => inst.check(/* @__PURE__ */ _cidrv4(ZodCIDRv4, params));
+	inst.cidrv6 = (params) => inst.check(/* @__PURE__ */ _cidrv6(ZodCIDRv6, params));
+	inst.e164 = (params) => inst.check(/* @__PURE__ */ _e164(ZodE164, params));
+	inst.datetime = (params) => inst.check(datetime(params));
+	inst.date = (params) => inst.check(date(params));
+	inst.time = (params) => inst.check(time(params));
+	inst.duration = (params) => inst.check(duration(params));
+});
+function string(params) {
+	return /* @__PURE__ */ _string(ZodString, params);
+}
+var ZodStringFormat = /* @__PURE__ */ $constructor("ZodStringFormat", (inst, def) => {
+	$ZodStringFormat.init(inst, def);
+	_ZodString.init(inst, def);
+});
+var ZodEmail = /* @__PURE__ */ $constructor("ZodEmail", (inst, def) => {
+	$ZodEmail.init(inst, def);
+	ZodStringFormat.init(inst, def);
+});
+var ZodGUID = /* @__PURE__ */ $constructor("ZodGUID", (inst, def) => {
+	$ZodGUID.init(inst, def);
+	ZodStringFormat.init(inst, def);
+});
+var ZodUUID = /* @__PURE__ */ $constructor("ZodUUID", (inst, def) => {
+	$ZodUUID.init(inst, def);
+	ZodStringFormat.init(inst, def);
+});
+var ZodURL = /* @__PURE__ */ $constructor("ZodURL", (inst, def) => {
+	$ZodURL.init(inst, def);
+	ZodStringFormat.init(inst, def);
+});
+var ZodEmoji = /* @__PURE__ */ $constructor("ZodEmoji", (inst, def) => {
+	$ZodEmoji.init(inst, def);
+	ZodStringFormat.init(inst, def);
+});
+var ZodNanoID = /* @__PURE__ */ $constructor("ZodNanoID", (inst, def) => {
+	$ZodNanoID.init(inst, def);
+	ZodStringFormat.init(inst, def);
+});
+var ZodCUID = /* @__PURE__ */ $constructor("ZodCUID", (inst, def) => {
+	$ZodCUID.init(inst, def);
+	ZodStringFormat.init(inst, def);
+});
+var ZodCUID2 = /* @__PURE__ */ $constructor("ZodCUID2", (inst, def) => {
+	$ZodCUID2.init(inst, def);
+	ZodStringFormat.init(inst, def);
+});
+var ZodULID = /* @__PURE__ */ $constructor("ZodULID", (inst, def) => {
+	$ZodULID.init(inst, def);
+	ZodStringFormat.init(inst, def);
+});
+var ZodXID = /* @__PURE__ */ $constructor("ZodXID", (inst, def) => {
+	$ZodXID.init(inst, def);
+	ZodStringFormat.init(inst, def);
+});
+var ZodKSUID = /* @__PURE__ */ $constructor("ZodKSUID", (inst, def) => {
+	$ZodKSUID.init(inst, def);
+	ZodStringFormat.init(inst, def);
+});
+var ZodIPv4 = /* @__PURE__ */ $constructor("ZodIPv4", (inst, def) => {
+	$ZodIPv4.init(inst, def);
+	ZodStringFormat.init(inst, def);
+});
+var ZodIPv6 = /* @__PURE__ */ $constructor("ZodIPv6", (inst, def) => {
+	$ZodIPv6.init(inst, def);
+	ZodStringFormat.init(inst, def);
+});
+var ZodCIDRv4 = /* @__PURE__ */ $constructor("ZodCIDRv4", (inst, def) => {
+	$ZodCIDRv4.init(inst, def);
+	ZodStringFormat.init(inst, def);
+});
+var ZodCIDRv6 = /* @__PURE__ */ $constructor("ZodCIDRv6", (inst, def) => {
+	$ZodCIDRv6.init(inst, def);
+	ZodStringFormat.init(inst, def);
+});
+var ZodBase64 = /* @__PURE__ */ $constructor("ZodBase64", (inst, def) => {
+	$ZodBase64.init(inst, def);
+	ZodStringFormat.init(inst, def);
+});
+var ZodBase64URL = /* @__PURE__ */ $constructor("ZodBase64URL", (inst, def) => {
+	$ZodBase64URL.init(inst, def);
+	ZodStringFormat.init(inst, def);
+});
+var ZodE164 = /* @__PURE__ */ $constructor("ZodE164", (inst, def) => {
+	$ZodE164.init(inst, def);
+	ZodStringFormat.init(inst, def);
+});
+var ZodJWT = /* @__PURE__ */ $constructor("ZodJWT", (inst, def) => {
+	$ZodJWT.init(inst, def);
+	ZodStringFormat.init(inst, def);
+});
+var ZodNumber = /* @__PURE__ */ $constructor("ZodNumber", (inst, def) => {
+	$ZodNumber.init(inst, def);
+	ZodType.init(inst, def);
+	inst._zod.processJSONSchema = (ctx, json, params) => numberProcessor(inst, ctx, json, params);
+	inst.gt = (value, params) => inst.check(/* @__PURE__ */ _gt(value, params));
+	inst.gte = (value, params) => inst.check(/* @__PURE__ */ _gte(value, params));
+	inst.min = (value, params) => inst.check(/* @__PURE__ */ _gte(value, params));
+	inst.lt = (value, params) => inst.check(/* @__PURE__ */ _lt(value, params));
+	inst.lte = (value, params) => inst.check(/* @__PURE__ */ _lte(value, params));
+	inst.max = (value, params) => inst.check(/* @__PURE__ */ _lte(value, params));
+	inst.int = (params) => inst.check(int(params));
+	inst.safe = (params) => inst.check(int(params));
+	inst.positive = (params) => inst.check(/* @__PURE__ */ _gt(0, params));
+	inst.nonnegative = (params) => inst.check(/* @__PURE__ */ _gte(0, params));
+	inst.negative = (params) => inst.check(/* @__PURE__ */ _lt(0, params));
+	inst.nonpositive = (params) => inst.check(/* @__PURE__ */ _lte(0, params));
+	inst.multipleOf = (value, params) => inst.check(/* @__PURE__ */ _multipleOf(value, params));
+	inst.step = (value, params) => inst.check(/* @__PURE__ */ _multipleOf(value, params));
+	inst.finite = () => inst;
+	const bag = inst._zod.bag;
+	inst.minValue = Math.max(bag.minimum ?? Number.NEGATIVE_INFINITY, bag.exclusiveMinimum ?? Number.NEGATIVE_INFINITY) ?? null;
+	inst.maxValue = Math.min(bag.maximum ?? Number.POSITIVE_INFINITY, bag.exclusiveMaximum ?? Number.POSITIVE_INFINITY) ?? null;
+	inst.isInt = (bag.format ?? "").includes("int") || Number.isSafeInteger(bag.multipleOf ?? .5);
+	inst.isFinite = true;
+	inst.format = bag.format ?? null;
+});
+function number(params) {
+	return /* @__PURE__ */ _number(ZodNumber, params);
+}
+var ZodNumberFormat = /* @__PURE__ */ $constructor("ZodNumberFormat", (inst, def) => {
+	$ZodNumberFormat.init(inst, def);
+	ZodNumber.init(inst, def);
+});
+function int(params) {
+	return /* @__PURE__ */ _int(ZodNumberFormat, params);
+}
+var ZodBoolean = /* @__PURE__ */ $constructor("ZodBoolean", (inst, def) => {
+	$ZodBoolean.init(inst, def);
+	ZodType.init(inst, def);
+	inst._zod.processJSONSchema = (ctx, json, params) => booleanProcessor(inst, ctx, json, params);
+});
+function boolean(params) {
+	return /* @__PURE__ */ _boolean(ZodBoolean, params);
+}
+var ZodUnknown = /* @__PURE__ */ $constructor("ZodUnknown", (inst, def) => {
+	$ZodUnknown.init(inst, def);
+	ZodType.init(inst, def);
+	inst._zod.processJSONSchema = (ctx, json, params) => unknownProcessor(inst, ctx, json, params);
+});
+function unknown() {
+	return /* @__PURE__ */ _unknown(ZodUnknown);
+}
+var ZodNever = /* @__PURE__ */ $constructor("ZodNever", (inst, def) => {
+	$ZodNever.init(inst, def);
+	ZodType.init(inst, def);
+	inst._zod.processJSONSchema = (ctx, json, params) => neverProcessor(inst, ctx, json, params);
+});
+function never(params) {
+	return /* @__PURE__ */ _never(ZodNever, params);
+}
+var ZodArray = /* @__PURE__ */ $constructor("ZodArray", (inst, def) => {
+	$ZodArray.init(inst, def);
+	ZodType.init(inst, def);
+	inst._zod.processJSONSchema = (ctx, json, params) => arrayProcessor(inst, ctx, json, params);
+	inst.element = def.element;
+	inst.min = (minLength, params) => inst.check(/* @__PURE__ */ _minLength(minLength, params));
+	inst.nonempty = (params) => inst.check(/* @__PURE__ */ _minLength(1, params));
+	inst.max = (maxLength, params) => inst.check(/* @__PURE__ */ _maxLength(maxLength, params));
+	inst.length = (len, params) => inst.check(/* @__PURE__ */ _length(len, params));
+	inst.unwrap = () => inst.element;
+});
+function array(element, params) {
+	return /* @__PURE__ */ _array(ZodArray, element, params);
+}
+var ZodObject = /* @__PURE__ */ $constructor("ZodObject", (inst, def) => {
+	$ZodObjectJIT.init(inst, def);
+	ZodType.init(inst, def);
+	inst._zod.processJSONSchema = (ctx, json, params) => objectProcessor(inst, ctx, json, params);
+	defineLazy(inst, "shape", () => {
+		return def.shape;
+	});
+	inst.keyof = () => _enum(Object.keys(inst._zod.def.shape));
+	inst.catchall = (catchall) => inst.clone({
+		...inst._zod.def,
+		catchall
+	});
+	inst.passthrough = () => inst.clone({
+		...inst._zod.def,
+		catchall: unknown()
+	});
+	inst.loose = () => inst.clone({
+		...inst._zod.def,
+		catchall: unknown()
+	});
+	inst.strict = () => inst.clone({
+		...inst._zod.def,
+		catchall: never()
+	});
+	inst.strip = () => inst.clone({
+		...inst._zod.def,
+		catchall: void 0
+	});
+	inst.extend = (incoming) => {
+		return extend(inst, incoming);
+	};
+	inst.safeExtend = (incoming) => {
+		return safeExtend(inst, incoming);
+	};
+	inst.merge = (other) => merge(inst, other);
+	inst.pick = (mask) => pick(inst, mask);
+	inst.omit = (mask) => omit(inst, mask);
+	inst.partial = (...args) => partial(ZodOptional, inst, args[0]);
+	inst.required = (...args) => required(ZodNonOptional, inst, args[0]);
+});
+function object(shape, params) {
+	return new ZodObject({
+		type: "object",
+		shape: shape ?? {},
+		...normalizeParams(params)
+	});
+}
+var ZodUnion = /* @__PURE__ */ $constructor("ZodUnion", (inst, def) => {
+	$ZodUnion.init(inst, def);
+	ZodType.init(inst, def);
+	inst._zod.processJSONSchema = (ctx, json, params) => unionProcessor(inst, ctx, json, params);
+	inst.options = def.options;
+});
+function union(options, params) {
+	return new ZodUnion({
+		type: "union",
+		options,
+		...normalizeParams(params)
+	});
+}
+var ZodIntersection = /* @__PURE__ */ $constructor("ZodIntersection", (inst, def) => {
+	$ZodIntersection.init(inst, def);
+	ZodType.init(inst, def);
+	inst._zod.processJSONSchema = (ctx, json, params) => intersectionProcessor(inst, ctx, json, params);
+});
+function intersection(left, right) {
+	return new ZodIntersection({
+		type: "intersection",
+		left,
+		right
+	});
+}
+var ZodEnum = /* @__PURE__ */ $constructor("ZodEnum", (inst, def) => {
+	$ZodEnum.init(inst, def);
+	ZodType.init(inst, def);
+	inst._zod.processJSONSchema = (ctx, json, params) => enumProcessor(inst, ctx, json, params);
+	inst.enum = def.entries;
+	inst.options = Object.values(def.entries);
+	const keys = new Set(Object.keys(def.entries));
+	inst.extract = (values, params) => {
+		const newEntries = {};
+		for (const value of values) if (keys.has(value)) newEntries[value] = def.entries[value];
+		else throw new Error(`Key ${value} not found in enum`);
+		return new ZodEnum({
+			...def,
+			checks: [],
+			...normalizeParams(params),
+			entries: newEntries
+		});
+	};
+	inst.exclude = (values, params) => {
+		const newEntries = { ...def.entries };
+		for (const value of values) if (keys.has(value)) delete newEntries[value];
+		else throw new Error(`Key ${value} not found in enum`);
+		return new ZodEnum({
+			...def,
+			checks: [],
+			...normalizeParams(params),
+			entries: newEntries
+		});
+	};
+});
+function _enum(values, params) {
+	return new ZodEnum({
+		type: "enum",
+		entries: Array.isArray(values) ? Object.fromEntries(values.map((v) => [v, v])) : values,
+		...normalizeParams(params)
+	});
+}
+var ZodTransform = /* @__PURE__ */ $constructor("ZodTransform", (inst, def) => {
+	$ZodTransform.init(inst, def);
+	ZodType.init(inst, def);
+	inst._zod.processJSONSchema = (ctx, json, params) => transformProcessor(inst, ctx, json, params);
+	inst._zod.parse = (payload, _ctx) => {
+		if (_ctx.direction === "backward") throw new $ZodEncodeError(inst.constructor.name);
+		payload.addIssue = (issue$1) => {
+			if (typeof issue$1 === "string") payload.issues.push(issue(issue$1, payload.value, def));
+			else {
+				const _issue = issue$1;
+				if (_issue.fatal) _issue.continue = false;
+				_issue.code ?? (_issue.code = "custom");
+				_issue.input ?? (_issue.input = payload.value);
+				_issue.inst ?? (_issue.inst = inst);
+				payload.issues.push(issue(_issue));
+			}
+		};
+		const output = def.transform(payload.value, payload);
+		if (output instanceof Promise) return output.then((output) => {
+			payload.value = output;
+			return payload;
+		});
+		payload.value = output;
+		return payload;
+	};
+});
+function transform(fn) {
+	return new ZodTransform({
+		type: "transform",
+		transform: fn
+	});
+}
+var ZodOptional = /* @__PURE__ */ $constructor("ZodOptional", (inst, def) => {
+	$ZodOptional.init(inst, def);
+	ZodType.init(inst, def);
+	inst._zod.processJSONSchema = (ctx, json, params) => optionalProcessor(inst, ctx, json, params);
+	inst.unwrap = () => inst._zod.def.innerType;
+});
+function optional(innerType) {
+	return new ZodOptional({
+		type: "optional",
+		innerType
+	});
+}
+var ZodExactOptional = /* @__PURE__ */ $constructor("ZodExactOptional", (inst, def) => {
+	$ZodExactOptional.init(inst, def);
+	ZodType.init(inst, def);
+	inst._zod.processJSONSchema = (ctx, json, params) => optionalProcessor(inst, ctx, json, params);
+	inst.unwrap = () => inst._zod.def.innerType;
+});
+function exactOptional(innerType) {
+	return new ZodExactOptional({
+		type: "optional",
+		innerType
+	});
+}
+var ZodNullable = /* @__PURE__ */ $constructor("ZodNullable", (inst, def) => {
+	$ZodNullable.init(inst, def);
+	ZodType.init(inst, def);
+	inst._zod.processJSONSchema = (ctx, json, params) => nullableProcessor(inst, ctx, json, params);
+	inst.unwrap = () => inst._zod.def.innerType;
+});
+function nullable(innerType) {
+	return new ZodNullable({
+		type: "nullable",
+		innerType
+	});
+}
+var ZodDefault = /* @__PURE__ */ $constructor("ZodDefault", (inst, def) => {
+	$ZodDefault.init(inst, def);
+	ZodType.init(inst, def);
+	inst._zod.processJSONSchema = (ctx, json, params) => defaultProcessor(inst, ctx, json, params);
+	inst.unwrap = () => inst._zod.def.innerType;
+	inst.removeDefault = inst.unwrap;
+});
+function _default(innerType, defaultValue) {
+	return new ZodDefault({
+		type: "default",
+		innerType,
+		get defaultValue() {
+			return typeof defaultValue === "function" ? defaultValue() : shallowClone(defaultValue);
+		}
+	});
+}
+var ZodPrefault = /* @__PURE__ */ $constructor("ZodPrefault", (inst, def) => {
+	$ZodPrefault.init(inst, def);
+	ZodType.init(inst, def);
+	inst._zod.processJSONSchema = (ctx, json, params) => prefaultProcessor(inst, ctx, json, params);
+	inst.unwrap = () => inst._zod.def.innerType;
+});
+function prefault(innerType, defaultValue) {
+	return new ZodPrefault({
+		type: "prefault",
+		innerType,
+		get defaultValue() {
+			return typeof defaultValue === "function" ? defaultValue() : shallowClone(defaultValue);
+		}
+	});
+}
+var ZodNonOptional = /* @__PURE__ */ $constructor("ZodNonOptional", (inst, def) => {
+	$ZodNonOptional.init(inst, def);
+	ZodType.init(inst, def);
+	inst._zod.processJSONSchema = (ctx, json, params) => nonoptionalProcessor(inst, ctx, json, params);
+	inst.unwrap = () => inst._zod.def.innerType;
+});
+function nonoptional(innerType, params) {
+	return new ZodNonOptional({
+		type: "nonoptional",
+		innerType,
+		...normalizeParams(params)
+	});
+}
+var ZodCatch = /* @__PURE__ */ $constructor("ZodCatch", (inst, def) => {
+	$ZodCatch.init(inst, def);
+	ZodType.init(inst, def);
+	inst._zod.processJSONSchema = (ctx, json, params) => catchProcessor(inst, ctx, json, params);
+	inst.unwrap = () => inst._zod.def.innerType;
+	inst.removeCatch = inst.unwrap;
+});
+function _catch(innerType, catchValue) {
+	return new ZodCatch({
+		type: "catch",
+		innerType,
+		catchValue: typeof catchValue === "function" ? catchValue : () => catchValue
+	});
+}
+var ZodPipe = /* @__PURE__ */ $constructor("ZodPipe", (inst, def) => {
+	$ZodPipe.init(inst, def);
+	ZodType.init(inst, def);
+	inst._zod.processJSONSchema = (ctx, json, params) => pipeProcessor(inst, ctx, json, params);
+	inst.in = def.in;
+	inst.out = def.out;
+});
+function pipe(in_, out) {
+	return new ZodPipe({
+		type: "pipe",
+		in: in_,
+		out
+	});
+}
+var ZodReadonly = /* @__PURE__ */ $constructor("ZodReadonly", (inst, def) => {
+	$ZodReadonly.init(inst, def);
+	ZodType.init(inst, def);
+	inst._zod.processJSONSchema = (ctx, json, params) => readonlyProcessor(inst, ctx, json, params);
+	inst.unwrap = () => inst._zod.def.innerType;
+});
+function readonly(innerType) {
+	return new ZodReadonly({
+		type: "readonly",
+		innerType
+	});
+}
+var ZodCustom = /* @__PURE__ */ $constructor("ZodCustom", (inst, def) => {
+	$ZodCustom.init(inst, def);
+	ZodType.init(inst, def);
+	inst._zod.processJSONSchema = (ctx, json, params) => customProcessor(inst, ctx, json, params);
+});
+function custom(fn, _params) {
+	return /* @__PURE__ */ _custom(ZodCustom, fn ?? (() => true), _params);
+}
+function refine(fn, _params = {}) {
+	return /* @__PURE__ */ _refine(ZodCustom, fn, _params);
+}
+function superRefine(fn) {
+	return /* @__PURE__ */ _superRefine(fn);
+}
+//#endregion
+//#region node_modules/@hookform/resolvers/dist/resolvers.mjs
+var r = (t, r, o) => {
+	if (t && "reportValidity" in t) {
+		const s = get(o, r);
+		t.setCustomValidity(s && s.message || ""), t.reportValidity();
+	}
+}, o = (e, t) => {
+	for (const o in t.fields) {
+		const s = t.fields[o];
+		s && s.ref && "reportValidity" in s.ref ? r(s.ref, o, e) : s && s.refs && s.refs.forEach((t) => r(t, o, e));
+	}
+}, s$1 = (r, s) => {
+	s.shouldUseNativeValidation && o(r, s);
+	const n = {};
+	for (const o in r) {
+		const f = get(s.fields, o), c = Object.assign(r[o] || {}, { ref: f && f.ref });
+		if (i$1(s.names || Object.keys(r), o)) {
+			const r = Object.assign({}, get(n, o));
+			set(r, "root", c), set(n, o, r);
+		} else set(n, o, c);
+	}
+	return n;
+}, i$1 = (e, t) => {
+	const r = n(t);
+	return e.some((e) => n(e).match(`^${r}\\.\\d+`));
+};
+function n(e) {
+	return e.replace(/\]|\[/g, "");
+}
+//#endregion
+//#region node_modules/@hookform/resolvers/zod/dist/zod.mjs
+function t(r, e) {
+	try {
+		var o = r();
+	} catch (r) {
+		return e(r);
+	}
+	return o && o.then ? o.then(void 0, e) : o;
+}
+function s(r, e) {
+	for (var n = {}; r.length;) {
+		var t = r[0], s = t.code, i = t.message, a = t.path.join(".");
+		if (!n[a]) if ("unionErrors" in t) {
+			var u = t.unionErrors[0].errors[0];
+			n[a] = {
+				message: u.message,
+				type: u.code
+			};
+		} else n[a] = {
+			message: i,
+			type: s
+		};
+		if ("unionErrors" in t && t.unionErrors.forEach(function(e) {
+			return e.errors.forEach(function(e) {
+				return r.push(e);
+			});
+		}), e) {
+			var c = n[a].types, f = c && c[t.code];
+			n[a] = appendErrors(a, e, n, s, f ? [].concat(f, t.message) : t.message);
+		}
+		r.shift();
+	}
+	return n;
+}
+function i(r, e) {
+	for (var n = {}; r.length;) {
+		var t = r[0], s = t.code, i = t.message, a = t.path.join(".");
+		if (!n[a]) if ("invalid_union" === t.code && t.errors.length > 0) {
+			var u = t.errors[0][0];
+			n[a] = {
+				message: u.message,
+				type: u.code
+			};
+		} else n[a] = {
+			message: i,
+			type: s
+		};
+		if ("invalid_union" === t.code && t.errors.forEach(function(e) {
+			return e.forEach(function(e) {
+				return r.push(e);
+			});
+		}), e) {
+			var c = n[a].types, f = c && c[t.code];
+			n[a] = appendErrors(a, e, n, s, f ? [].concat(f, t.message) : t.message);
+		}
+		r.shift();
+	}
+	return n;
+}
+function a(o$1, a, u) {
+	if (void 0 === u && (u = {}), function(r) {
+		return "_def" in r && "object" == typeof r._def && "typeName" in r._def;
+	}(o$1)) return function(n, i, c) {
+		try {
+			return Promise.resolve(t(function() {
+				return Promise.resolve(o$1["sync" === u.mode ? "parse" : "parseAsync"](n, a)).then(function(e) {
+					return c.shouldUseNativeValidation && o({}, c), {
+						errors: {},
+						values: u.raw ? Object.assign({}, n) : e
+					};
+				});
+			}, function(r) {
+				if (function(r) {
+					return Array.isArray(null == r ? void 0 : r.issues);
+				}(r)) return {
+					values: {},
+					errors: s$1(s(r.errors, !c.shouldUseNativeValidation && "all" === c.criteriaMode), c)
+				};
+				throw r;
+			}));
+		} catch (r) {
+			return Promise.reject(r);
+		}
+	};
+	if (function(r) {
+		return "_zod" in r && "object" == typeof r._zod;
+	}(o$1)) return function(s, c, f) {
+		try {
+			return Promise.resolve(t(function() {
+				return Promise.resolve(("sync" === u.mode ? parse$1 : parseAsync$1)(o$1, s, a)).then(function(e) {
+					return f.shouldUseNativeValidation && o({}, f), {
+						errors: {},
+						values: u.raw ? Object.assign({}, s) : e
+					};
+				});
+			}, function(r) {
+				if (function(r) {
+					return r instanceof $ZodError;
+				}(r)) return {
+					values: {},
+					errors: s$1(i(r.issues, !f.shouldUseNativeValidation && "all" === f.criteriaMode), f)
+				};
+				throw r;
+			}));
+		} catch (r) {
+			return Promise.reject(r);
+		}
+	};
+	throw new Error("Invalid input: not a Zod schema");
+}
+//#endregion
+//#region src/components/layout/Column.jsx
+/**
+* @param {ColumnProps} 
+*/
+function Column({ children = [], visible = true, width = 12, breakAfter = false }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Col, {
+		xs: width,
+		className: visible ? "" : "d-none",
+		children
+	}), breakAfter && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Col, { className: "w-100" })] });
+}
+//#endregion
+//#region src/components/Display.jsx
+function InvalidFeedback({ message, className }) {
+	return Feedback({
+		type: "invalid",
+		message,
+		className
+	});
+}
+function Feedback({ type, message, className }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Form_default.Control.Feedback, {
 		type,
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-			className: "d-flex align-items-start",
+			className: `d-flex align-items-start ${className ?? ""}`,
 			children: message
 		})
 	});
@@ -15287,10 +21680,7 @@ function LabelContent({ label, tooltip = null }) {
 		className: "d-flex align-items-center",
 		children: [tooltip && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(OverlayTrigger, {
 			placement: "right",
-			overlay: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Tooltip_default, {
-				id: "button-tooltip",
-				children: tooltip
-			}),
+			overlay: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Tooltip_default, { children: tooltip }),
 			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", {
 				className: "bi bi-info-circle-fill me-2 pe-auto",
 				style: { cursor: "help" }
@@ -15299,251 +21689,1442 @@ function LabelContent({ label, tooltip = null }) {
 	});
 }
 //#endregion
-//#region src/components/MainForm.jsx
-function MainForm({ data, loaded, ref }) {
-	const { register, handleSubmit, watch, reset, getValues, trigger, formState: { errors, touchedFields } } = useForm({
-		mode: "onBlur",
-		reValidateMode: "onChange",
-		defaultValues: data
+//#region src/components/layout/helpers.jsx
+function hideIf(condition) {
+	return condition ? "d-none" : "";
+}
+/**
+* @param {string} label 
+* @param {?string} tooltip 
+* @returns {import("react").JSX.Element | string}
+*/
+function buildLabel(label, tooltip) {
+	if (tooltip) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LabelContent, {
+		label,
+		tooltip
+	});
+	return label;
+}
+//#endregion
+//#region src/components/layout/SectionRow.jsx
+function SectionRow({ children }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Row, {
+		className: "section-row g-3 pb-3",
+		children
+	});
+}
+//#endregion
+//#region src/components/form/sections/Section.jsx
+/**
+* @param {{title: string, columns: ColumnProps[], first: boolean}} 
+* @returns 
+*/
+function Section({ title, columns = [], first = false }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: `${hideIf(columns.every((v) => v.visible === false))} ${first ? "" : "mt-2"}`,
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Row, {
+			className: "mt-2 mb-4",
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Col, {
+				className: "d-flex align-items-start",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "title-l",
+					children: title
+				})
+			})
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SectionRow, { children: columns.map((column, index) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Column, {
+			visible: column.visible ?? void 0,
+			width: column.width ?? void 0,
+			breakAfter: column.breakAfter ?? void 0,
+			children: Array.isArray(column.children) ? column.children.map((child, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: child }, i)) : column.children
+		}, index)) })]
+	});
+}
+//#endregion
+//#region src/validation/helpers.jsx
+function useDependentValidation(form, { watch, trigger }) {
+	const values = useWatch({
+		control: form.control,
+		name: watch
 	});
 	(0, import_react.useEffect)(() => {
-		reset(data);
-	}, [data, reset]);
-	const validate = async () => {
-		return await trigger();
-	};
-	const getData = () => getValues();
-	const showMessage = (type, content) => {
-		console.log(content);
-	};
-	(0, import_react.useImperativeHandle)(ref, () => {
-		return {
-			validate,
-			getData,
-			showMessage
-		};
-	}, []);
-	const required = () => {
-		return { required: "Este campo é obrigatório." };
-	};
-	const formData = watch();
-	if (!loaded) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-		className: "p-3",
-		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Spinner, { animation: "border" })
+		if (trigger.some((field) => form.formState.touchedFields[field] || form.formState.errors[field])) form.trigger(trigger);
+	}, [
+		values,
+		form.formState.touchedFields,
+		form.formState.errors
+	]);
+	return values;
+}
+/**
+* @param {{
+*  form: import("react-hook-form").UseFormReturn,
+*  arrayName: string,
+*  index: number,
+*  dependency: FieldArrayValidationDependency,
+* }} 
+* @returns 
+*/
+function useDependentFieldArrayValidation({ form, arrayName, index, dependency }) {
+	const fieldPath = `${arrayName}.${index}.${dependency.fieldName}`;
+	const itemValue = useWatch({
+		control: form.control,
+		name: fieldPath,
+		defaultValue: dependency.defaultValue
 	});
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Form_default, {
-		noValidate: true,
-		onSubmit: handleSubmit(() => {}),
-		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Row, {
-				className: "mt-2 mb-2",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Col, {
-					className: "d-flex align-items-start",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h4", {
-						style: { color: "black" },
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("em", { children: "Solicitação" }) })
-					})
+	(0, import_react.useEffect)(() => {
+		if (dependency.targetFields.some((field) => {
+			return form.formState.touchedFields?.[arrayName]?.[index]?.[field] || form.formState.errors?.[arrayName]?.[index]?.[field];
+		})) form.trigger(dependency.targetFields.map((target) => `${arrayName}.${index}.${target}`));
+	}, [
+		itemValue,
+		form.formState.errors?.[arrayName]?.[index],
+		form.formState.touchedFields?.[arrayName]?.[index]
+	]);
+	return itemValue;
+}
+/**
+* @param {import("react-hook-form").UseFormReturn} form 
+* @param {{
+*  arrayName: string, index: number, dependency: FieldArrayValidationDependency
+* }[]} dependencies 
+* @returns 
+*/
+function useDependentFieldArrayValidations(form, dependencies) {
+	const watched = {};
+	for (const dependency of dependencies) watched[dependency.dependency.fieldName] = useDependentFieldArrayValidation({
+		form,
+		arrayName: dependency.arrayName,
+		index: dependency.index,
+		dependency: dependency.dependency
+	});
+	return watched;
+}
+//#endregion
+//#region src/components/form/sections/FieldArrayRow.jsx
+function buildIds(idList, arrayName, index) {
+	const idObject = {};
+	for (const id of idList) idObject[id] = `${arrayName}.${index}.${id}`;
+	return idObject;
+}
+/**
+* @param {{
+*  form: import("react-hook-form").UseFormReturn,
+*  field: string, 
+*  arrayName: string,
+*  index: number,
+*  fieldNames: string[],
+*  validationDependencies: Object[],
+*  rowBuilder: function(FieldArrayRowBuilder): import("react").JSX.Element
+*  removeFunction: function,
+* }}
+* @returns
+*/
+function FieldArrayRow({ form, field, arrayName, index, fieldNames, validationDependencies = [], rowBuilder, removeFunction }) {
+	const watched = useDependentFieldArrayValidations(form, validationDependencies.map((v) => ({
+		form,
+		arrayName,
+		index,
+		dependency: v
+	})));
+	const columns = rowBuilder({
+		field,
+		index,
+		rowFields: buildIds(fieldNames, arrayName, index),
+		watched,
+		rowErrors: form.formState.errors?.[arrayName]?.[index]
+	});
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SectionRow, { children: [removeFunction && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Col, {
+		xs: "12",
+		className: "d-flex justify-content-end",
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+			onClick: () => removeFunction(index),
+			size: "sm",
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "bi bi-dash fs-5" })
+		})
+	}), columns.map((column, columnIndex) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Column, {
+		visible: column.visible ?? void 0,
+		width: column.width ?? void 0,
+		breakAfter: column.breakAfter ?? void 0,
+		children: Array.isArray(column.children) ? column.children.map((child, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: child }, i)) : column.children
+	}, columnIndex))] });
+}
+//#endregion
+//#region src/components/form/sections/FieldArraySection.jsx
+/**
+* @param {{
+*  form: import("react-hook-form").UseFormReturn,
+*  arrayName: string,
+*  fieldNames: string[],
+*  title: string,
+*  first: boolean,
+*  visible: boolean,
+*  arrayFields: {id: string}[],
+*  validationDependencies: FieldArrayValidationDependency[],
+*  appendFunction: function,
+*  removeFunction: function,
+*  rowBuilder: FieldArrayRowBuilder,
+* }}
+* @returns 
+*/
+function FieldArraySection({ form, arrayName, fieldNames = [], title, first = false, visible = true, arrayFields = [], validationDependencies = [], appendFunction, removeFunction, rowBuilder }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: `${hideIf(!visible)} ${first ? "" : "mt-4"}`,
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Row, {
+			className: "mt-2 mb-4",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Col, {
+				xs: "6",
+				className: "d-flex justify-content-start title-sm",
+				children: title
+			}), appendFunction && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Col, {
+				xs: "6",
+				className: "d-flex justify-content-end",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+					onClick: (e) => {
+						appendFunction();
+					},
+					size: "sm",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "bi bi-plus fs-5" })
 				})
+			})]
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+			className: "d-grid gap-4",
+			children: arrayFields.map((field, rowIndex) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FieldArrayRow, {
+				form,
+				field,
+				arrayName,
+				index: rowIndex,
+				fieldNames,
+				validationDependencies,
+				rowBuilder,
+				removeFunction
+			}, field.id))
+		})]
+	});
+}
+//#endregion
+//#region src/logic/flow.js
+var currentStep = getCurrentStep();
+function currentStepIs(step) {
+	return step === currentStep;
+}
+function getCurrentStep() {
+	return new URL(window.location.toLocaleString()).searchParams.get("step");
+}
+//#endregion
+//#region src/components/form/fields/constants.jsx
+var defaultParams = {
+	required: false,
+	disabled: false,
+	hint: null
+};
+//#endregion
+//#region src/components/form/fields/select.jsx
+/**
+* @param {{
+*  form: import("react-hook-form").UseFormReturn,
+*  errors: import("react-hook-form").FieldErrors,
+*  id: string,
+*  fieldName: string,
+*  label: string,
+*  hint: ?string,
+*  required: boolean,
+*  disabled: boolean,
+*  options: {label: string, value: string}[],
+*  showEmptyOption: boolean,
+*  onBlur: React.FocusEventHandler,
+*  onChange: React.ChangeEventHandler,
+* }} props
+* @returns {import("react").JSX.Element}
+*/
+function SelectField({ form, errors, id, fieldName = id, label, hint = defaultParams.hint, required = defaultParams.required, disabled = defaultParams.disabled, options, showEmptyOption = true, onBlur, onChange }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(FloatingLabel, {
+		label: buildLabel(label, hint),
+		controlId: id,
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Form_default.Select, {
+			...form.register(id, {
+				onBlur,
+				onChange
 			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Row, {
-				className: "g-3",
-				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Col, {
-						lg: "4",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(FloatingLabel, {
-							label: "Tipo de solicitação",
-							controlId: "tipoSolicitacao",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Form_default.Select, {
-								...register("tipoSolicitacao", required()),
-								isInvalid: errors.tipoSolicitacao,
-								required: true,
-								children: [
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
-										value: "",
-										children: "Selecione..."
-									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
-										value: "1",
-										children: "1 - Aprovação de remessas de NF-e"
-									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
-										value: "2",
-										children: "2 - Aprovação de contrato"
-									})
-								]
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(InvalidFeedback, { message: errors.tipoSolicitacao?.message })]
-						})
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Col, {
-						lg: "2",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(FloatingLabel, {
-							label: "Número",
-							controlId: "numeroRemessa",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Form_default.Control, {
-								type: "text",
-								placeholder: "Número",
-								...register("numeroRemessa", {
-									required: "abcde",
-									validate: { tipo: (numeroRemessa, { tipoSolicitacao }) => {
-										if (tipoSolicitacao === "2") return "O número da remessa não pode ser informado para o tipo 2.";
-										return true;
-									} }
-								}),
-								required: true,
-								isInvalid: errors.numeroRemessa
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(InvalidFeedback, { message: errors.numeroRemessa?.message })]
-						})
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Col, {
-						lg: "2",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FloatingLabel, {
-							label: "Data",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Form_default.Control, {
-								id: "dataRemessa",
-								name: "dataRemessa",
-								type: "date",
-								placeholder: "Data"
-							})
-						})
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Col, {
-						lg: "2",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FloatingLabel, {
-							label: "Quantidade de notas",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Form_default.Control, {
-								id: "quantidadeNotasRemessa",
-								name: "quantidadeNotasRemessa",
-								type: "text",
-								placeholder: "Quantidade de notas"
-							})
-						})
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Col, {
-						lg: "2",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FloatingLabel, {
-							label: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LabelContent, {
-								label: "Categoria",
-								tooltip: "Categoria da remessa com base em seu valor ( <= 1000 = baixo valor, > 1000 = alto valor)"
-							}),
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Form_default.Control, {
-								id: "categoriaRemessa",
-								name: "categoriaRemessa",
-								type: "text",
-								placeholder: "Categoria"
-							})
-						})
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Col, {
-						lg: "2",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FloatingLabel, {
-							label: "Valor total",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Form_default.Control, {
-								id: "valorTotalRemessa",
-								name: "valorTotalRemessa",
-								type: "text",
-								placeholder: "Valor total"
-							})
-						})
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Col, {
-						lg: "4",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FloatingLabel, {
-							label: "Solicitante",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Form_default.Control, {
-								id: "solicitante",
-								name: "solicitante",
-								type: "text",
-								placeholder: "Solicitante"
-							})
-						})
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Col, {
-						lg: "6",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Form_default.Label, {
-							className: "d-flex align-items-start",
-							children: "Remessa e notas fiscais"
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Form_default.Control, {
-							id: "anexo",
-							name: "anexo",
-							type: "file"
-						})]
-					})
-				]
+			isInvalid: !!errors?.[fieldName],
+			required,
+			disabled,
+			children: [showEmptyOption && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+				value: "",
+				children: "Selecione..."
+			}), options.map((option) => {
+				const value = option.value;
+				const label = option.label;
+				return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+					value,
+					children: `${value} - ${label}`
+				}, `${id}-option-${value}`);
+			})]
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(InvalidFeedback, { message: errors?.[fieldName]?.message })]
+	});
+}
+//#endregion
+//#region src/components/form/fields/input.jsx
+/**
+* @param {{
+*  form: import("react-hook-form").UseFormReturn;
+*  errors: import("react-hook-form").FieldErrors;
+*  id: string;
+*  fieldName: string;
+*  label: string;
+*  hint: ?string;
+*  type: string;
+*  value: string | number | string[];
+*  required: boolean;
+*  disabled: boolean;
+*  onBlur: React.FocusEventHandler;
+*  onChange: React.ChangeEventHandler;
+*  className: ?string | undefined;
+* }} props 
+* @returns {import("react").JSX.Element}
+*/
+function InputField({ form, errors, id, fieldName = id, label, hint = defaultParams.hint, type = "text", required = defaultParams.required, disabled = defaultParams.disabled, onBlur, onChange, className }) {
+	const options = {
+		onBlur,
+		onChange
+	};
+	if (type === "number") options.setValueAs = (value) => {
+		if (value === "") return void 0;
+		const parsed = Number(value);
+		return isNaN(parsed) ? void 0 : parsed;
+	};
+	else if (type === "date") options.valueAsDate = true;
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(FloatingLabel, {
+		label: buildLabel(label, hint),
+		controlId: id,
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Form_default.Control, {
+			className,
+			type,
+			placeholder: label,
+			...form.register(id, options),
+			isInvalid: !!errors?.[fieldName],
+			required,
+			disabled
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(InvalidFeedback, { message: errors?.[fieldName]?.message })]
+	});
+}
+//#endregion
+//#region src/logic/text/helpers.jsx
+/**
+* @param {any[]} array 
+*/
+function naturalLanguageJoin(array) {
+	if (array.length > 1) return `${array.slice(0, -1).join(", ")} e ${array.slice(-1)}`;
+	return array.join("");
+}
+//#endregion
+//#region src/components/form/fields/checkbox.jsx
+/**
+* @param {{
+*  form: import("react-hook-form").UseFormReturn,
+*  errors: import("react-hook-form").FieldErrors,
+*  id: string,
+*  fieldName: string,
+*  label: string,
+*  isSwitch: boolean,
+*  hint: ?string,
+*  required: boolean,
+*  disabled: boolean,
+*  onBlur: React.FocusEventHandler,
+*  onChange: React.ChangeEventHandler,
+* }} props 
+* @returns {import("react").JSX.Element}
+*/
+function CheckboxField({ form, errors, id, fieldName = id, label, isSwitch = false, hint = defaultParams.hint, required = defaultParams.required, disabled = defaultParams.disabled, onBlur, onChange }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Form_default.Check, {
+		type: isSwitch ? "switch" : "checkbox",
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Form_default.Check.Input, {
+				id,
+				...form.register(id, {
+					onBlur,
+					onChange
+				}),
+				type: "checkbox",
+				required,
+				disabled,
+				role: isSwitch ? "switch" : void 0,
+				isInvalid: !!errors?.[fieldName]
 			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Row, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Col, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { children: ["Dados: ", JSON.stringify(formData)] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-				type: "submit",
-				children: "Enviar"
-			})] }) })
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Form_default.Check.Label, {
+				className: "ms-2",
+				htmlFor: id,
+				children: buildLabel(label, hint)
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(InvalidFeedback, { message: errors?.[fieldName]?.message })
 		]
 	});
 }
 //#endregion
-//#region src/bpmBridge.jsx
-function initBPMBridge({ onLoad, onSubmit, onError, initializationRef }) {
-	window._loadData = async (data, info) => {
-		onLoad && await onLoad(data, info);
-	};
-	window._saveData = (data, info) => {
-		return onSubmit ? onSubmit(data, info) : {};
-	};
-	window._rollback = (error) => {
-		onError && onError(error);
-	};
-	if (!window.workflowCockpit) {
-		console.warn("workflowCockpit não está disponível ainda.");
-		return;
-	}
-	if (initializationRef.current) return;
-	window.workflowCockpit = window.workflowCockpit({
-		init: window._loadData,
-		onSubmit: window._saveData,
-		onError: window._rollback
+//#region src/components/form/fields/textarea.jsx
+/**
+* @param {{
+*  form: import("react-hook-form").UseFormReturn,
+*  errors: import("react-hook-form").FieldErrors,
+*  id: string,
+*  fieldName: string,
+*  label: string,
+*  hint: ?string,
+*  height: number,
+*  required: boolean,
+*  disabled: boolean,
+*  onBlur: React.FocusEventHandler,
+*  onChange: React.ChangeEventHandler,
+* }} props 
+* @returns {import("react").JSX.Element}
+*/
+function TextAreaField({ form, errors, id, fieldName = id, label, hint = defaultParams.hint, height = 5, required = defaultParams.required, disabled = defaultParams.disabled, onBlur, onChange }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(FloatingLabel, {
+		label: buildLabel(label, hint),
+		controlId: id,
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Form_default.Control, {
+			...form.register(id, {
+				onBlur,
+				onChange
+			}),
+			as: "textarea",
+			placeholder: label,
+			style: { height: `${height}lh` },
+			required,
+			disabled,
+			isInvalid: !!errors?.[fieldName]
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(InvalidFeedback, { message: errors?.[fieldName]?.message })]
 	});
 }
+//#endregion
+//#region src/components/messages/ToastContext.jsx
+/** @import {ToastData} from "../../logic/types" */
+var ToastContext = (0, import_react.createContext)();
+/**
+* @returns {{
+*  showToast: function(Omit<ToastData, 'id' | 'show'>): void;
+* }} 
+*/
+var useToast = () => (0, import_react.useContext)(ToastContext);
+//#endregion
+//#region src/components/form/fields/file.jsx
+/**
+* @typedef {import('react').RefObject<HTMLButtonElement>} ButtonRef
+*/
+/**
+* @param {{
+*  form: import("react-hook-form").UseFormReturn;
+*  errors: import("react-hook-form").FieldErrors;
+*  id: string;
+*  fieldName: string;
+*  label: string;
+*  hint: ?string;
+*  required: boolean;
+*  disabled: boolean;
+*  multiple: boolean;
+*  allowRemoval: boolean;
+*  acceptedFormats: string[];
+*  onBlur: React.FocusEventHandler;
+*  onChange: React.ChangeEventHandler;
+* }} props 
+* @returns {import("react").JSX.Element}
+*/
+function FileField({ form, errors, id, fieldName = id, label, hint = defaultParams.hint, required = defaultParams.required, disabled = defaultParams.disabled, multiple = false, allowRemoval = true, acceptedFormats = [], onBlur, onChange }) {
+	/** @type {ButtonRef} */
+	const addButtonRef = (0, import_react.useRef)(null);
+	const [files, setFiles] = (0, import_react.useState)([]);
+	const [showMore, setShowMore] = (0, import_react.useState)(false);
+	const { showToast } = useToast();
+	const options = {
+		onBlur,
+		onChange: (e) => {
+			onChange?.call(e);
+			setFiles(Array.from(e.target.files));
+		}
+	};
+	(0, import_react.useEffect)(() => {
+		if (multiple || files.length < 1) return;
+		updateFiles((items, _) => {
+			items.add(files[0]);
+		});
+	}, [multiple]);
+	/**
+	* @param {File[]} fileArray 
+	*/
+	function setValue(fileArray) {
+		form.setValue(id, fileArray, {
+			shouldValidate: true,
+			shouldDirty: true,
+			shouldTouch: true
+		});
+	}
+	/**
+	* @param {function(DataTransferItemList, HTMLInputElement): Promise<void>} action
+	* @returns {Promise<void>}
+	*/
+	async function updateFiles(action) {
+		const dataTransfer = new DataTransfer();
+		await action(dataTransfer.items);
+		const fileArray = Array.from(dataTransfer.files);
+		setFiles(fileArray);
+		setValue(fileArray);
+	}
+	async function addFiles() {
+		/** @type {FileSystemFileHandle[]} */
+		let fileHandles;
+		try {
+			fileHandles = await window.showOpenFilePicker({
+				id: "file-picker",
+				multiple
+			});
+		} catch (e) {
+			return;
+		}
+		updateFiles(async (items) => {
+			for (const file of files) items.add(file);
+			for (const handle of fileHandles) {
+				if (files.some((f) => f.name === handle.name)) {
+					showToast({
+						variant: "warning",
+						title: `Anexo - ${label}`,
+						message: `O arquivo "${handle.name}" já foi anexado. Caso seja realmente necessário anexá-lo novamente, por gentileza, renomeie e tente novamente.`,
+						delay: 1e4
+					});
+					continue;
+				}
+				const file = await handle.getFile();
+				items.add(file);
+			}
+		});
+		setShowMore(true);
+	}
+	function removeFile(index) {
+		updateFiles(async (items) => {
+			files.forEach((file, i) => {
+				if (i === index) return;
+				items.add(file);
+			});
+		});
+	}
+	function removeAll() {
+		updateFiles(async (items) => {
+			items.clear();
+		});
+	}
+	const { ref: registerRef, ...rest } = form.register(id, options);
+	const moreThanOneFile = files.length > 1;
+	const denyRemoval = disabled || !allowRemoval;
+	const addButtonLabel = "Anexar";
+	const clearButtonLabel = "Limpar";
+	const isInvalid = !!errors?.[fieldName];
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Form_default.Control, {
+			id,
+			name: id,
+			type: "file",
+			hidden: true
+		}),
+		/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(ListGroup_default, {
+			as: "ul",
+			className: "file-selector" + (isInvalid ? " is-invalid" : ""),
+			style: {
+				maxHeight: "600px",
+				overflowY: "auto"
+			},
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(ListGroupItem, {
+					as: "li",
+					className: "d-flex justify-content-between sticky-top gap-3 file-selector-header" + (isInvalid ? " is-invalid" : ""),
+					required,
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "d-flex align-items-center gap-2",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Form_default.Label, {
+								className: "d-flex align-items-center text-start mb-0",
+								htmlFor: id,
+								onClick: (_) => {
+									const addButton = addButtonRef.current;
+									if (!addButton) return;
+									addButton.click();
+								},
+								children: buildLabel(label, hint)
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Card_default, {
+								title: `${files.length} arquivos anexados`,
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Card_default.Body, {
+									className: "px-2 py-1",
+									children: `${files.length}`
+								})
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "d-flex gap-2",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+									variant: "primary",
+									size: "md",
+									title: addButtonLabel,
+									ref: (r) => {
+										registerRef(r);
+										addButtonRef.current = r;
+									},
+									onClick: disabled ? null : addFiles,
+									onBlur: (e) => {
+										rest.onBlur(e);
+										if (!e.relatedTarget) return;
+										setValue(files);
+									},
+									onChange: rest.onChange,
+									disabled: disabled || !multiple && files.length > 0,
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "bi bi-file-earmark-plus-fill me-2" }), addButtonLabel]
+								}), moreThanOneFile ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+									onClick: () => setShowMore(!showMore),
+									children: `Mostrar ${showMore ? "menos" : `tudo`}`
+								}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {})]
+							})
+						]
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "d-flex justify-content-end gap-3",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+							variant: "danger",
+							size: "md",
+							onClick: denyRemoval ? null : removeAll,
+							disabled: denyRemoval,
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "bi bi-x-square-fill me-2" }), clearButtonLabel]
+						})
+					})]
+				}),
+				files.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FileLink, {
+					file: files[0],
+					index: 0,
+					onRemove: denyRemoval ? null : removeFile,
+					disabled: denyRemoval
+				}, files[0].name),
+				moreThanOneFile && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Collapse, {
+					in: showMore,
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: files.slice(1).map((file, index) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FileLink, {
+						file,
+						index: index + 1,
+						onRemove: denyRemoval ? null : removeFile
+					}, file.name)) })
+				})
+			]
+		}),
+		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(InvalidFeedback, { message: errors?.[fieldName]?.message })
+	] });
+}
+/**
+* @param {{
+*  file: File,
+*  index: number,
+*  onRemove: ?function(number): void,
+* }} 
+* @returns {import("react").JSX.Element}
+*/
+function FileLink({ file, index, onRemove = null }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(ListGroupItem, {
+		className: "d-flex justify-content-between",
+		as: "li",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+			className: "justify-content-start",
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
+				href: URL.createObjectURL(file),
+				target: "_blank",
+				children: file.name
+			})
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+			variant: "warning",
+			size: "sm",
+			title: "Remover",
+			onClick: () => onRemove?.(index),
+			disabled: !onRemove,
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "bi bi-trash-fill" })
+		}) })]
+	});
+}
+//#endregion
+//#region src/services/api.jsx
+/**
+* @param {{
+*  dataSource: string,
+*  token: string,
+*  searchField: ?string,
+*  searchingValue: ?string,
+*  filters: any[],
+* }} 
+* @returns {Promise<any[]>}
+*/
+async function fetchDataSource({ dataSource, token, searchField, searchingValue, filters = [] }) {
+	const response = await fetch("https://platform.senior.com.br/t/senior.com.br/bridge/1.0/rest/platform/ecm_form/actions/getResultSet", {
+		method: "POST",
+		headers: {
+			"Accept": "application/json",
+			"Content-Type": "application/json",
+			"Authorization": `bearer ${token}`
+		},
+		body: JSON.stringify({
+			dataSource,
+			token,
+			dataSourceField: searchField,
+			searchingValue,
+			filters,
+			skip: 0,
+			top: 1e4
+		})
+	});
+	const json = await response.json();
+	if (response.status >= 300) {
+		if (response.status === 401) throw "A sua autenticação expirou. Acesse a solicitação novamente.";
+		if (json.message) {
+			console.error(json.message);
+			throw json.message;
+		}
+		console.error(json);
+		throw "Houve um erro ao carregar os dados. Tente novamente mais tarde.";
+	}
+	return JSON.parse(json["data"])["value"];
+}
+//#endregion
+//#region src/hooks/useDataSource.jsx
+var loadingStatus = {
+	ready: 1,
+	loading: 2,
+	loaded: 3,
+	failed: 4
+};
+/**
+* @param {DataSourceConfig} config
+*/
+function useDataSource(config) {
+	const [data, setData] = (0, import_react.useState)([]);
+	const [status, setStatus] = (0, import_react.useState)(loadingStatus.ready);
+	const [error, setError] = (0, import_react.useState)(null);
+	/**
+	* @param {string?} value 
+	* @param {[]} extraFilters 
+	* @returns {Promise<any[]>}
+	*/
+	async function search(value = void 0, extraFilters = []) {
+		try {
+			setStatus(loadingStatus.loading);
+			const result = await fetchDataSource({
+				dataSource: config.name,
+				token: config.token,
+				searchField: config.searchField,
+				searchingValue: value,
+				filters: extraFilters
+			});
+			setData(result || []);
+			setStatus(loadingStatus.loaded);
+			setError(null);
+			return result || [];
+		} catch (e) {
+			setError(e.toString());
+			setStatus(loadingStatus.failed);
+			return [];
+		}
+	}
+	return {
+		data,
+		error,
+		status,
+		search
+	};
+}
+//#endregion
+//#region src/hooks/useDebounce.jsx
+/**
+* @param {string} value 
+* @param {number} delay 
+* @returns 
+*/
+function useDebounce(value, delay = 1e3) {
+	const [debounced, setDebounced] = (0, import_react.useState)(value);
+	(0, import_react.useEffect)(() => {
+		const timer = setTimeout(() => setDebounced(value), delay);
+		return () => clearTimeout(timer);
+	}, [value]);
+	return debounced;
+}
+//#endregion
+//#region src/styles/loading.jsx
+function getStyleFromLoadingStatus(status) {
+	switch (status) {
+		case loadingStatus.loaded: return "loaded";
+		case loadingStatus.loading: return "loading";
+		case loadingStatus.failed: return "loading-failed";
+		default: return "";
+	}
+}
+//#endregion
+//#region src/components/modals/lookup.jsx
+/**
+* @param {{
+*  show: boolean;
+*  onHide: function(): void;
+*  dataSourceHook: {
+*      data: Object[];
+*      search: function;
+*      status: number;
+*  };
+*  config: import("../../logic/types").DataSourceConfig;
+*  onSelect: function(Object): void;
+* }} 
+* @returns 
+*/
+function LookupModal({ show, onHide, dataSourceHook, config, onSelect }) {
+	const [searchText, setSearchText] = (0, import_react.useState)("");
+	const debounced = useDebounce(searchText);
+	(0, import_react.useEffect)(() => {
+		if (debounced) dataSourceHook.search(debounced);
+	}, [debounced]);
+	let visibleFields;
+	if (config.visibleFields && config.visibleFields.length > 0) visibleFields = config.visibleFields;
+	else visibleFields = Object.keys(config.columnMap);
+	let tableContent;
+	if (dataSourceHook.status === loadingStatus.loading) tableContent = /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+		colSpan: visibleFields.length,
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+			className: "d-flex justify-content-center",
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Spinner, { animation: "border" })
+		})
+	}) });
+	else if (dataSourceHook.data.length === 0 && dataSourceHook.status === loadingStatus.loaded) tableContent = /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+		colSpan: visibleFields.length,
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+			className: "d-flex justify-content-center",
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Alert_default, {
+				variant: "primary",
+				className: "w-100 text-center fw-bold mb-0",
+				children: "Nenhum registro encontrado."
+			})
+		})
+	}) });
+	else tableContent = dataSourceHook.data.map((row, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tr", {
+		onClick: () => {
+			onSelect(row);
+			onHide();
+		},
+		children: visibleFields.map((field) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", { children: row[field] }, field))
+	}, i));
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Modal_default, {
+		show,
+		onHide,
+		size: "xl",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Modal_default.Header, {
+			closeButton: true,
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Modal_default.Title, { children: config.name })
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Modal_default.Body, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FloatingLabel, {
+			label: "Pesquisar",
+			className: "mb-2",
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Form_default.Control, {
+				type: "text",
+				placeholder: "Pesquisar",
+				value: searchText,
+				className: getStyleFromLoadingStatus(dataSourceHook.status),
+				onChange: (e) => setSearchText(e.target.value)
+			})
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Table, {
+			striped: true,
+			hover: true,
+			responsive: true,
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tr", { children: visibleFields.map((field) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", { children: config.columnMap[field] }, field)) }) }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", { children: tableContent })]
+		})] })]
+	});
+}
+//#endregion
+//#region src/components/form/fields/lookup.jsx
+/**
+* @import {DataSourceConfig} from '../../../logic/types'
+* @import {UseFormReturn} from 'react-hook-form'
+* @import {FieldErrors} from 'react-hook-form'
+*/
+/**
+* @param {{
+*  form: UseFormReturn;
+*  errors: FieldErrors;
+*  id: string;
+*  fieldName: string;
+*  label: string;
+*  hint: ?string;
+*  value: string | number | string[];
+*  required: boolean;
+*  disabled: boolean;
+*  onBlur: React.FocusEventHandler;
+*  onChange: React.ChangeEventHandler;
+*  config: DataSourceConfig;
+*  formMap: Record<string, [
+*      name: string,
+*      parse: (function(any): any)|undefined;
+*  ]>;
+*  dependentFields: string[];
+* }} props 
+*/
+function LookupField({ form, errors, id, fieldName = id, label, hint = defaultParams.hint, type = "text", required = defaultParams.required, disabled = defaultParams.disabled, onBlur, onChange, config, formMap }) {
+	const { error, status, data, search } = useDataSource(config);
+	const [showDropDown, setShowDropdown] = (0, import_react.useState)(true);
+	const [input, setInput] = (0, import_react.useState)("");
+	const [showModal, setShowModal] = (0, import_react.useState)(false);
+	const debounced = useDebounce(input);
+	const { showToast } = useToast();
+	(0, import_react.useEffect)(() => {
+		if (disabled) return;
+		if (!debounced) {
+			clearDependencies();
+			return;
+		}
+		handleSearch(debounced);
+	}, [debounced, disabled]);
+	(0, import_react.useEffect)(() => {
+		if (!showModal && status === loadingStatus.loaded && data.length === 0) {
+			showToast({
+				title: "Pesquisa",
+				message: "Nenhum registro encontrado com o valor informado.",
+				variant: "info",
+				delay: 5e3
+			});
+			clearDependencies(true);
+		} else if (error && status === loadingStatus.failed) showToast({
+			title: "Erro ao realizar a pesquisa",
+			message: error,
+			variant: "danger",
+			delay: 2e4
+		});
+	}, [error, status]);
+	/**
+	* @param {string} value 
+	*/
+	async function handleSearch(value) {
+		const results = await search(value);
+		if (results.length === 1) selectRecord(results[0]);
+		setShowDropdown(true);
+	}
+	function clearDependencies(ignoreLookupField = false) {
+		Object.keys(formMap).forEach((field) => {
+			if (ignoreLookupField && field === id) return;
+			form.setValue(field);
+		});
+	}
+	/**
+	* @param {Object} record 
+	*/
+	function selectRecord(record) {
+		Object.keys(formMap).forEach((field) => {
+			const options = formMap[field];
+			let value;
+			const name = options[0];
+			const parse = options[1];
+			if (parse) value = parse(record[name]);
+			else value = record[name];
+			form.setValue(field, value, {
+				shouldValidate: true,
+				shouldDirty: true,
+				shouldTouch: true
+			});
+		});
+		setShowDropdown(false);
+	}
+	const options = {
+		onChange: (e) => {
+			onChange?.(e);
+			setInput(e.target.value);
+		},
+		onBlur
+	};
+	let inputType;
+	if (type === "number") {
+		inputType = type;
+		options.setValueAs = (value) => {
+			if (value === "") return void 0;
+			const parsed = Number(value);
+			return isNaN(parsed) ? void 0 : parsed;
+		};
+	} else inputType = "text";
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+		/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(InputGroup_default, {
+			className: !!errors?.[fieldName] ? "is-invalid" : "",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FloatingLabel, {
+				label: buildLabel(label, hint),
+				controlId: id,
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Form_default.Control, {
+					type: inputType,
+					placeholder: label,
+					...form.register(id, options),
+					isInvalid: !!errors?.[fieldName],
+					required,
+					disabled,
+					className: getStyleFromLoadingStatus(status)
+				})
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+				variant: "primary",
+				size: "lg",
+				onClick: () => setShowModal(true),
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "bi bi-search" })
+			})]
+		}),
+		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(InvalidFeedback, { message: errors?.[fieldName]?.message }),
+		showDropDown && data.length > 1 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Dropdown_default.Menu, {
+			show: true,
+			children: data.map((item, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Dropdown_default.Item, {
+				onClick: () => selectRecord(item),
+				children: item[config.keyField]
+			}, i))
+		}),
+		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(LookupModal, {
+			show: showModal,
+			onHide: () => setShowModal(false),
+			dataSourceHook: {
+				data,
+				search,
+				status
+			},
+			config,
+			onSelect: selectRecord
+		})
+	] });
+}
+//#endregion
+//#region src/components/MainForm.jsx
+/**
+* @param {{
+*  ref: React.RefObject;
+*  initialData: Object;
+*  userData: {
+*      accessToken: string;
+*  };
+* }}
+*/
+function MainForm({ ref, initialData, userData }) {
+	const { showToast } = useToast();
+	const form = useForm({
+		mode: "onBlur",
+		reValidateMode: "onChange",
+		defaultValues: initialData,
+		resolver: a(formValidationSchema)
+	});
+	const { handleSubmit, watch, reset, getValues, trigger, control, formState: { errors, touchedFields } } = form;
+	const { fields: arrayFields, append, remove } = useFieldArray({
+		control,
+		name: "notasFiscais"
+	});
+	(0, import_react.useEffect)(() => {
+		reset(initialData);
+	}, [initialData, reset]);
+	(0, import_react.useImperativeHandle)(ref, () => {
+		return {
+			validate,
+			getData
+		};
+	}, []);
+	async function validate() {
+		return await trigger();
+	}
+	function getData() {
+		return getValues();
+	}
+	const tipoSolicitacao = watch("tipoSolicitacao");
+	useDependentValidation(form, {
+		watch: "tipoSolicitacao",
+		trigger: ["numeroRemessa"]
+	});
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_jsx_runtime.Fragment, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Form_default, {
+		noValidate: true,
+		onSubmit: handleSubmit((data) => {
+			console.log("Dados enviados.");
+			console.log(JSON.stringify(data));
+		}),
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Section, {
+				title: "Solicitação",
+				columns: [
+					{
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectField, {
+							form,
+							errors,
+							id: "tipoSolicitacao",
+							label: "Tipo de solicitação",
+							disabled: !currentStepIs(steps.request),
+							required: currentStepIs(steps.request),
+							options: [{
+								value: "1",
+								label: "Aprovação de remessas de NF-e"
+							}, {
+								value: "2",
+								label: "Aprovação de contrato"
+							}]
+						}),
+						width: 4
+					},
+					{
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LookupField, {
+							form,
+							errors,
+							type: "number",
+							id: "numeroRemessa",
+							label: "Número",
+							required: tipoSolicitacao === "1" && currentStepIs(steps.request),
+							disabled: !currentStepIs(steps.request),
+							config: {
+								name: "Remessas de notas fiscais de entrada",
+								searchField: "numrem",
+								token: userData.accessToken,
+								columnMap: {
+									numrem: "Número",
+									datger: "Data de geração",
+									usuger: "Usuário de geração",
+									emprem: "Empresa",
+									filrem: "Filiais",
+									qtdnfc: "Quantidade de notas",
+									vlrtot: "Valor total",
+									catrem: "Categoria"
+								},
+								keyField: "numrem"
+							},
+							formMap: {
+								"numeroRemessa": ["numrem"],
+								"dataRemessa": ["datger", (datger) => {
+									return new Date(datger).toISOString().substring(0, 10);
+								}],
+								"quantidadeNotasRemessa": ["qtdnfc"],
+								"categoriaRemessa": ["catrem"],
+								"valorTotalRemessa": ["vlrtot"]
+							}
+						}),
+						width: 2,
+						visible: tipoSolicitacao === "1"
+					},
+					{
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(InputField, {
+							form,
+							errors,
+							type: "date",
+							id: "dataRemessa",
+							label: "Data",
+							disabled: true
+						}),
+						width: 2,
+						visible: tipoSolicitacao === "1"
+					},
+					{
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(InputField, {
+							form,
+							errors,
+							type: "number",
+							id: "quantidadeNotasRemessa",
+							label: "Quantidade de notas",
+							disabled: true
+						}),
+						width: 2,
+						visible: tipoSolicitacao === "1"
+					},
+					{
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(InputField, {
+							form,
+							errors,
+							type: "text",
+							id: "categoriaRemessa",
+							label: "Categoria",
+							hint: "Categoria da remessa com base em seu valor ( <= 1000 = baixo valor, > 1000 = alto valor)",
+							disabled: true
+						}),
+						width: 2,
+						visible: tipoSolicitacao === "1"
+					},
+					{
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(InputField, {
+							form,
+							errors,
+							type: "text",
+							id: "valorTotalRemessa",
+							label: "Valor total",
+							disabled: true
+						}),
+						width: 2,
+						visible: tipoSolicitacao === "1"
+					},
+					{
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(InputField, {
+							form,
+							errors,
+							type: "text",
+							id: "solicitante",
+							label: "Solicitante",
+							disabled: true
+						}),
+						width: 4,
+						visible: tipoSolicitacao === "1"
+					},
+					{
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FileField, {
+							form,
+							errors,
+							id: "anexo",
+							label: (() => {
+								switch (tipoSolicitacao) {
+									case "1": return "Remessa e notas fiscais";
+									case "2": return "Contrato";
+									default: return "Anexo";
+								}
+							})(),
+							required: true,
+							multiple: tipoSolicitacao === "1"
+						}),
+						width: 6
+					}
+				]
+			}),
+			tipoSolicitacao === "1" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FieldArraySection, {
+				form,
+				arrayName: "notasFiscais",
+				fieldNames: [
+					"empresa",
+					"filial",
+					"nomeFilial",
+					"serie",
+					"fornecedor",
+					"nomeFornecedor",
+					"numero",
+					"emissao",
+					"entrada",
+					"reprovar",
+					"motivo"
+				],
+				title: "Notas fiscais",
+				arrayFields,
+				validationDependencies: [{
+					fieldName: "reprovar",
+					defaultValue: false,
+					targetFields: ["motivo"]
+				}],
+				appendFunction: append,
+				removeFunction: remove,
+				rowBuilder: ({ rowFields, watched, rowErrors }) => {
+					return [
+						{
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(InputField, {
+								form,
+								id: rowFields.empresa,
+								type: "number",
+								label: "Empresa",
+								disabled: true
+							}),
+							width: 2
+						},
+						{
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(InputField, {
+								form,
+								id: rowFields.filial,
+								type: "number",
+								label: "Filial",
+								disabled: true
+							}),
+							width: 2
+						},
+						{
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(InputField, {
+								form,
+								id: rowFields.nomeFilial,
+								type: "text",
+								label: "Nome da filial",
+								disabled: true
+							}),
+							width: 4
+						},
+						{
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(InputField, {
+								form,
+								id: rowFields.serie,
+								type: "text",
+								label: "Série",
+								disabled: true
+							}),
+							width: 2
+						},
+						{
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(InputField, {
+								form,
+								id: rowFields.fornecedor,
+								type: "number",
+								label: "Fornecedor",
+								disabled: true
+							}),
+							width: 2
+						},
+						{
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(InputField, {
+								form,
+								id: rowFields.nomeFornecedor,
+								type: "text",
+								label: "Nome do fornecedor",
+								disabled: true
+							}),
+							width: 4
+						},
+						{
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(InputField, {
+								form,
+								id: rowFields.numero,
+								type: "number",
+								label: "Número",
+								disabled: true
+							}),
+							width: 2
+						},
+						{
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(InputField, {
+								form,
+								id: rowFields.emissao,
+								type: "date",
+								label: "Data de emissão",
+								disabled: true
+							}),
+							width: 2
+						},
+						{
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(InputField, {
+								form,
+								id: rowFields.entrada,
+								type: "date",
+								label: "Data de entrada",
+								disabled: true
+							}),
+							width: 2
+						},
+						{
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CheckboxField, {
+								form,
+								errors: rowErrors,
+								id: rowFields.reprovar,
+								label: "Reprovar",
+								hint: "Marque aqui caso queira reprovar esta nota fiscal."
+							}),
+							width: 2
+						},
+						{
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TextAreaField, {
+								form,
+								errors: rowErrors,
+								id: rowFields.motivo,
+								fieldName: "motivo",
+								label: "Motivo",
+								required: watched.reprovar
+							}),
+							width: 4,
+							visible: watched.reprovar
+						}
+					];
+				}
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "mt-3",
+				children: [false, /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Row, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Col, {
+					className: "d-flex justify-content-end",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+						type: "submit",
+						children: "Enviar"
+					})
+				}) })]
+			})
+		]
+	}) });
+}
+var steps = { request: "1" };
+var requiredMsg = "Este campo é obrigatório.";
+var arraySchema = object({
+	reprovar: boolean(),
+	motivo: string().nullish()
+}).superRefine((data, context) => {
+	if (data.reprovar && !data.motivo) context.addIssue({
+		code: "custom",
+		message: requiredMsg,
+		path: ["motivo"]
+	});
+});
+var supportedFormats = [
+	"png",
+	"jpg",
+	"jpeg",
+	"pdf"
+];
+var formValidationSchema = object({
+	tipoSolicitacao: string().min(1, requiredMsg),
+	numeroRemessa: number().nullish(),
+	anexo: custom().transform((files) => {
+		return Array.from(files);
+	}).refine((files) => files?.length >= 1, "Você deve anexar ao menos um arquivo.").refine((files) => files && files.every((f) => supportedFormats.some((s) => f.type.toLowerCase().endsWith(s))), `Somente são suportados os formatos ${naturalLanguageJoin(supportedFormats)}.`),
+	notasFiscais: array(arraySchema).optional()
+}).superRefine((data, context) => {
+	if (data.tipoSolicitacao === "1") {
+		if (!data.numeroRemessa) context.addIssue({
+			code: "custom",
+			message: requiredMsg,
+			path: ["numeroRemessa"]
+		});
+	}
+});
 //#endregion
 //#region src/App.jsx
 function App() {
 	const [formData, setFormData] = (0, import_react.useState)({});
+	const [userData, setUserData] = (0, import_react.useState)({});
 	const [loaded, setLoaded] = (0, import_react.useState)(false);
 	const formRef = (0, import_react.useRef)(null);
 	const initializationRef = (0, import_react.useRef)(false);
-	const onSubmit = async () => {
+	const { showToast } = useToast();
+	async function onLoad(incomingData, info) {
+		const data = {};
+		const { initialVariables } = incomingData["loadContext"];
+		for (const prop in initialVariables) data[prop] = initialVariables[prop];
+		try {
+			const userData = await info.getUserData();
+			const accessToken = (await info.getPlatformData()).token.access_token;
+			const variableData = await info.getInfoFromProcessVariables();
+			userData.accessToken = accessToken;
+			setUserData(userData);
+			if (info.isRequestNew() || !Array.isArray(variableData)) {
+				setFormData(data);
+				setLoaded(true);
+				return;
+			}
+			for (let i = 0; i < variableData.length; i++) {
+				/** @type {{key: string, value: any}} */
+				const item = variableData[i];
+				if (data[item.key]) continue;
+				data[item.key] = item.value || "";
+			}
+			setFormData(data);
+		} catch (e) {
+			console.error(`Erro ao carregar os dados: ${e}`);
+		}
+		setLoaded(true);
+	}
+	async function onSubmit() {
 		const currentRef = formRef.current;
-		if (!currentRef) throw new Error("O formulário ainda não foi carregado.");
-		if (!await currentRef.validate()) throw new Error("Dados inválidos. Preencha todos os campos obrigatórios e verifique as informações inseridas no formulário para prosseguir");
-		return currentRef.getData();
-	};
+		if (!currentRef) {
+			const msg = "O formulário ainda não foi carregado.";
+			showToast({
+				variant: "danger",
+				title: "Estado inválido!",
+				message: msg
+			});
+			throw new Error(msg);
+		}
+		if (!await currentRef.validate()) {
+			const msg = "Preencha todos os campos obrigatórios e verifique as informações inseridas no formulário para prosseguir.";
+			showToast({
+				variant: "danger",
+				title: "Dados inválidos",
+				message: msg
+			});
+			throw new Error(msg);
+		}
+		return { formData: await currentRef.getData() };
+	}
+	async function onError(err) {
+		console.error("Erro no BPM:", err);
+	}
 	(0, import_react.useEffect)(() => {
 		initBPMBridge({
-			onLoad: async (incomingData, info) => {
-				const data = {};
-				const { initialVariables } = incomingData["loadContext"];
-				for (const prop in initialVariables) data[prop] = initialVariables[prop];
-				try {
-					(await info.getPlatformData()).token.access_token;
-					const variableData = await info.getInfoFromProcessVariables();
-					if (info.isRequestNew() || !Array.isArray(variableData)) {
-						setFormData(data);
-						return;
-					}
-					for (let i = 0; i < variableData.length; i++) {
-						/** @type {{key: string, value: any}} */
-						const item = variableData[i];
-						if (data[item.key]) continue;
-						data[item.key] = item.value || "";
-					}
-					setFormData(data);
-				} catch (e) {
-					console.error(`Erro ao carregar os dados: ${e}`);
-				}
-				setLoaded(true);
-			},
-			onSubmit: async () => {
-				return { formData: await onSubmit() };
-			},
-			onError: (err) => {
-				console.error("Erro no BPM:", err);
-			},
+			onLoad,
+			onSubmit,
+			onError,
 			initializationRef
 		});
 	}, []);
@@ -15551,16 +23132,98 @@ function App() {
 		if (initializationRef.current) return;
 		initializationRef.current = true;
 	}, []);
+	if (!loaded) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		className: "d-flex align-items-center justify-content-center",
+		style: {
+			width: "100vw",
+			height: "100vh"
+		},
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Spinner, { animation: "border" })
+	});
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Container, {
 		fluid: true,
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MainForm, {
 			ref: formRef,
-			data: formData,
-			loaded
+			initialData: formData,
+			userData
 		})
 	});
 }
 //#endregion
+//#region src/components/messages/ToastProvider.jsx
+/** @import {ToastData, ToastProviderData, showToast} from "./types" */
+var idCounter = 0;
+var defaultDelay = 12e4;
+function ToastProvider({ children }) {
+	const [toasts, setToasts] = (0, import_react.useState)([]);
+	/** @type {showToast} */
+	function addToast({ variant, title, message, delay, closeButton = true, extraContent = /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_jsx_runtime.Fragment, {}) }) {
+		const id = idCounter;
+		idCounter++;
+		setToasts((previous) => {
+			return [...previous, {
+				show: true,
+				id,
+				variant,
+				title,
+				message,
+				closeButton,
+				delay,
+				extraContent
+			}];
+		});
+		setTimeout(() => {
+			removeToast(id);
+		}, defaultDelay + 5e3);
+	}
+	function removeToast(id) {
+		setToasts((previousToasts) => {
+			return [...previousToasts].filter((t) => t.id !== id);
+		});
+	}
+	const showToast = (0, import_react.useCallback)(addToast, []);
+	/**
+	* @param {number} index 
+	*/
+	function closeToast(index) {
+		const copy = [...toasts];
+		copy[index].show = false;
+		setToasts(copy);
+	}
+	/** @type {ToastProviderData} */
+	const providerData = { showToast };
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(ToastContext.Provider, {
+		value: providerData,
+		children: [children, /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ToastContainer, {
+			position: "top-end",
+			className: "p-1",
+			children: toasts.map((t, index) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Toast_default, {
+				bg: t.variant,
+				autohide: true,
+				delay: t.delay ?? defaultDelay,
+				show: t.show,
+				onClose: () => closeToast(index),
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Toast_default.Header, {
+					closeButton: t.closeButton,
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "d-flex justify-content-start w-100",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "text-start",
+							children: t.title
+						})
+					})
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Toast_default.Body, {
+					className: `
+                                d-flex justify-content-start text-start fs-6
+                                ${t.variant !== "primary" && t.variant !== "warning" ? "text-white" : ""}
+                            `,
+					children: [t.message, t.extraContent]
+				})]
+			}, t.id))
+		})]
+	});
+}
+//#endregion
 //#region src/main.jsx
-(0, import_client.createRoot)(document.getElementById("root")).render(/* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_react.StrictMode, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(App, {}) }));
+(0, import_client.createRoot)(document.getElementById("root")).render(/* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_react.StrictMode, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ToastProvider, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(App, {}) }) }));
 //#endregion
