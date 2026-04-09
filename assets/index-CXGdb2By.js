@@ -22109,6 +22109,7 @@ var useToast = () => (0, import_react.useContext)(ToastContext);
 //#region src/components/form/fields/file.jsx
 /**
 * @typedef {import('react').RefObject<HTMLButtonElement>} ButtonRef
+* @typedef {import('react').RefObject<HTMLInputElement>} InputRef
 */
 /**
 * @param {{
@@ -22131,6 +22132,8 @@ var useToast = () => (0, import_react.useContext)(ToastContext);
 function FileField({ form, errors, id, fieldName = id, label, hint = defaultParams.hint, required = defaultParams.required, disabled = defaultParams.disabled, multiple = false, allowRemoval = true, acceptedFormats = [], onBlur, onChange }) {
 	/** @type {ButtonRef} */
 	const addButtonRef = (0, import_react.useRef)(null);
+	/** @type {InputRef} */
+	const inputRef = (0, import_react.useRef)(null);
 	const [files, setFiles] = (0, import_react.useState)([]);
 	const [showMore, setShowMore] = (0, import_react.useState)(false);
 	const { showToast } = useToast();
@@ -22168,31 +22171,24 @@ function FileField({ form, errors, id, fieldName = id, label, hint = defaultPara
 		setFiles(fileArray);
 		setValue(fileArray);
 	}
-	async function addFiles() {
-		/** @type {FileSystemFileHandle[]} */
-		let fileHandles;
-		try {
-			fileHandles = await window.showOpenFilePicker({
-				id: "file-picker",
-				multiple
-			});
-		} catch (e) {
-			return;
-		}
+	/**
+	* @param {File[]} selectedFiles 
+	* @returns {Promise<void>}
+	*/
+	async function addFiles(selectedFiles) {
 		updateFiles(async (items) => {
 			for (const file of files) items.add(file);
-			for (const handle of fileHandles) {
-				if (files.some((f) => f.name === handle.name)) {
+			for (const selectedFile of selectedFiles) {
+				if (files.some((f) => f.name === selectedFile.name)) {
 					showToast({
 						variant: "warning",
 						title: `Anexo - ${label}`,
-						message: `O arquivo "${handle.name}" já foi anexado. Caso seja realmente necessário anexá-lo novamente, por gentileza, renomeie e tente novamente.`,
+						message: `O arquivo "${selectedFile.name}" já foi anexado. Caso seja realmente necessário anexá-lo novamente, por gentileza, renomeie e tente novamente.`,
 						delay: 1e4
 					});
 					continue;
 				}
-				const file = await handle.getFile();
-				items.add(file);
+				items.add(selectedFile);
 			}
 		});
 		setShowMore(true);
@@ -22219,9 +22215,16 @@ function FileField({ form, errors, id, fieldName = id, label, hint = defaultPara
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
 		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Form_default.Control, {
 			id,
+			ref: inputRef,
 			name: id,
 			type: "file",
-			hidden: true
+			hidden: true,
+			onChange: (e) => {
+				const input = inputRef.current;
+				if (!input) return;
+				addFiles(Array.from(input.files));
+			},
+			multiple
 		}),
 		/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(ListGroup_default, {
 			as: "ul",
@@ -22265,7 +22268,11 @@ function FileField({ form, errors, id, fieldName = id, label, hint = defaultPara
 										registerRef(r);
 										addButtonRef.current = r;
 									},
-									onClick: disabled ? null : addFiles,
+									onClick: disabled ? null : () => {
+										const input = inputRef.current;
+										if (!input) return;
+										input.click();
+									},
 									onBlur: (e) => {
 										rest.onBlur(e);
 										if (!e.relatedTarget) return;
