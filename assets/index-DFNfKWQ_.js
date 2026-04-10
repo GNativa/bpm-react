@@ -22097,12 +22097,10 @@ function TextAreaField({ form, errors, id, fieldName = id, label, hint = default
 }
 //#endregion
 //#region src/components/messages/ToastContext.jsx
-/** @import {ToastData} from "../../logic/types" */
+/** @import {ToastProviderData} from "./types" */
 var ToastContext = (0, import_react.createContext)();
 /**
-* @returns {{
-*  showToast: function(Omit<ToastData, 'id' | 'show'>): void;
-* }} 
+* @returns {ToastProviderData}
 */
 var useToast = () => (0, import_react.useContext)(ToastContext);
 //#endregion
@@ -22178,18 +22176,21 @@ function FileField({ form, errors, id, fieldName = id, label, hint = defaultPara
 	async function addFiles(selectedFiles) {
 		updateFiles(async (items) => {
 			for (const file of files) items.add(file);
+			const alreadyAdded = [];
 			for (const selectedFile of selectedFiles) {
 				if (files.some((f) => f.name === selectedFile.name)) {
-					showToast({
-						variant: "warning",
-						title: `Anexo - ${label}`,
-						message: `O arquivo "${selectedFile.name}" já foi anexado. Caso seja realmente necessário anexá-lo novamente, por gentileza, renomeie e tente novamente.`,
-						delay: 1e4
-					});
+					alreadyAdded.push(selectedFile.name);
 					continue;
 				}
 				items.add(selectedFile);
 			}
+			if (alreadyAdded.length > 0) showToast({
+				variant: "warning",
+				title: `Anexo - ${label}`,
+				message: `Os arquivos abaixo já foram anexados. Caso seja realmente necessário anexá-los novamente, por gentileza, renomeie e tente novamente.`,
+				delay: 1e4,
+				extraContent: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ListGroup_default, { children: alreadyAdded.map((fileName, index) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ListGroupItem, { children: fileName }, index)) })
+			});
 		});
 		setShowMore(true);
 	}
@@ -22212,6 +22213,9 @@ function FileField({ form, errors, id, fieldName = id, label, hint = defaultPara
 	const addButtonLabel = "Anexar";
 	const clearButtonLabel = "Limpar";
 	const isInvalid = !!errors?.[fieldName];
+	let counterHint;
+	if (files.length === 0) counterHint = "Nenhum arquivo anexado";
+	else counterHint = `${files.length} ${moreThanOneFile ? "arquivos anexados" : "arquivo anexado"}`;
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
 		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Form_default.Control, {
 			id,
@@ -22219,7 +22223,7 @@ function FileField({ form, errors, id, fieldName = id, label, hint = defaultPara
 			name: id,
 			type: "file",
 			hidden: true,
-			onChange: (e) => {
+			onChange: (_) => {
 				const input = inputRef.current;
 				if (!input) return;
 				addFiles(Array.from(input.files));
@@ -22236,13 +22240,14 @@ function FileField({ form, errors, id, fieldName = id, label, hint = defaultPara
 			children: [
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(ListGroupItem, {
 					as: "li",
-					className: "d-flex justify-content-between sticky-top gap-3 file-selector-header" + (isInvalid ? " is-invalid" : ""),
+					className: "file-selector-header gap-2 d-flex flex-wrap sticky-top" + (isInvalid ? " is-invalid" : ""),
 					required,
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "d-flex align-items-center gap-2",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Form_default.Label, {
-								className: "d-flex align-items-center text-start mb-0",
+					disabled,
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "d-flex gap-2 align-items-center",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Form_default.Label, {
+								className: "d-flex flex-grow-1 align-items-center text-start mb-0",
 								htmlFor: id,
 								onClick: (_) => {
 									const addButton = addButtonRef.current;
@@ -22250,65 +22255,63 @@ function FileField({ form, errors, id, fieldName = id, label, hint = defaultPara
 									addButton.click();
 								},
 								children: buildLabel(label, hint)
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Card_default, {
-								title: `${files.length} arquivos anexados`,
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Card_default, {
+								title: counterHint,
 								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Card_default.Body, {
-									className: "px-2 py-1",
-									children: `${files.length}`
+									className: "px-2 py-1 file-counter",
+									children: files.length
 								})
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "d-flex gap-2",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
-									variant: "primary",
-									size: "md",
-									title: addButtonLabel,
-									ref: (r) => {
-										registerRef(r);
-										addButtonRef.current = r;
-									},
-									onClick: disabled ? null : () => {
-										const input = inputRef.current;
-										if (!input) return;
-										input.click();
-									},
-									onBlur: (e) => {
-										rest.onBlur(e);
-										if (!e.relatedTarget) return;
-										setValue(files);
-									},
-									onChange: rest.onChange,
-									disabled: disabled || !multiple && files.length > 0,
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "bi bi-file-earmark-plus-fill me-2" }), addButtonLabel]
-								}), moreThanOneFile ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-									onClick: () => setShowMore(!showMore),
-									children: `Mostrar ${showMore ? "menos" : `tudo`}`
-								}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {})]
-							})
-						]
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "d-flex justify-content-end gap-3",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "d-flex gap-2 left-buttons",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+								variant: "primary",
+								size: "md",
+								title: addButtonLabel,
+								ref: (r) => {
+									addButtonRef.current = r;
+								},
+								onClick: disabled ? null : () => {
+									const input = inputRef.current;
+									if (!input) return;
+									input.click();
+								},
+								onBlur: (e) => {
+									rest.onBlur(e);
+									if (!e.relatedTarget) return;
+									setValue(files);
+								},
+								onChange: rest.onChange,
+								disabled: disabled || !multiple && files.length > 0,
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "bi bi-file-earmark-plus-fill me-2" }), addButtonLabel]
+							}), moreThanOneFile ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+								onClick: () => setShowMore(!showMore),
+								children: `Ver ${showMore ? "menos" : `todos`}`
+							}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_jsx_runtime.Fragment, {})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "spacer me-auto" }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
 							variant: "danger",
 							size: "md",
 							onClick: denyRemoval ? null : removeAll,
 							disabled: denyRemoval,
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "bi bi-x-square-fill me-2" }), clearButtonLabel]
 						})
-					})]
+					]
 				}),
 				files.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FileLink, {
 					file: files[0],
 					index: 0,
-					onRemove: denyRemoval ? null : removeFile,
-					disabled: denyRemoval
+					disabled,
+					onRemove: denyRemoval ? null : removeFile
 				}, files[0].name),
 				moreThanOneFile && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Collapse, {
 					in: showMore,
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: files.slice(1).map((file, index) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FileLink, {
 						file,
 						index: index + 1,
+						disabled,
 						onRemove: denyRemoval ? null : removeFile
 					}, file.name)) })
 				})
@@ -22321,29 +22324,32 @@ function FileField({ form, errors, id, fieldName = id, label, hint = defaultPara
 * @param {{
 *  file: File,
 *  index: number,
+*  disabled: boolean,
 *  onRemove: ?function(number): void,
 * }} 
 * @returns {import("react").JSX.Element}
 */
-function FileLink({ file, index, onRemove = null }) {
+function FileLink({ file, index, disabled = false, onRemove = null }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(ListGroupItem, {
-		className: "d-flex justify-content-between",
+		className: "d-flex justify-content-between align-items-center",
 		as: "li",
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-			className: "justify-content-start",
-			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
-				href: URL.createObjectURL(file),
-				target: "_blank",
-				children: file.name
-			})
-		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+		disabled,
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
+			href: URL.createObjectURL(file),
+			target: "_blank",
+			style: {
+				textOverflow: "ellipsis",
+				overflow: "hidden"
+			},
+			children: file.name
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
 			variant: "warning",
 			size: "sm",
 			title: "Remover",
 			onClick: () => onRemove?.(index),
 			disabled: !onRemove,
 			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("i", { className: "bi bi-trash-fill" })
-		}) })]
+		})]
 	});
 }
 //#endregion
@@ -22871,7 +22877,8 @@ function MainForm({ ref, initialData, userData }) {
 								}
 							})(),
 							required: true,
-							multiple: tipoSolicitacao === "1"
+							multiple: tipoSolicitacao === "1",
+							disabled: !currentStepIs(steps.request)
 						}),
 						width: 6
 					}
@@ -23219,13 +23226,13 @@ function ToastProvider({ children }) {
 							children: t.title
 						})
 					})
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Toast_default.Body, {
-					className: `
-                                d-flex justify-content-start text-start fs-6
-                                ${t.variant !== "primary" && t.variant !== "warning" ? "text-white" : ""}
-                            `,
-					children: [t.message, t.extraContent]
-				})]
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Toast_default.Body, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Row, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Col, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "text-start fs-6" + (t.variant !== "primary" && t.variant !== "warning" ? " text-white" : ""),
+					children: t.message
+				}) }) }), t.extraContent && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Row, {
+					className: "mt-2",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Col, { children: t.extraContent })
+				})] })]
 			}, t.id))
 		})]
 	});

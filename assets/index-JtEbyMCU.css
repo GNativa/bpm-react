@@ -2311,7 +2311,8 @@ input[type="file"]::file-selector-button {
 
 input[disabled],
 .form-floating>input[disabled].form-control~label,
-.form-floating>label:has(input[disabled]) {
+.form-floating>label:has(input[disabled]),
+.file-selector-header.disabled label {
     color: color-mix(in oklab, var(--base-color) 60%, rgba(0, 0, 0, 0) 40%);
 }
 
@@ -2373,8 +2374,52 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     color: var(--base-color);
 }
 
+.file-selector {
+    container-type: inline-size;
+    container-name: file-selector;
+}
+
 .file-selector-header {
-    height: calc(3.5rem + calc(var(--bs-border-width) * 2));
+    label {
+        word-break: break-all;
+    }
+
+    .card:has(.file-counter) {
+        flex: none;
+    }
+
+    /*
+    min-height: calc(3.5rem + calc(var(--bs-border-width) * 2));
+    */
+    @container (max-width: 500px) {
+        .spacer {
+            display: none;
+        }
+
+        .card:has(.file-counter) {
+            margin-left: auto;
+        }
+
+        .left-buttons {
+            flex-direction: column;
+        }
+
+        flex-direction: column;
+    }
+}
+
+.btn,
+.card:has(.file-counter) {
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.list-group-item.disabled,
+.list-group-item.disabled .card {
+    background-color: var(--bs-secondary-bg);
+    pointer-events: all;
 }@keyframes loading {
     0% {
         background-position: 200% 50%;
