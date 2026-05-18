@@ -22834,7 +22834,7 @@ function MainForm({ ref, initialData, userData }) {
 							type: "text",
 							id: "categoriaRemessa",
 							label: "Categoria",
-							hint: "Categoria da remessa com base em seu valor ( <= 1000 = baixo valor, > 1000 = alto valor)",
+							hint: "Categoria da remessa com base em seu valor (<= 1000 = baixo valor, > 1000 = alto valor)",
 							disabled: true
 						}),
 						width: 2,
@@ -23041,7 +23041,7 @@ function MainForm({ ref, initialData, userData }) {
 }
 var steps = { request: "1" };
 var requiredMsg = "Este campo é obrigatório.";
-var arraySchema = object({
+var receiptArraySchema = object({
 	reprovar: boolean(),
 	motivo: string().nullish()
 }).superRefine((data, context) => {
@@ -23060,10 +23060,10 @@ var supportedFormats = [
 var formValidationSchema = object({
 	tipoSolicitacao: string().min(1, requiredMsg),
 	numeroRemessa: number().nullish(),
-	anexo: custom().transform((files) => {
+	anexo: custom().default([]).transform((files) => {
 		return Array.from(files);
-	}).refine((files) => files?.length >= 1, "Você deve anexar ao menos um arquivo.").refine((files) => files && files.every((f) => supportedFormats.some((s) => f.type.toLowerCase().endsWith(s))), `Somente são suportados os formatos ${naturalLanguageJoin(supportedFormats)}.`),
-	notasFiscais: array(arraySchema).optional()
+	}).refine((files) => files.length >= 1, "Você deve anexar ao menos um arquivo.").refine((files) => files.every((f) => supportedFormats.some((s) => f.type.toLowerCase().endsWith(s))), `Somente são suportados os formatos ${naturalLanguageJoin(supportedFormats)}.`),
+	notasFiscais: array(receiptArraySchema).optional()
 }).superRefine((data, context) => {
 	if (data.tipoSolicitacao === "1") {
 		if (!data.numeroRemessa) context.addIssue({
